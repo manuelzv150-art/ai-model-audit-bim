@@ -394,7 +394,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 let capS=null,capD=null,geminiKey='';
-const GEMINI_MODEL='gemini-2.5-flash';
+const GEMINI_MODEL='gemini-3.5-flash-lite';
 try{geminiKey=sessionStorage.getItem('ama_gemini_key')||''}catch(e){}
 function configureGemini(){ const key=window.prompt('Pegue su clave de Gemini API. Se guardará solo durante esta sesión del navegador y se enviará únicamente a Google Gemini.');
   if(!key) return false; geminiKey=key.trim(); try{sessionStorage.setItem('ama_gemini_key',geminiKey)}catch(e){} $('iaStatus').textContent=`Gemini conectado (${GEMINI_MODEL}). Ya puede proponer reglas.`; toast('Gemini conectado para esta sesión'); return true; }
