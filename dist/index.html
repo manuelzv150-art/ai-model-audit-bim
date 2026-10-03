@@ -152,7 +152,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
   <section id="s3" class="grid viewer" hidden>
     <div class="col">
       <div class="canvas" id="cv">
-        <div class="ov" style="left:10px;top:10px">Arrastre: girar · rueda: zoom · doble clic: encuadrar</div>
+        <div class="ov row" style="left:10px;top:10px;gap:7px">Arrastre: girar · rueda: zoom · doble clic: encuadrar <select id="ifcModel" aria-label="Modelo IFC mostrado"><option value="2">V02 · modelo completo</option><option value="1">V01 · modelo completo</option></select></div>
         <div class="ov modes" role="group" aria-label="Modo" style="right:10px;top:10px;display:flex;gap:4px;padding:4px"><button id="mCh" aria-pressed="true">CAMBIOS</button><button id="mCu" aria-pressed="false">CUMPLIMIENTO</button></div>
         <div class="ov" id="legend" style="left:10px;bottom:10px;display:flex;gap:10px;flex-wrap:wrap"></div>
       </div>
@@ -425,10 +425,11 @@ function go(n){ if(n>1&&!(S.m1&&S.m2)) n=1; step=n; timers(n);
   for(let i=1;i<=5;i++) $('s'+i).hidden=i!==n;
   if(n===2) renderBep(), renderRules();
   if(n>=3) run();
-  if(n===3){ initViewer(); buildScene(); refresh(); if(S.file2) renderIfcGeometry(S.file2); }
+  if(n===3){ initViewer(); buildScene(); refresh(); const k=+$('ifcModel').value; if(S['file'+k]) renderIfcGeometry(S['file'+k],k); }
   if(n===4) renderAvance(); if(n===5) renderReport(); }
 document.querySelectorAll('nav.steps button').forEach(b=>b.onclick=()=>go(+b.dataset.step));
 $('go2').onclick=()=>go(2); $('go3').onclick=()=>go(3);
+$('ifcModel').onchange=()=>{ const k=+$('ifcModel').value; if(S['file'+k]) renderIfcGeometry(S['file'+k],k); };
 $('btnGuide').onclick=()=>{const g=$('guide');g.hidden=!g.hidden;$('btnGuide').setAttribute('aria-expanded',!g.hidden)};
 
 /* ---------- 1 carga ---------- */
@@ -582,7 +583,7 @@ function buildScene(){ if(!R3) return; const {root}=R3; while(root.children.leng
   const note=$('viewerNote'); if(note) note.textContent=separated?`Se muestran ${all.length} elementos IFC. ${separated} comparten la misma ubicación en la exportación y se separaron visualmente para poder inspeccionarlos.`:`Se muestran ${all.length} elementos IFC en sus ubicaciones exportadas.`;
   resize(); }
 let IFCG={api:null,model:null,token:0};
-async function renderIfcGeometry(file){
+async function renderIfcGeometry(file,k=2){
   if(!R3||!file) return; const token=++IFCG.token, note=$('viewerNote');
   if(note) note.textContent='Cargando la geometría real del IFC…';
   try{
@@ -592,7 +593,7 @@ async function renderIfcGeometry(file){
     const model=IFCG.api.OpenModel(new Uint8Array(await file.arrayBuffer()),{COORDINATE_TO_ORIGIN:true,OPTIMIZE_PROFILES:true});
     const flat=IFCG.api.LoadAllGeometry(model); if(token!==IFCG.token){ IFCG.api.CloseModel(model); return; }
     const {root}=R3; while(root.children.length) root.remove(root.children[0]); R3.meshes=[];
-    const group=new THREE.Group(), rows=new Map(S.cmp.map(r=>[r.el.step,r])); group.rotation.x=-Math.PI/2; root.add(group);
+    const group=new THREE.Group(), rows=new Map((k===2?S.cmp.map(r=>[r.el.step,r]):S.cmp.filter(r=>r.v1).map(r=>[r.v1.step,r]))); group.rotation.x=-Math.PI/2; root.add(group);
     let pieces=0;
     for(let i=0;i<flat.size();i++){
       const item=flat.get(i), row=rows.get(item.expressID)||null, placed=item.geometries;
@@ -606,7 +607,7 @@ async function renderIfcGeometry(file){
     }
     if(!pieces) throw new Error('el archivo no contiene representaciones geométricas');
     IFCG.model=model; const box=new THREE.Box3().setFromObject(group), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3()); group.position.sub(center); R3.span=Math.max(10,size.x,size.y,size.z); resize(); refresh();
-    if(note) note.textContent=`Geometría real IFC cargada: ${pieces} piezas trianguladas. Arrastre para girar, rueda para acercar y haga clic para seleccionar.`;
+    if(note) note.textContent=`Modelo ${k===2?'V02':'V01'} completo cargado: ${pieces} piezas trianguladas. Arrastre para girar, rueda para acercar y haga clic para seleccionar.`;
   }catch(err){ if(token!==IFCG.token) return; buildScene(); refresh(); if(note) note.textContent=`No se pudo generar la geometría real (${err.message||'error de lectura'}). Se mantiene la vista esquemática.`; }
 }
 function resize(){ if(!R3) return; const cv=$('cv'); const w=cv.clientWidth,h=Math.max(480,cv.clientHeight); R3.renderer.setSize(w,h,false); R3.renderer.domElement.style.height=h+'px';
