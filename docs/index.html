@@ -1,0 +1,654 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Auditoría de modelos IFC: compara entregas, valida reglas BIM y exporta hallazgos."><title>AI Model Audit · Revisión BIM</title><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: app de una pantalla — cabecera con medición, pasos, área de trabajo; en móvil todo se apila. Look oscuro único de visor BIM. */
+:root{
+  --bg:#0B1522; --panel:#122033; --panel2:#18293F; --line:#25395A; --fg:#E4ECF5; --muted:#8EA2BA;
+  --teal:#22B8CC; --purple:#8B74F0; --orange:#F08A3C; --red:#E5554B; --green:#2DB37A; --amber:#E9A23B; --grey:#9AA8B8;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45}
+*{box-sizing:border-box} [hidden]{display:none!important}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:14px 40px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono)}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+.brand b{font-size:18px}
+.chip{display:inline-flex;align-items:center;gap:5px;font:500 11px var(--mono);padding:2px 8px;border-radius:20px;border:1px solid currentColor;white-space:nowrap}
+.sw{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}
+nav.steps{display:flex;gap:6px;flex-wrap:wrap}
+nav.steps button{font:500 13px var(--sans);color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 11px;cursor:pointer;display:flex;gap:7px;align-items:center}
+nav.steps button .n{font-family:var(--mono);font-size:11px}
+nav.steps button[aria-current="step"]{color:var(--fg);border-color:var(--teal);background:var(--panel2)}
+nav.steps button[aria-current="step"] .n{color:var(--teal)}
+nav.steps button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.btn{font:600 13px var(--sans);border-radius:6px;padding:8px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--fg)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.pri{background:var(--teal);border-color:var(--teal);color:#06202A}
+.btn.ia{background:var(--purple);border-color:var(--purple);color:#140C33}
+.btn.ok{border-color:var(--green);color:var(--green)} .btn.ok[aria-pressed="true"]{background:var(--green);color:#062217}
+.btn.no{border-color:var(--red);color:var(--red)} .btn.no[aria-pressed="true"]{background:var(--red);color:#2A0705}
+.btn.sm{padding:5px 9px;font-size:12px}
+.btn.ghost{background:transparent}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .viewer{grid-template-columns:minmax(0,1fr) 360px}
+@media (max-width:900px){.g2,.g3,.viewer{grid-template-columns:1fr}}
+h2{font-size:17px;margin:0 0 4px;text-wrap:balance} h3{font-size:15px;margin:0} p{margin:0}
+.sub{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:150px;transition:border-color .15s}
+.drop.over{border-color:var(--teal);background:rgba(34,184,204,.06)}
+.drop.done{border-style:solid}
+.drop input[type=file]{font-size:12px;color:var(--muted);max-width:100%}
+textarea,input[type=text],input[type=number],select{font:13px var(--sans);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:100%}
+textarea{width:100%;min-height:150px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.5}
+.stat{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}
+.stat dt{color:var(--muted)} .stat dd{margin:0;font-variant-numeric:tabular-nums}
+.warn{color:var(--amber);font-size:12px}
+.rule{border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;background:var(--panel2)}
+.rule.ap{border-left-color:var(--green)} .rule.dv{border-left-color:var(--red)}
+.rule code{font-family:var(--mono);font-size:12px;color:var(--teal)}
+.cita{font-size:12px;color:var(--muted);border-left:2px solid var(--purple);padding-left:8px;font-style:italic}
+.amb{font-size:12px;color:var(--amber)}
+.cond{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:6px;align-items:center}
+.cond select,.cond input{width:100%}
+.canvas{position:relative;min-height:480px;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#16263C,#0A1320);border:1px solid var(--line)}
+.canvas canvas{display:block;width:100%;cursor:grab;touch-action:none}
+.ov{position:absolute;background:rgba(11,21,34,.85);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--muted)}
+.modes button{font:600 11px var(--mono);letter-spacing:.06em;padding:6px 10px;border-radius:6px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--teal);color:#06202A}
+.trip{display:flex;flex-direction:column;gap:8px}
+.trip>div{border-left:3px solid var(--grey);padding:2px 0 2px 10px;font-size:13px;word-break:break-word}
+.trip .a{border-color:var(--teal)} .trip .e{border-color:var(--orange)}
+.elist{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}
+.elist button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;font:500 13px var(--sans);background:var(--panel2);border:1px solid transparent;color:var(--fg);border-radius:6px;padding:6px 9px;cursor:pointer}
+.elist button[aria-current="true"]{border-color:var(--teal)}
+.alert{border:1px solid var(--red);background:rgba(229,85,75,.1);border-radius:8px;padding:10px 12px;font-size:13px}
+.okbox{border:1px solid var(--green);background:rgba(45,179,122,.08);border-radius:8px;padding:10px 12px;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.kpi{background:var(--panel2);border-radius:8px;padding:10px 12px}
+.kpi .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.bar{height:10px;background:var(--bg);border-radius:5px;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:5px}
+.tbl{overflow-x:auto} table{width:100%;border-collapse:collapse;font-size:13px}
+th{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.guide{border:1px dashed var(--amber);border-radius:10px;padding:12px 14px;background:rgba(233,162,59,.06)}
+.guide ol{margin:6px 0 0;padding-left:20px}
+.meter{display:flex;gap:6px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--teal);padding:8px 14px;border-radius:8px;font-size:13px;z-index:9;max-width:calc(100% - 32px)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>AI model audit</b><span class="lbl" id="projName">Revisión de entregas BIM · v1</span><span class="chip" id="demoChip" style="color:var(--amber)" hidden>Caso de ejemplo sintético</span></div>
+    <div class="row">
+      <div class="meter" aria-label="Medición de tiempos"><span class="chip" style="color:var(--purple)" title="Tiempo configurando reglas">Configuración <b id="tCfg">0:00</b></span><span class="chip" style="color:var(--teal)" title="Tiempo revisando resultados">Revisión <b id="tRev">0:00</b></span></div>
+      <button class="btn sm" id="btnGuide" aria-expanded="false">Guía de prueba</button>
+    </div>
+  </header>
+
+  <section class="guide" id="guide" hidden>
+    <div class="lbl" style="color:var(--amber)">Prueba con coordinadores (Kit, hoja 8)</div>
+    <ol><li><b>T1</b> · ¿Qué cambió en el equipo EQ-014 y qué le falta?</li><li><b>T2</b> · Encuentre el requisito que se cumplía en V01 y ahora falla.</li><li><b>T3</b> · Apruebe o corrija una regla propuesta por la IA.</li><li><b>T4</b> · Descargue el reporte de observaciones.</li></ol>
+    <p class="sub" style="margin-top:6px">Con el caso de ejemplo. No ayude salvo bloqueo de más de 2 minutos.</p>
+  </section>
+
+  <nav class="steps" aria-label="Pasos">
+    <button data-step="1"><span class="n">01</span>Entrega</button>
+    <button data-step="2"><span class="n">02</span>Requisitos</button>
+    <button data-step="3"><span class="n">03</span>Visor</button>
+    <button data-step="4"><span class="n">04</span>Avance</button>
+    <button data-step="5"><span class="n">05</span>Reporte</button>
+  </nav>
+
+  <!-- 1 ENTREGA -->
+  <section id="s1" class="grid" hidden>
+    <div class="panel row" style="justify-content:space-between">
+      <div class="col" style="gap:2px"><h2>Cargue la entrega</h2><p class="sub">Dos versiones IFC de la misma disciplina y los acuerdos escritos. Los archivos se leen en su navegador: no se suben a ningún servidor.</p></div>
+      <button class="btn" id="btnDemo">Cargar caso de ejemplo</button>
+    </div>
+    <div class="grid g3">
+      <div class="drop panel" id="d1"><div class="row" style="justify-content:space-between"><span class="chip" style="color:var(--grey)">Antes · V01</span><span class="lbl">IFC</span></div>
+        <label class="sub" for="f1">Versión de referencia</label><input type="file" id="f1" accept=".ifc,.IFC"><div id="i1" class="col"></div></div>
+      <div class="drop panel" id="d2"><div class="row" style="justify-content:space-between"><span class="chip" style="color:var(--teal)">Ahora · V02</span><span class="lbl">IFC</span></div>
+        <label class="sub" for="f2">Nueva entrega</label><input type="file" id="f2" accept=".ifc,.IFC"><div id="i2" class="col"></div></div>
+      <div class="drop panel" id="d3"><div class="row" style="justify-content:space-between"><span class="chip" style="color:var(--orange)">Esperado</span><span class="lbl">BEP · actas</span></div>
+        <label class="sub" for="bepText">Pegue el texto de los acuerdos (o cargue un .txt)</label>
+        <textarea id="bepText" placeholder="Ej.: R-03. Todo equipo mecánico deberá incluir su código y su capacidad en kW…"></textarea>
+        <input type="file" id="f3" accept=".txt,.md,.csv"></div>
+    </div>
+    <div class="panel row" style="justify-content:space-between">
+      <div class="row"><label class="sub" for="tol">Tolerancia de desplazamiento</label><input type="number" id="tol" min="0" step="0.005" value="0.01" style="width:90px"><span class="sub">m</span><span id="checks" class="sub"></span></div>
+      <button class="btn pri" id="go2" disabled>Continuar a requisitos →</button>
+    </div>
+  </section>
+
+  <!-- 2 REQUISITOS -->
+  <section id="s2" class="grid" hidden>
+    <div class="panel row" style="justify-content:space-between">
+      <div class="col" style="gap:2px"><h2>La IA propone reglas; usted decide</h2><p class="sub">Cada regla cita el texto de origen y solo usa propiedades que existen en el modelo. Solo las reglas aprobadas se verifican.</p></div>
+      <div class="row"><button class="btn ia" id="btnIA">Proponer reglas con IA</button><button class="btn" id="btnManual">+ Regla manual</button><button class="btn ghost sm" id="btnSampleRules" hidden>Usar reglas de ejemplo</button></div>
+    </div>
+    <p class="sub" id="iaStatus" aria-live="polite"></p>
+    <div class="grid g2">
+      <div class="panel col"><div class="lbl">Acuerdos escritos</div><div id="bepView" class="mono" style="font-size:12px;white-space:pre-wrap;max-height:520px;overflow:auto;line-height:1.6"></div></div>
+      <div class="panel col"><div class="row" style="justify-content:space-between"><div class="lbl">Reglas</div><span class="mono" style="font-size:12px" id="ruleCount"></span></div>
+        <div id="rules" class="col" style="gap:10px"></div>
+        <div class="row" style="justify-content:flex-end"><button class="btn pri" id="go3">Verificar modelo →</button></div></div>
+    </div>
+  </section>
+
+  <!-- 3 VISOR -->
+  <section id="s3" class="grid viewer" hidden>
+    <div class="col">
+      <div class="canvas" id="cv">
+        <div class="ov" style="left:10px;top:10px">Arrastre: girar · rueda: zoom · doble clic: encuadrar</div>
+        <div class="ov modes" role="group" aria-label="Modo" style="right:10px;top:10px;display:flex;gap:4px;padding:4px"><button id="mCh" aria-pressed="true">CAMBIOS</button><button id="mCu" aria-pressed="false">CUMPLIMIENTO</button></div>
+        <div class="ov" id="legend" style="left:10px;bottom:10px;display:flex;gap:10px;flex-wrap:wrap"></div>
+      </div>
+      <p class="sub">Vista esquemática: cada elemento se dibuja en su ubicación real del IFC con una caja tipo por clase. La geometría completa llega en el MVP.</p>
+    </div>
+    <div class="col" style="gap:10px">
+      <div id="retro"></div>
+      <div class="panel" id="detail"></div>
+      <div class="panel col"><div class="row" style="justify-content:space-between"><div class="lbl">Elementos</div>
+        <label class="sub row" style="gap:4px"><input type="checkbox" id="onlyObs" checked> solo con cambios u observaciones</label></div>
+        <div class="row"><input type="text" id="q" placeholder="Buscar por nombre…" style="flex:1"><select id="lvl" aria-label="Nivel"></select></div>
+        <div class="elist" id="elist"></div></div>
+    </div>
+  </section>
+
+  <!-- 4 AVANCE -->
+  <section id="s4" class="grid" hidden>
+    <div class="panel"><h2>Avance contra el alcance aprobado</h2><p class="sub">Los cambios no son avance. Geometría e información se reportan por separado y los retrocesos no se compensan con lo recuperado.</p></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid g2"><div class="panel" id="bars"></div><div class="panel tbl" id="perRule"></div></div>
+  </section>
+
+  <!-- 5 REPORTE -->
+  <section id="s5" class="grid" hidden>
+    <div class="panel row" style="justify-content:space-between">
+      <div class="col" style="gap:2px"><h2>Reporte de observaciones</h2><p class="sub">Cada observación trae evidencia: valor antes y ahora, regla y fuente. El resultado lo decide el motor; la IA solo redacta.</p></div>
+      <div class="row"><button class="btn ia sm" id="btnRedact">Redactar con IA</button><button class="btn sm" id="dlCsv">Descargar CSV</button><button class="btn sm" id="dlHtml">Descargar reporte</button><button class="btn sm" id="copy">Copiar resumen</button></div>
+    </div>
+    <p class="sub" id="redStatus" aria-live="polite"></p>
+    <div class="panel tbl"><table><thead><tr><th>Obs.</th><th>Elemento</th><th>Estado</th><th>Evidencia</th><th>Regla y fuente</th></tr></thead><tbody id="rep"></tbody></table></div>
+    <div class="panel col"><div class="row" style="justify-content:space-between"><div><div class="lbl">Registro de medición para el Kit (hojas 2 y 8)</div><p class="sub">Tiempos de esta sesión y desempeño de la IA (H6).</p></div><button class="btn sm" id="dlLog">Descargar registro</button></div>
+      <div class="kpis" id="logKpis"></div></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* AI model audit · motor (lectura IFC STEP, comparación y verificación). Sin dependencias. */
+const Engine = (() => {
+  const SPATIAL = new Set(["IFCSITE","IFCBUILDING","IFCBUILDINGSTOREY","IFCSPACE","IFCPROJECT","IFCFACILITY","IFCFACILITYPART","IFCBRIDGE","IFCROAD"]);
+  const SKIP = new Set(["IFCOPENINGELEMENT","IFCVIRTUALELEMENT","IFCANNOTATION","IFCGRID"]);
+
+  // ---------- STEP tokenizer ----------
+  function parseArgs(s) {
+    let i = 0;
+    function val() {
+      while (s[i] === " ") i++;
+      const c = s[i];
+      if (c === "'") { let out = ""; i++; for (;;) { if (s[i] === "'") { if (s[i + 1] === "'") { out += "'"; i += 2; continue; } i++; break; } out += s[i++]; } return { t: "s", v: decodeStr(out) }; }
+      if (c === "(") { i++; const arr = []; while (s[i] !== ")") { arr.push(val()); while (s[i] === " ") i++; if (s[i] === ",") i++; } i++; return { t: "l", v: arr }; }
+      if (c === "#") { i++; let n = ""; while (/[0-9]/.test(s[i])) n += s[i++]; return { t: "r", v: +n }; }
+      if (c === "$") { i++; return { t: "n" }; }
+      if (c === "*") { i++; return { t: "n" }; }
+      if (c === ".") { i++; let n = ""; while (s[i] !== ".") n += s[i++]; i++; return { t: "e", v: n }; }
+      if (/[A-Za-z]/.test(c)) { let n = ""; while (/[A-Za-z0-9_]/.test(s[i])) n += s[i++]; const inner = val(); return { t: "typed", type: n.toUpperCase(), v: inner.t === "l" ? inner.v[0] : inner }; }
+      let n = ""; while (i < s.length && /[-+0-9.Ee]/.test(s[i])) n += s[i++]; return { t: "f", v: parseFloat(n) };
+    }
+    const out = []; while (s[i] !== ")" && i < s.length) { out.push(val()); while (s[i] === " ") i++; if (s[i] === ",") i++; }
+    return out;
+  }
+  function decodeStr(s) {
+    return s.replace(/\\X2\\([0-9A-F]+)\\X0\\/gi, (_, h) => h.match(/.{4}/g).map(x => String.fromCharCode(parseInt(x, 16))).join(""))
+            .replace(/\\X\\([0-9A-F]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+            .replace(/\\S\\(.)/g, (_, c) => String.fromCharCode(c.charCodeAt(0) + 128));
+  }
+  const S = a => (a && (a.t === "s")) ? a.v : (a && a.t === "typed") ? S(a.v) : null;
+  const R = a => (a && a.t === "r") ? a.v : null;
+  const L = a => (a && a.t === "l") ? a.v : [];
+  function plain(a) {
+    if (!a || a.t === "n") return "";
+    if (a.t === "typed") return plain(a.v);
+    if (a.t === "e") return a.v === "T" ? "TRUE" : a.v === "F" ? "FALSE" : a.v;
+    if (a.t === "f") return String(+a.v.toFixed(6));
+    if (a.t === "l") return a.v.map(plain).join(", ");
+    return String(a.v ?? "");
+  }
+
+  // ---------- parse ----------
+  function parse(text) {
+    const t0 = performance.now();
+    const ents = new Map();
+    const schema = (text.match(/FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'/i) || [])[1] || "?";
+    const data = text.slice(text.search(/\bDATA\s*;/i));
+    const re = /#(\d+)\s*=\s*([A-Za-z0-9_]+)\s*\(/g;
+    let m;
+    while ((m = re.exec(data))) {
+      // find matching end ");" respecting strings
+      let i = re.lastIndex, depth = 1, inS = false;
+      for (; i < data.length; i++) {
+        const c = data[i];
+        if (inS) { if (c === "'") { if (data[i + 1] === "'") i++; else inS = false; } continue; }
+        if (c === "'") inS = true; else if (c === "(") depth++; else if (c === ")") { depth--; if (depth === 0) break; }
+      }
+      ents.set(+m[1], { type: m[2].toUpperCase(), raw: data.slice(re.lastIndex, i) });
+      re.lastIndex = i + 1;
+    }
+    const args = id => { const e = ents.get(id); if (!e) return []; if (!e.a) e.a = parseArgs(e.raw.replace(/\r?\n/g, "")); return e.a; };
+
+    // units
+    let scale = 1, unitName = "m";
+    for (const [id, e] of ents) if (e.type === "IFCUNITASSIGNMENT") {
+      for (const u of L(args(id)[0])) { const ue = ents.get(R(u)); if (!ue) continue; const a = args(R(u));
+        if (ue.type === "IFCSIUNIT" && a[1]?.v === "LENGTHUNIT") { const pre = a[2]?.t === "e" ? a[2].v : null; scale = { MILLI: .001, CENTI: .01, DECI: .1, KILO: 1000 }[pre] || 1; unitName = pre ? pre.toLowerCase() + "metre" : "m"; }
+        if (ue.type === "IFCCONVERSIONBASEDUNIT" && a[1]?.v === "LENGTHUNIT") { const n = (S(a[2]) || "").toUpperCase(); scale = n.includes("FOOT") ? .3048 : n.includes("INCH") ? .0254 : 1; unitName = n.toLowerCase(); } }
+      break;
+    }
+
+    // placements -> 4x4 (column-major-ish simple arrays)
+    const pcache = new Map();
+    const mul = (A, B) => { const C = new Array(16).fill(0); for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) for (let k = 0; k < 4; k++) C[r * 4 + c] += A[r * 4 + k] * B[k * 4 + c]; return C; };
+    const I = () => [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+    const vec = id => { const a = args(id); return L(a[0]).map(x => x.v); };
+    const norm = v => { const l = Math.hypot(...v) || 1; return v.map(x => x / l); };
+    const cross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+    function axis(id) {
+      const e = ents.get(id); if (!e) return I(); const a = args(id);
+      const p = R(a[0]) ? vec(R(a[0])) : [0, 0, 0]; while (p.length < 3) p.push(0);
+      let z = [0, 0, 1], x = [1, 0, 0];
+      if (e.type === "IFCAXIS2PLACEMENT3D") { if (R(a[1])) z = norm(vec(R(a[1]))); if (R(a[2])) x = norm(vec(R(a[2]))); }
+      else if (e.type === "IFCAXIS2PLACEMENT2D" && R(a[1])) { const d = vec(R(a[1])); x = norm([d[0], d[1], 0]); }
+      const dot = x[0]*z[0]+x[1]*z[1]+x[2]*z[2]; x = norm([x[0]-dot*z[0], x[1]-dot*z[1], x[2]-dot*z[2]]);
+      const y = cross(z, x);
+      return [x[0], y[0], z[0], p[0], x[1], y[1], z[1], p[1], x[2], y[2], z[2], p[2], 0, 0, 0, 1];
+    }
+    function place(id) {
+      if (!id) return I(); if (pcache.has(id)) return pcache.get(id);
+      const e = ents.get(id); let M = I();
+      if (e && e.type === "IFCLOCALPLACEMENT") { const a = args(id); M = mul(place(R(a[0])), axis(R(a[1]))); }
+      pcache.set(id, M); return M;
+    }
+
+    // relations
+    const container = new Map(), psets = new Map(), storeys = [];
+    for (const [id, e] of ents) {
+      if (e.type === "IFCRELCONTAINEDINSPATIALSTRUCTURE") { const a = args(id); const s = R(a[5]); for (const r of L(a[4])) container.set(R(r), s); }
+      else if (e.type === "IFCRELDEFINESBYPROPERTIES") {
+        const a = args(id); const pd = R(a[5]); const pe = ents.get(pd); if (!pe || pe.type !== "IFCPROPERTYSET") continue;
+        const pa = args(pd); const pname = S(pa[2]) || "Pset";
+        for (const pr of L(pa[4])) { const ppe = ents.get(R(pr)); if (!ppe) continue; const q = args(R(pr));
+          let v = "";
+          if (ppe.type === "IFCPROPERTYSINGLEVALUE") v = plain(q[2]);
+          else if (ppe.type === "IFCPROPERTYENUMERATEDVALUE") v = plain(q[2]);
+          else if (ppe.type === "IFCPROPERTYLISTVALUE") v = plain(q[2]);
+          else continue;
+          for (const o of L(a[4])) { const k = R(o); if (!psets.has(k)) psets.set(k, {}); psets.get(k)[pname + "." + (S(q[0]) || "?")] = v; } }
+      }
+      else if (e.type === "IFCBUILDINGSTOREY") storeys.push(id);
+    }
+    // contained via aggregation to an element hosted in a storey (e.g. parts) -> inherit
+    const elements = new Map();
+    for (const [id, e] of ents) {
+      if (SPATIAL.has(e.type) || SKIP.has(e.type)) continue;
+      if (!container.has(id)) continue;
+      const a = args(id); const gid = S(a[0]); if (!gid) continue;
+      const M = place(R(a[5]));
+      const st = container.get(id); const sa = st ? args(st) : [];
+      elements.set(gid, { id: gid, step: id, cls: ifcName(e.type), name: S(a[2]) || "", level: S(sa[2]) || "—",
+        pos: [M[3] * scale, M[7] * scale, M[11] * scale], dir: [M[0], M[4]], props: psets.get(id) || {} });
+    }
+    const vocab = {};
+    for (const el of elements.values()) { (vocab[el.cls] ||= new Set()); Object.keys(el.props).forEach(k => vocab[el.cls].add(k)); }
+    return { schema, scale, unitName, elements, vocab, nEnt: ents.size, ms: performance.now() - t0,
+      warnings: [...elements.values()].filter(e => !Object.keys(e.props).length).length };
+  }
+  const NAMES = {};
+  function ifcName(T) { if (NAMES[T]) return NAMES[T];
+    const known = ["IfcWallStandardCase","IfcWall","IfcColumn","IfcBeam","IfcSlab","IfcDoor","IfcWindow","IfcStair","IfcStairFlight","IfcRailing","IfcRoof","IfcCovering","IfcPlate","IfcMember","IfcFooting","IfcPile","IfcFlowTerminal","IfcFlowSegment","IfcFlowFitting","IfcFlowController","IfcFlowMovingDevice","IfcFlowStorageDevice","IfcFlowTreatmentDevice","IfcEnergyConversionDevice","IfcDistributionControlElement","IfcDuctSegment","IfcPipeSegment","IfcDuctFitting","IfcPipeFitting","IfcAirTerminal","IfcSanitaryTerminal","IfcLightFixture","IfcFurnishingElement","IfcFurniture","IfcBuildingElementProxy","IfcCurtainWall","IfcRamp","IfcRampFlight","IfcChimney","IfcShadingDevice","IfcTransportElement","IfcCableSegment","IfcCableCarrierSegment","IfcUnitaryEquipment","IfcPump","IfcFan","IfcValve","IfcBoiler","IfcChiller","IfcTank","IfcElectricAppliance","IfcOutlet","IfcSwitchingDevice","IfcSensor","IfcAlarm","IfcFireSuppressionTerminal","IfcSpaceHeater","IfcReinforcingBar","IfcGeographicElement","IfcElementAssembly","IfcDiscreteAccessory","IfcMechanicalFastener"];
+    for (const k of known) NAMES[k.toUpperCase()] = k;
+    return NAMES[T] || ("Ifc" + T.slice(3).toLowerCase().replace(/^./, c => c.toUpperCase())); }
+
+  // ---------- compare ----------
+  function compare(m1, m2, tol = 0.01) {
+    const rows = []; const a = m1.elements, b = m2.elements;
+    const only1 = [...a.keys()].filter(k => !b.has(k)), only2 = new Set([...b.keys()].filter(k => !a.has(k)));
+    const idMap = new Map(); // v2 id -> v1 id
+    for (const k1 of only1) { const e1 = a.get(k1);
+      for (const k2 of only2) { const e2 = b.get(k2);
+        if (e1.cls === e2.cls && e1.name && e1.name === e2.name && dist(e1.pos, e2.pos) < 0.5) { idMap.set(k2, k1); only2.delete(k2); break; } } }
+    const matched1 = new Set(idMap.values());
+    for (const [k, e2] of b) {
+      const k1 = a.has(k) ? k : idMap.get(k);
+      if (!k1) { rows.push({ el: e2, v1: null, kind: "Agregado", geo: null, info: [] }); continue; }
+      const e1 = a.get(k1); const d = dist(e1.pos, e2.pos);
+      const keys = new Set([...Object.keys(e1.props), ...Object.keys(e2.props)]);
+      const info = [...keys].filter(x => (e1.props[x] ?? "") !== (e2.props[x] ?? "")).sort().map(x => ({ k: x, a: e1.props[x] ?? "", b: e2.props[x] ?? "" }));
+      const kind = k !== k1 ? "ID modificado" : (d > tol || info.length) ? "Modificado" : "Sin cambio";
+      rows.push({ el: e2, v1: e1, kind, geo: d > tol ? d : null, info, oldId: k !== k1 ? k1 : null });
+    }
+    for (const k of only1) if (!matched1.has(k)) rows.push({ el: a.get(k), v1: a.get(k), kind: "Eliminado", geo: null, info: [], removed: true });
+    return rows;
+  }
+  const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+
+  // ---------- rules ----------
+  // rule: {id, src, cita, cls, props:[{key, allowed?:[]}], amb, st:'prop'|'ap'|'dv'}
+  function evalEl(el, rule) {
+    if (!el) return null;
+    const miss = [];
+    for (const p of rule.props) { const v = el.props[p.key]; if (v === undefined || String(v).trim() === "") miss.push(p.key + " vacío");
+      else if (p.allowed && p.allowed.length && !p.allowed.map(String).includes(String(v))) miss.push(`${p.key}=${v} no permitido`); }
+    return { st: miss.length ? "Incumple" : "Cumple", miss };
+  }
+  function check(m1, m2, rules, cmp) {
+    const out = [];
+    const v1Of = new Map(cmp.filter(r => !r.removed).map(r => [r.el.id, r.v1]));
+    for (const r of rules) {
+      if (r.st !== "ap" || !r.props.length) { out.push({ rule: r, el: null, antes: "No evaluable", ahora: "No evaluable", why: r.st === "dv" ? "Devuelta al equipo" : r.props.length ? "Regla sin aprobar" : "Sin condición medible" }); continue; }
+      const els = [...m2.elements.values()].filter(e => r.cls === "*" || e.cls === r.cls);
+      if (!els.length) { out.push({ rule: r, el: null, antes: "No evaluable", ahora: "No evaluable", why: "No hay elementos de esa clase en V02" }); continue; }
+      for (const e of els) { const now = evalEl(e, r); const prev = v1Of.get(e.id); const bef = prev ? evalEl(prev, r) : null;
+        out.push({ rule: r, el: e, antes: bef ? bef.st : "No existía", ahora: now.st, miss: now.miss }); }
+    }
+    return out;
+  }
+  function summary(cmp, chk) {
+    const c = k => cmp.filter(r => r.kind === k).length;
+    const ev = chk.filter(x => x.ahora !== "No evaluable"), ev1 = chk.filter(x => x.antes === "Cumple" || x.antes === "Incumple");
+    return { agregados: c("Agregado"), eliminados: c("Eliminado"), modificados: c("Modificado"), ids: c("ID modificado"), sinCambio: c("Sin cambio"),
+      geo: cmp.filter(r => r.geo).length, info: cmp.filter(r => r.info.length).length,
+      comprobaciones: chk.length, cumple: ev.filter(x => x.ahora === "Cumple").length, incumple: ev.filter(x => x.ahora === "Incumple").length,
+      noEval: chk.length - ev.length, evaluables: ev.length,
+      cumpleV1: ev1.filter(x => x.antes === "Cumple").length, evaluablesV1: ev1.length,
+      retrocesos: chk.filter(x => x.antes === "Cumple" && x.ahora === "Incumple").length,
+      recuperadas: chk.filter(x => x.antes === "Incumple" && x.ahora === "Cumple").length };
+  }
+  return { parse, compare, check, summary, dist };
+})();
+if (typeof module !== "undefined") module.exports = Engine;
+
+</script>
+<script>
+const DEMO = {"v1": "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition[DesignTransferView]'),'2;1');\nFILE_NAME('/dev/null','2026-10-03T11:05:09-05:00',(''),(''),'IfcOpenShell 0.9.0','IfcOpenShell 0.9.0','Nobody');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n#1=IFCPROJECT('1UlIxihQv1iRsFitivzYzx',$,'Edificio demo V01',$,$,$,$,(#10),#5);\n#2=IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);\n#3=IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.);\n#4=IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.);\n#5=IFCUNITASSIGNMENT((#2,#3,#4));\n#6=IFCCARTESIANPOINT((0.,0.,0.));\n#7=IFCDIRECTION((0.,0.,1.));\n#8=IFCDIRECTION((1.,0.,0.));\n#9=IFCAXIS2PLACEMENT3D(#6,#7,#8);\n#10=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-05,#9,$);\n#11=IFCSITE('1TYOWrvxL3tPLHeXjqZZtq',$,'Sitio',$,$,$,$,$,$,$,$,$,$,$);\n#12=IFCBUILDING('285kn9QILDjRTYOXcOh1Ep',$,'Edificio demo',$,$,$,$,$,$,$,$,$);\n#13=IFCRELAGGREGATES('1ctQPEWefElgv2NKYeUzZY',$,$,$,#1,(#11));\n#14=IFCRELAGGREGATES('0Ljy91Z0n6X8E8uugTrfCn',$,$,$,#11,(#12));\n#15=IFCBUILDINGSTOREY('0be$pcb6XFBu6cp$4a4bSe',$,'Nivel 1',$,$,#21,$,$,$,0.);\n#16=IFCRELAGGREGATES('096degpsf4rxL0afBEsMVq',$,$,$,#12,(#22,#15,#34,#28));\n#17=IFCCARTESIANPOINT((0.,0.,0.));\n#18=IFCDIRECTION((0.,0.,1.));\n#19=IFCDIRECTION((1.,0.,0.));\n#20=IFCAXIS2PLACEMENT3D(#17,#18,#19);\n#21=IFCLOCALPLACEMENT($,#20);\n#22=IFCBUILDINGSTOREY('2$AjIQFvLBEuu9BYSgDCGu',$,'Nivel 2',$,$,#27,$,$,$,3000.);\n#23=IFCCARTESIANPOINT((0.,0.,3000.));\n#24=IFCDIRECTION((0.,0.,1.));\n#25=IFCDIRECTION((1.,0.,0.));\n#26=IFCAXIS2PLACEMENT3D(#23,#24,#25);\n#27=IFCLOCALPLACEMENT($,#26);\n#28=IFCBUILDINGSTOREY('0oPbB0_$T7ZfxD9pGIu1n5',$,'Nivel 3',$,$,#33,$,$,$,6000.);\n#29=IFCCARTESIANPOINT((0.,0.,6000.));\n#30=IFCDIRECTION((0.,0.,1.));\n#31=IFCDIRECTION((1.,0.,0.));\n#32=IFCAXIS2PLACEMENT3D(#29,#30,#31);\n#33=IFCLOCALPLACEMENT($,#32);\n#34=IFCBUILDINGSTOREY('2hjilvWjjF7vfdkljAC$mw',$,'Nivel 4',$,$,#39,$,$,$,9000.);\n#35=IFCCARTESIANPOINT((0.,0.,9000.));\n#36=IFCDIRECTION((0.,0.,1.));\n#37=IFCDIRECTION((1.,0.,0.));\n#38=IFCAXIS2PLACEMENT3D(#35,#36,#37);\n#39=IFCLOCALPLACEMENT($,#38);\n#40=IFCCOLUMN('1G0o3K_FAbHNBNvjvNapLA',$,'C-01',$,$,#51,$,$,$);\n#46=IFCRELCONTAINEDINSPATIALSTRUCTURE('3E6acsH_TEfRbWazkSg3H7',$,$,$,(#86,#101,#116,#131,#40,#71,#56),#15);\n#47=IFCCARTESIANPOINT((0.,0.,0.));\n#48=IFCDIRECTION((0.,0.,1.));\n#49=IFCDIRECTION((1.,0.,0.));\n#50=IFCAXIS2PLACEMENT3D(#47,#48,#49);\n#51=IFCLOCALPLACEMENT(#21,#50);\n#52=IFCPROPERTYSET('2fspqpiZv6tutoaBx2W4cD',$,'Pset_Proyecto',$,(#54,#55));\n#53=IFCRELDEFINESBYPROPERTIES('13PS4XdQ918QkMtG1HIEU0',$,$,$,(#40),#52);\n#54=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-01'),$);\n#55=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#56=IFCCOLUMN('1ZIQiloWLyiHpJbjNgjHEX',$,'C-02',$,$,#66,$,$,$);\n#62=IFCCARTESIANPOINT((6000.,0.,0.));\n#63=IFCDIRECTION((0.,0.,1.));\n#64=IFCDIRECTION((1.,0.,0.));\n#65=IFCAXIS2PLACEMENT3D(#62,#63,#64);\n#66=IFCLOCALPLACEMENT(#21,#65);\n#67=IFCPROPERTYSET('1$dxfKynLCIRZAsf7IBsnQ',$,'Pset_Proyecto',$,(#69,#70));\n#68=IFCRELDEFINESBYPROPERTIES('3uqH8j2EPEp90FWv77O9wr',$,$,$,(#56),#67);\n#69=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-02'),$);\n#70=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#71=IFCCOLUMN('0cQzbCXnkeec$GcMkaVHEQ',$,'C-03',$,$,#81,$,$,$);\n#77=IFCCARTESIANPOINT((12000.,0.,0.));\n#78=IFCDIRECTION((0.,0.,1.));\n#79=IFCDIRECTION((1.,0.,0.));\n#80=IFCAXIS2PLACEMENT3D(#77,#78,#79);\n#81=IFCLOCALPLACEMENT(#21,#80);\n#82=IFCPROPERTYSET('0YQZMeKVH06Pjx7zKNCooz',$,'Pset_Proyecto',$,(#84,#85));\n#83=IFCRELDEFINESBYPROPERTIES('3UjilEVnzFARR3KMNRI73Q',$,$,$,(#71),#82);\n#84=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-03'),$);\n#85=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#86=IFCCOLUMN('00h8YJTD3ME6aU0qU$_GDk',$,'C-04',$,$,#96,$,$,$);\n#92=IFCCARTESIANPOINT((0.,8000.,0.));\n#93=IFCDIRECTION((0.,0.,1.));\n#94=IFCDIRECTION((1.,0.,0.));\n#95=IFCAXIS2PLACEMENT3D(#92,#93,#94);\n#96=IFCLOCALPLACEMENT(#21,#95);\n#97=IFCPROPERTYSET('0Fh7F$rqD6$wZoIdZXdVNF',$,'Pset_Proyecto',$,(#99,#100));\n#98=IFCRELDEFINESBYPROPERTIES('2bNg4Mtc9BpBzNqG7VdhnZ',$,$,$,(#86),#97);\n#99=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-04'),$);\n#100=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#101=IFCCOLUMN('1c1bxyaDCChplbIkEFFXoG',$,'C-05',$,$,#111,$,$,$);\n#107=IFCCARTESIANPOINT((6000.,8000.,0.));\n#108=IFCDIRECTION((0.,0.,1.));\n#109=IFCDIRECTION((1.,0.,0.));\n#110=IFCAXIS2PLACEMENT3D(#107,#108,#109);\n#111=IFCLOCALPLACEMENT(#21,#110);\n#112=IFCPROPERTYSET('1ycux6g4XEuOaeOrcV8awE',$,'Pset_Proyecto',$,(#114,#115));\n#113=IFCRELDEFINESBYPROPERTIES('0$gdtkWhb2Vg_J_4N9djUw',$,$,$,(#101),#112);\n#114=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-05'),$);\n#115=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#116=IFCCOLUMN('0coSGzQ87k92EZSr4hkQb2',$,'C-06',$,$,#126,$,$,$);\n#122=IFCCARTESIANPOINT((12000.,8000.,0.));\n#123=IFCDIRECTION((0.,0.,1.));\n#124=IFCDIRECTION((1.,0.,0.));\n#125=IFCAXIS2PLACEMENT3D(#122,#123,#124);\n#126=IFCLOCALPLACEMENT(#21,#125);\n#127=IFCPROPERTYSET('32WYer1XDAB9F6b9Qg8H8d',$,'Pset_Proyecto',$,(#129,#130));\n#128=IFCRELDEFINESBYPROPERTIES('1BOxAurUz4EgtJ$jcI0n$1',$,$,$,(#116),#127);\n#129=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-06'),$);\n#130=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#131=IFCSLAB('10$gu_NGTSMc_837TETGs9',$,'Losa-N1',$,$,#141,$,$,$);\n#137=IFCCARTESIANPOINT((0.,0.,0.));\n#138=IFCDIRECTION((0.,0.,1.));\n#139=IFCDIRECTION((1.,0.,0.));\n#140=IFCAXIS2PLACEMENT3D(#137,#138,#139);\n#141=IFCLOCALPLACEMENT(#21,#140);\n#142=IFCPROPERTYSET('1QRcuzESLBEe7_b$downDj',$,'Pset_Proyecto',$,(#144,#145));\n#143=IFCRELDEFINESBYPROPERTIES('1T6EggI5L05uj7LI25QGgZ',$,$,$,(#131),#142);\n#144=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-1'),$);\n#145=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#146=IFCCOLUMN('0Wdv4Ft1UVU3ZuGgZ_nsB9',$,'C-07',$,$,#157,$,$,$);\n#152=IFCRELCONTAINEDINSPATIALSTRUCTURE('2on9j16fLC9eiqkN$f1Rcq',$,$,$,(#162,#494,#192,#222,#146,#479,#177,#509,#207,#464,#237),#22);\n#153=IFCCARTESIANPOINT((0.,0.,0.));\n#154=IFCDIRECTION((0.,0.,1.));\n#155=IFCDIRECTION((1.,0.,0.));\n#156=IFCAXIS2PLACEMENT3D(#153,#154,#155);\n#157=IFCLOCALPLACEMENT(#27,#156);\n#158=IFCPROPERTYSET('3h6g_d2LvEWA8ua$bTwiHO',$,'Pset_Proyecto',$,(#160,#161));\n#159=IFCRELDEFINESBYPROPERTIES('0wbYXKXDr1nxskM9CSEXEm',$,$,$,(#146),#158);\n#160=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-07'),$);\n#161=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#162=IFCCOLUMN('10bGcFlJFxZqRP053AaCH6',$,'C-08',$,$,#172,$,$,$);\n#168=IFCCARTESIANPOINT((6000.,0.,0.));\n#169=IFCDIRECTION((0.,0.,1.));\n#170=IFCDIRECTION((1.,0.,0.));\n#171=IFCAXIS2PLACEMENT3D(#168,#169,#170);\n#172=IFCLOCALPLACEMENT(#27,#171);\n#173=IFCPROPERTYSET('0YNDBdRcX5EP_dKR_qPzFi',$,'Pset_Proyecto',$,(#175,#176));\n#174=IFCRELDEFINESBYPROPERTIES('1NQjjQBUj6LOPovSMqBzhR',$,$,$,(#162),#173);\n#175=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-08'),$);\n#176=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#177=IFCCOLUMN('1$R8saGJMHjMLryXtdOOQn',$,'C-09',$,$,#187,$,$,$);\n#183=IFCCARTESIANPOINT((12000.,0.,0.));\n#184=IFCDIRECTION((0.,0.,1.));\n#185=IFCDIRECTION((1.,0.,0.));\n#186=IFCAXIS2PLACEMENT3D(#183,#184,#185);\n#187=IFCLOCALPLACEMENT(#27,#186);\n#188=IFCPROPERTYSET('1t9mRi_cv5lgJluhEpvJTA',$,'Pset_Proyecto',$,(#190,#191));\n#189=IFCRELDEFINESBYPROPERTIES('25HS1N5H9FCfZd4vtvLL0p',$,$,$,(#177),#188);\n#190=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-09'),$);\n#191=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#192=IFCCOLUMN('1Fev6fMQANstwMFm6hfhot',$,'C-10',$,$,#202,$,$,$);\n#198=IFCCARTESIANPOINT((0.,8000.,0.));\n#199=IFCDIRECTION((0.,0.,1.));\n#200=IFCDIRECTION((1.,0.,0.));\n#201=IFCAXIS2PLACEMENT3D(#198,#199,#200);\n#202=IFCLOCALPLACEMENT(#27,#201);\n#203=IFCPROPERTYSET('14$r1Orfr4Sv7hHRvWbhQI',$,'Pset_Proyecto',$,(#205,#206));\n#204=IFCRELDEFINESBYPROPERTIES('0$Ov2IX2jCMw$tZLvjzzMJ',$,$,$,(#192),#203);\n#205=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-10'),$);\n#206=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#207=IFCCOLUMN('0RZpn4kwrmz1I1q$BiAzAG',$,'C-11',$,$,#217,$,$,$);\n#213=IFCCARTESIANPOINT((6000.,8000.,0.));\n#214=IFCDIRECTION((0.,0.,1.));\n#215=IFCDIRECTION((1.,0.,0.));\n#216=IFCAXIS2PLACEMENT3D(#213,#214,#215);\n#217=IFCLOCALPLACEMENT(#27,#216);\n#218=IFCPROPERTYSET('2KjdQ8rn9FJw64nV$3ZV7l',$,'Pset_Proyecto',$,(#220,#221));\n#219=IFCRELDEFINESBYPROPERTIES('2eYUsxjKHDpBOwblkNdZ3p',$,$,$,(#207),#218);\n#220=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-11'),$);\n#221=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#222=IFCCOLUMN('1EPxAVxS3bjWMVv4UEhkuD',$,'C-12',$,$,#232,$,$,$);\n#228=IFCCARTESIANPOINT((12000.,8000.,0.));\n#229=IFCDIRECTION((0.,0.,1.));\n#230=IFCDIRECTION((1.,0.,0.));\n#231=IFCAXIS2PLACEMENT3D(#228,#229,#230);\n#232=IFCLOCALPLACEMENT(#27,#231);\n#233=IFCPROPERTYSET('3PeBiMiE90MOIXDrIGIZGW',$,'Pset_Proyecto',$,(#235,#236));\n#234=IFCRELDEFINESBYPROPERTIES('3rwmsvoL5B5g2MmB4PmTu0',$,$,$,(#222),#233);\n#235=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-12'),$);\n#236=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#237=IFCSLAB('0kFUQJLy_BQaoHIwRILUGO',$,'Losa-N2',$,$,#247,$,$,$);\n#243=IFCCARTESIANPOINT((0.,0.,0.));\n#244=IFCDIRECTION((0.,0.,1.));\n#245=IFCDIRECTION((1.,0.,0.));\n#246=IFCAXIS2PLACEMENT3D(#243,#244,#245);\n#247=IFCLOCALPLACEMENT(#27,#246);\n#248=IFCPROPERTYSET('054DOYng12Xfp_7lmJb5ny',$,'Pset_Proyecto',$,(#250,#251));\n#249=IFCRELDEFINESBYPROPERTIES('0w7Ipo_rf1jeQPXsXVfz6S',$,$,$,(#237),#248);\n#250=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-2'),$);\n#251=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#252=IFCCOLUMN('04aIlVEEtQ1K7du7eI7ex2',$,'C-13',$,$,#263,$,$,$);\n#258=IFCRELCONTAINEDINSPATIALSTRUCTURE('2MbwK09IP2yQ6PVPisA4cc',$,$,$,(#568,#597,#343,#268,#524,#298,#553,#252,#328,#583,#283,#539,#313),#28);\n#259=IFCCARTESIANPOINT((0.,0.,0.));\n#260=IFCDIRECTION((0.,0.,1.));\n#261=IFCDIRECTION((1.,0.,0.));\n#262=IFCAXIS2PLACEMENT3D(#259,#260,#261);\n#263=IFCLOCALPLACEMENT(#33,#262);\n#264=IFCPROPERTYSET('1zggsTzdj4yu2gwDnoHFrn',$,'Pset_Proyecto',$,(#266,#267));\n#265=IFCRELDEFINESBYPROPERTIES('1uAkpRRyr3LAapXyYchyRr',$,$,$,(#252),#264);\n#266=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-13'),$);\n#267=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#268=IFCCOLUMN('0xhAEN$36X$tLbmEjdUoh4',$,'C-14',$,$,#278,$,$,$);\n#274=IFCCARTESIANPOINT((6000.,0.,0.));\n#275=IFCDIRECTION((0.,0.,1.));\n#276=IFCDIRECTION((1.,0.,0.));\n#277=IFCAXIS2PLACEMENT3D(#274,#275,#276);\n#278=IFCLOCALPLACEMENT(#33,#277);\n#279=IFCPROPERTYSET('2LIXF680X8IhOyv7TqVqm_',$,'Pset_Proyecto',$,(#281,#282));\n#280=IFCRELDEFINESBYPROPERTIES('2cZSPrter80esXd32Ib7Nl',$,$,$,(#268),#279);\n#281=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-14'),$);\n#282=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#283=IFCCOLUMN('1GYdnaQMSyk47EcsSuVxaQ',$,'C-15',$,$,#293,$,$,$);\n#289=IFCCARTESIANPOINT((12000.,0.,0.));\n#290=IFCDIRECTION((0.,0.,1.));\n#291=IFCDIRECTION((1.,0.,0.));\n#292=IFCAXIS2PLACEMENT3D(#289,#290,#291);\n#293=IFCLOCALPLACEMENT(#33,#292);\n#294=IFCPROPERTYSET('1RVJVfRX14xvu$lr38MRJZ',$,'Pset_Proyecto',$,(#296,#297));\n#295=IFCRELDEFINESBYPROPERTIES('36SUGEfon5h9kDJa9IcT3d',$,$,$,(#283),#294);\n#296=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-15'),$);\n#297=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#298=IFCCOLUMN('0$cOnveXKYmX_kaQUmZsQ4',$,'C-16',$,$,#308,$,$,$);\n#304=IFCCARTESIANPOINT((0.,8000.,0.));\n#305=IFCDIRECTION((0.,0.,1.));\n#306=IFCDIRECTION((1.,0.,0.));\n#307=IFCAXIS2PLACEMENT3D(#304,#305,#306);\n#308=IFCLOCALPLACEMENT(#33,#307);\n#309=IFCPROPERTYSET('2Ml_ksOuL8GeFkd1Tf2gJ5',$,'Pset_Proyecto',$,(#311,#312));\n#310=IFCRELDEFINESBYPROPERTIES('0B_sDIalf5L9faJs0Yw9HC',$,$,$,(#298),#309);\n#311=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-16'),$);\n#312=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#313=IFCCOLUMN('01WdTq$oBUGHYWeYeCSCtJ',$,'C-17',$,$,#323,$,$,$);\n#319=IFCCARTESIANPOINT((6000.,8000.,0.));\n#320=IFCDIRECTION((0.,0.,1.));\n#321=IFCDIRECTION((1.,0.,0.));\n#322=IFCAXIS2PLACEMENT3D(#319,#320,#321);\n#323=IFCLOCALPLACEMENT(#33,#322);\n#324=IFCPROPERTYSET('2YZj$2T0jBjhMjAjNUiGGY',$,'Pset_Proyecto',$,(#326,#327));\n#325=IFCRELDEFINESBYPROPERTIES('2e0G1kDwT9AwIUnxRn8ABd',$,$,$,(#313),#324);\n#326=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-17'),$);\n#327=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#328=IFCCOLUMN('1Ob88lV0Z9lXcjUojmu3zF',$,'C-18',$,$,#338,$,$,$);\n#334=IFCCARTESIANPOINT((12000.,8000.,0.));\n#335=IFCDIRECTION((0.,0.,1.));\n#336=IFCDIRECTION((1.,0.,0.));\n#337=IFCAXIS2PLACEMENT3D(#334,#335,#336);\n#338=IFCLOCALPLACEMENT(#33,#337);\n#339=IFCPROPERTYSET('2_zNZ93192nfARCsjfkN8_',$,'Pset_Proyecto',$,(#341,#342));\n#340=IFCRELDEFINESBYPROPERTIES('0Gp4_kzW17ouhltDzAGHfG',$,$,$,(#328),#339);\n#341=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-18'),$);\n#342=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#343=IFCSLAB('07bOxD3TfZz36TwpfKW0CC',$,'Losa-N3',$,$,#353,$,$,$);\n#349=IFCCARTESIANPOINT((0.,0.,0.));\n#350=IFCDIRECTION((0.,0.,1.));\n#351=IFCDIRECTION((1.,0.,0.));\n#352=IFCAXIS2PLACEMENT3D(#349,#350,#351);\n#353=IFCLOCALPLACEMENT(#33,#352);\n#354=IFCPROPERTYSET('2ffMnHoYzCjxVt_mM7wCq8',$,'Pset_Proyecto',$,(#356,#357));\n#355=IFCRELDEFINESBYPROPERTIES('2KGtGSJxf3yB$ELqExKEJV',$,$,$,(#343),#354);\n#356=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-3'),$);\n#357=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#358=IFCCOLUMN('0lJFT0N4ZpaG1wNHU_c0QV',$,'C-19',$,$,#369,$,$,$);\n#364=IFCRELCONTAINEDINSPATIALSTRUCTURE('3Aq8yAqq967QVlrB63caJx',$,$,$,(#404,#434,#419,#358,#449,#374,#389),#34);\n#365=IFCCARTESIANPOINT((0.,0.,0.));\n#366=IFCDIRECTION((0.,0.,1.));\n#367=IFCDIRECTION((1.,0.,0.));\n#368=IFCAXIS2PLACEMENT3D(#365,#366,#367);\n#369=IFCLOCALPLACEMENT(#39,#368);\n#370=IFCPROPERTYSET('1JA$XA94T9TQ6TaTTlPKju',$,'Pset_Proyecto',$,(#372,#373));\n#371=IFCRELDEFINESBYPROPERTIES('3uIOlFOOnCgAklkuEpIdo3',$,$,$,(#358),#370);\n#372=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-19'),$);\n#373=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#374=IFCCOLUMN('1gFm46pmkTD1F5ONNKyyNo',$,'C-20',$,$,#384,$,$,$);\n#380=IFCCARTESIANPOINT((6000.,0.,0.));\n#381=IFCDIRECTION((0.,0.,1.));\n#382=IFCDIRECTION((1.,0.,0.));\n#383=IFCAXIS2PLACEMENT3D(#380,#381,#382);\n#384=IFCLOCALPLACEMENT(#39,#383);\n#385=IFCPROPERTYSET('0c5gJr2B9Bqee3B7ZrI0hP',$,'Pset_Proyecto',$,(#387,#388));\n#386=IFCRELDEFINESBYPROPERTIES('10BjEkJN1AYxe9CtJifGpR',$,$,$,(#374),#385);\n#387=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-20'),$);\n#388=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#389=IFCCOLUMN('0YGB6gn5EXZd2kkLbxWRDr',$,'C-21',$,$,#399,$,$,$);\n#395=IFCCARTESIANPOINT((12000.,0.,0.));\n#396=IFCDIRECTION((0.,0.,1.));\n#397=IFCDIRECTION((1.,0.,0.));\n#398=IFCAXIS2PLACEMENT3D(#395,#396,#397);\n#399=IFCLOCALPLACEMENT(#39,#398);\n#400=IFCPROPERTYSET('0rzdyN2VHEQvqlXio3Z09X',$,'Pset_Proyecto',$,(#402,#403));\n#401=IFCRELDEFINESBYPROPERTIES('1AoVt8flfC3htj47VqasSl',$,$,$,(#389),#400);\n#402=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-21'),$);\n#403=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#404=IFCCOLUMN('11GDD45zPp3snlQrLuISl3',$,'C-22',$,$,#414,$,$,$);\n#410=IFCCARTESIANPOINT((0.,8000.,0.));\n#411=IFCDIRECTION((0.,0.,1.));\n#412=IFCDIRECTION((1.,0.,0.));\n#413=IFCAXIS2PLACEMENT3D(#410,#411,#412);\n#414=IFCLOCALPLACEMENT(#39,#413);\n#415=IFCPROPERTYSET('0ZSCYippL5iRhcBMynO3o8',$,'Pset_Proyecto',$,(#417,#418));\n#416=IFCRELDEFINESBYPROPERTIES('2GPHGi9Dj2FAsmbybORCUQ',$,$,$,(#404),#415);\n#417=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-22'),$);\n#418=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#419=IFCCOLUMN('1Hua2BMfqt25xoMRG5O$yw',$,'C-23',$,$,#429,$,$,$);\n#425=IFCCARTESIANPOINT((6000.,8000.,0.));\n#426=IFCDIRECTION((0.,0.,1.));\n#427=IFCDIRECTION((1.,0.,0.));\n#428=IFCAXIS2PLACEMENT3D(#425,#426,#427);\n#429=IFCLOCALPLACEMENT(#39,#428);\n#430=IFCPROPERTYSET('00I4Gydn14bQarbuBtbl_K',$,'Pset_Proyecto',$,(#432,#433));\n#431=IFCRELDEFINESBYPROPERTIES('3Fk$81c7T0WRpyyFdN9GEX',$,$,$,(#419),#430);\n#432=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-23'),$);\n#433=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#434=IFCCOLUMN('0BjY33l9mLv4L4CsEVIqXs',$,'C-24',$,$,#444,$,$,$);\n#440=IFCCARTESIANPOINT((12000.,8000.,0.));\n#441=IFCDIRECTION((0.,0.,1.));\n#442=IFCDIRECTION((1.,0.,0.));\n#443=IFCAXIS2PLACEMENT3D(#440,#441,#442);\n#444=IFCLOCALPLACEMENT(#39,#443);\n#445=IFCPROPERTYSET('2uli$jBkHFTxw0TVV3M51x',$,'Pset_Proyecto',$,(#447,#448));\n#446=IFCRELDEFINESBYPROPERTIES('0E6QU0CVP4xhpuxRGCCj2l',$,$,$,(#434),#445);\n#447=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-24'),$);\n#448=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#449=IFCSLAB('0fMK57J9OG6HCvlgOSuYIM',$,'Losa-N4',$,$,#459,$,$,$);\n#455=IFCCARTESIANPOINT((0.,0.,0.));\n#456=IFCDIRECTION((0.,0.,1.));\n#457=IFCDIRECTION((1.,0.,0.));\n#458=IFCAXIS2PLACEMENT3D(#455,#456,#457);\n#459=IFCLOCALPLACEMENT(#39,#458);\n#460=IFCPROPERTYSET('0rtbdAFYL1W9CLoHcAYlRU',$,'Pset_Proyecto',$,(#462,#463));\n#461=IFCRELDEFINESBYPROPERTIES('2GE_Lo55P8ZwL16GspVuv2',$,$,$,(#449),#460);\n#462=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-4'),$);\n#463=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#464=IFCWALL('1eVSHPCDUrBJ2HiJ2pK_VN',$,'M-01',$,$,#474,$,$,$);\n#470=IFCCARTESIANPOINT((3000.,2000.,0.));\n#471=IFCDIRECTION((0.,0.,1.));\n#472=IFCDIRECTION((1.,0.,0.));\n#473=IFCAXIS2PLACEMENT3D(#470,#471,#472);\n#474=IFCLOCALPLACEMENT(#27,#473);\n#475=IFCPROPERTYSET('3BQGKk_9rEsRXCZVC6E$6T',$,'Pset_Proyecto',$,(#477,#478));\n#476=IFCRELDEFINESBYPROPERTIES('0w7zUVAlbDiBFwAKx5o$BQ',$,$,$,(#464),#475);\n#477=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-01'),$);\n#478=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#479=IFCWALL('1zHvnLIQOx3qk4sGaoDGLU',$,'M-02',$,$,#489,$,$,$);\n#485=IFCCARTESIANPOINT((3000.,5000.,0.));\n#486=IFCDIRECTION((0.,0.,1.));\n#487=IFCDIRECTION((1.,0.,0.));\n#488=IFCAXIS2PLACEMENT3D(#485,#486,#487);\n#489=IFCLOCALPLACEMENT(#27,#488);\n#490=IFCPROPERTYSET('2BFCwi6ozCcvG4$plrAkrR',$,'Pset_Proyecto',$,(#492,#493));\n#491=IFCRELDEFINESBYPROPERTIES('0KgILAUEH2QgBrsK8oczzf',$,$,$,(#479),#490);\n#492=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-02'),$);\n#493=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#494=IFCWALL('1DSdkxE44MZr6ftpYv3FrS',$,'M-03',$,$,#504,$,$,$);\n#500=IFCCARTESIANPOINT((2000.,3500.,0.));\n#501=IFCDIRECTION((0.,0.,1.));\n#502=IFCDIRECTION((6.123233995736766E-17,1.,0.));\n#503=IFCAXIS2PLACEMENT3D(#500,#501,#502);\n#504=IFCLOCALPLACEMENT(#27,#503);\n#505=IFCPROPERTYSET('3RgOfY5qn29hsyGvRR2cVh',$,'Pset_Proyecto',$,(#507,#508));\n#506=IFCRELDEFINESBYPROPERTIES('3YYgrmKNH4qeUWgvIAgLlQ',$,$,$,(#494),#505);\n#507=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-03'),$);\n#508=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#509=IFCWALL('0uN34In_Edwnwg22gjqik8',$,'M-04',$,$,#519,$,$,$);\n#515=IFCCARTESIANPOINT((4000.,3500.,0.));\n#516=IFCDIRECTION((0.,0.,1.));\n#517=IFCDIRECTION((6.123233995736766E-17,1.,0.));\n#518=IFCAXIS2PLACEMENT3D(#515,#516,#517);\n#519=IFCLOCALPLACEMENT(#27,#518);\n#520=IFCPROPERTYSET('0wNtteIWbCc9Qp1PHYNSjT',$,'Pset_Proyecto',$,(#522,#523));\n#521=IFCRELDEFINESBYPROPERTIES('0eUX8kRKnEkes_GLQy_z$j',$,$,$,(#509),#520);\n#522=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-04'),$);\n#523=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#524=IFCFLOWTERMINAL('0pXH1nXh1samnWpBnflvWa',$,'EQ-011',$,$,#534,$,$);\n#530=IFCCARTESIANPOINT((2000.,6000.,0.));\n#531=IFCDIRECTION((0.,0.,1.));\n#532=IFCDIRECTION((1.,0.,0.));\n#533=IFCAXIS2PLACEMENT3D(#530,#531,#532);\n#534=IFCLOCALPLACEMENT(#33,#533);\n#535=IFCPROPERTYSET('0qFFjV5vrEOgA7dj_Ntyge',$,'Pset_Proyecto',$,(#537,#538));\n#536=IFCRELDEFINESBYPROPERTIES('3pKhJj9GLEz8MN73xPT8Yc',$,$,$,(#524),#535);\n#537=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-011'),$);\n#538=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('15'),$);\n#539=IFCFLOWTERMINAL('1xuSeXi$jDG1k5G9PvoQ$L',$,'EQ-012',$,$,#549,$,$);\n#545=IFCCARTESIANPOINT((4000.,6000.,0.));\n#546=IFCDIRECTION((0.,0.,1.));\n#547=IFCDIRECTION((1.,0.,0.));\n#548=IFCAXIS2PLACEMENT3D(#545,#546,#547);\n#549=IFCLOCALPLACEMENT(#33,#548);\n#550=IFCPROPERTYSET('1lnt94XJz0TPD$b$TmuFEv',$,'Pset_Proyecto',$,(#552));\n#551=IFCRELDEFINESBYPROPERTIES('30c4YVvsjFNBMv5H31S$Ft',$,$,$,(#539),#550);\n#552=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-012'),$);\n#553=IFCFLOWTERMINAL('1L$6QU0FYzvIPqAao1qrf5',$,'EQ-013',$,$,#563,$,$);\n#559=IFCCARTESIANPOINT((10000.,6000.,0.));\n#560=IFCDIRECTION((0.,0.,1.));\n#561=IFCDIRECTION((1.,0.,0.));\n#562=IFCAXIS2PLACEMENT3D(#559,#560,#561);\n#563=IFCLOCALPLACEMENT(#33,#562);\n#564=IFCPROPERTYSET('0iKf_nn413C9SXD3hVa3Ek',$,'Pset_Proyecto',$,(#566,#567));\n#565=IFCRELDEFINESBYPROPERTIES('3YWEreDkz8XvhMNAJvAs76',$,$,$,(#553),#564);\n#566=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-013'),$);\n#567=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('12'),$);\n#568=IFCFLOWTERMINAL('0GsCbyH3flrMmhPJLiFHn8',$,'EQ-015',$,$,#578,$,$);\n#574=IFCCARTESIANPOINT((8000.,6000.,0.));\n#575=IFCDIRECTION((0.,0.,1.));\n#576=IFCDIRECTION((1.,0.,0.));\n#577=IFCAXIS2PLACEMENT3D(#574,#575,#576);\n#578=IFCLOCALPLACEMENT(#33,#577);\n#579=IFCPROPERTYSET('1lvUgfj41EUw3oDWah1$Gl',$,'Pset_Proyecto',$,(#581,#582));\n#580=IFCRELDEFINESBYPROPERTIES('3hZ7NrOaz75P5yfetyUDAs',$,$,$,(#568),#579);\n#581=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-015'),$);\n#582=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('12'),$);\n#583=IFCFLOWSEGMENT('0OegJGI0jfUdR5dGpW1ogQ',$,'Ducto-03',$,$,#593,$,$);\n#589=IFCCARTESIANPOINT((6000.,7000.,0.));\n#590=IFCDIRECTION((0.,0.,1.));\n#591=IFCDIRECTION((1.,0.,0.));\n#592=IFCAXIS2PLACEMENT3D(#589,#590,#591);\n#593=IFCLOCALPLACEMENT(#33,#592);\n#594=IFCPROPERTYSET('2AJOmpk4PEdPbg2$YMdNYp',$,'Pset_Proyecto',$,(#596));\n#595=IFCRELDEFINESBYPROPERTIES('2M$NM$HLXBR98ZwHY2m3ML',$,$,$,(#583),#594);\n#596=IFCPROPERTYSINGLEVALUE('Sistema',$,IFCLABEL('Extracci\\X2\\00F3\\X0\\n'),$);\n#597=IFCFLOWSEGMENT('1uz0$9lSaEANEpYvdDhRot',$,'Ducto-01',$,$,#607,$,$);\n#603=IFCCARTESIANPOINT((2000.,7000.,0.));\n#604=IFCDIRECTION((0.,0.,1.));\n#605=IFCDIRECTION((1.,0.,0.));\n#606=IFCAXIS2PLACEMENT3D(#603,#604,#605);\n#607=IFCLOCALPLACEMENT(#33,#606);\nENDSEC;\nEND-ISO-10303-21;\n", "v2": "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition[DesignTransferView]'),'2;1');\nFILE_NAME('/dev/null','2026-10-03T11:05:09-05:00',(''),(''),'IfcOpenShell 0.9.0','IfcOpenShell 0.9.0','Nobody');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n#1=IFCPROJECT('0RgLfccYP42RiCNnUlBfzp',$,'Edificio demo V02',$,$,$,$,(#10),#5);\n#2=IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);\n#3=IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.);\n#4=IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.);\n#5=IFCUNITASSIGNMENT((#2,#3,#4));\n#6=IFCCARTESIANPOINT((0.,0.,0.));\n#7=IFCDIRECTION((0.,0.,1.));\n#8=IFCDIRECTION((1.,0.,0.));\n#9=IFCAXIS2PLACEMENT3D(#6,#7,#8);\n#10=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-05,#9,$);\n#11=IFCSITE('2yQHT1qTr8Mge89C8zDUZD',$,'Sitio',$,$,$,$,$,$,$,$,$,$,$);\n#12=IFCBUILDING('2paumcC49FqhGxvxqE0Tub',$,'Edificio demo',$,$,$,$,$,$,$,$,$);\n#13=IFCRELAGGREGATES('0450J0byv0agK3u6bxzIsT',$,$,$,#1,(#11));\n#14=IFCRELAGGREGATES('3XNqVj921CIB5rJENTLCaO',$,$,$,#11,(#12));\n#15=IFCBUILDINGSTOREY('2gGK6bTOjAGhQXqm6zjZQk',$,'Nivel 1',$,$,#21,$,$,$,0.);\n#16=IFCRELAGGREGATES('2LUi83jBT1Af8EGajHgGlS',$,$,$,#12,(#34,#28,#22,#15));\n#17=IFCCARTESIANPOINT((0.,0.,0.));\n#18=IFCDIRECTION((0.,0.,1.));\n#19=IFCDIRECTION((1.,0.,0.));\n#20=IFCAXIS2PLACEMENT3D(#17,#18,#19);\n#21=IFCLOCALPLACEMENT($,#20);\n#22=IFCBUILDINGSTOREY('0TcHaL__bC3wrEk5Bcs0ZR',$,'Nivel 2',$,$,#27,$,$,$,3000.);\n#23=IFCCARTESIANPOINT((0.,0.,3000.));\n#24=IFCDIRECTION((0.,0.,1.));\n#25=IFCDIRECTION((1.,0.,0.));\n#26=IFCAXIS2PLACEMENT3D(#23,#24,#25);\n#27=IFCLOCALPLACEMENT($,#26);\n#28=IFCBUILDINGSTOREY('1ToGTqPE9DoA8t9QxL49xP',$,'Nivel 3',$,$,#33,$,$,$,6000.);\n#29=IFCCARTESIANPOINT((0.,0.,6000.));\n#30=IFCDIRECTION((0.,0.,1.));\n#31=IFCDIRECTION((1.,0.,0.));\n#32=IFCAXIS2PLACEMENT3D(#29,#30,#31);\n#33=IFCLOCALPLACEMENT($,#32);\n#34=IFCBUILDINGSTOREY('3gtkuih7DB4u1CzBoMPyYf',$,'Nivel 4',$,$,#39,$,$,$,9000.);\n#35=IFCCARTESIANPOINT((0.,0.,9000.));\n#36=IFCDIRECTION((0.,0.,1.));\n#37=IFCDIRECTION((1.,0.,0.));\n#38=IFCAXIS2PLACEMENT3D(#35,#36,#37);\n#39=IFCLOCALPLACEMENT($,#38);\n#40=IFCCOLUMN('1G0o3K_FAbHNBNvjvNapLA',$,'C-01',$,$,#51,$,$,$);\n#46=IFCRELCONTAINEDINSPATIALSTRUCTURE('3bwuL6RMD5wPhp5ySa1hn_',$,$,$,(#86,#101,#40,#116,#131,#56,#71),#15);\n#47=IFCCARTESIANPOINT((0.,0.,0.));\n#48=IFCDIRECTION((0.,0.,1.));\n#49=IFCDIRECTION((1.,0.,0.));\n#50=IFCAXIS2PLACEMENT3D(#47,#48,#49);\n#51=IFCLOCALPLACEMENT(#21,#50);\n#52=IFCPROPERTYSET('0iBEbZ4QD1997gS8$mRgSk',$,'Pset_Proyecto',$,(#54,#55));\n#53=IFCRELDEFINESBYPROPERTIES('0GI1r$WJ15OPpK5UrLPM0p',$,$,$,(#40),#52);\n#54=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-01'),$);\n#55=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#56=IFCCOLUMN('1ZIQiloWLyiHpJbjNgjHEX',$,'C-02',$,$,#66,$,$,$);\n#62=IFCCARTESIANPOINT((6400.,0.,0.));\n#63=IFCDIRECTION((0.,0.,1.));\n#64=IFCDIRECTION((1.,0.,0.));\n#65=IFCAXIS2PLACEMENT3D(#62,#63,#64);\n#66=IFCLOCALPLACEMENT(#21,#65);\n#67=IFCPROPERTYSET('12F9GPbHb5ig3GfW8s1Dkd',$,'Pset_Proyecto',$,(#69,#70));\n#68=IFCRELDEFINESBYPROPERTIES('0kKANLE6PATR$Y3toV64NY',$,$,$,(#56),#67);\n#69=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-02'),$);\n#70=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#71=IFCCOLUMN('0cQzbCXnkeec$GcMkaVHEQ',$,'C-03',$,$,#81,$,$,$);\n#77=IFCCARTESIANPOINT((12000.,0.,0.));\n#78=IFCDIRECTION((0.,0.,1.));\n#79=IFCDIRECTION((1.,0.,0.));\n#80=IFCAXIS2PLACEMENT3D(#77,#78,#79);\n#81=IFCLOCALPLACEMENT(#21,#80);\n#82=IFCPROPERTYSET('2AyiYdVOn5RPM9PfXMEWk0',$,'Pset_Proyecto',$,(#84,#85));\n#83=IFCRELDEFINESBYPROPERTIES('3niUiKj2D85xIfi2YoBAxA',$,$,$,(#71),#82);\n#84=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-03'),$);\n#85=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#86=IFCCOLUMN('00h8YJTD3ME6aU0qU$_GDk',$,'C-04',$,$,#96,$,$,$);\n#92=IFCCARTESIANPOINT((0.,8000.,0.));\n#93=IFCDIRECTION((0.,0.,1.));\n#94=IFCDIRECTION((1.,0.,0.));\n#95=IFCAXIS2PLACEMENT3D(#92,#93,#94);\n#96=IFCLOCALPLACEMENT(#21,#95);\n#97=IFCPROPERTYSET('1WsMBqBF1AAALfmWkNoaiZ',$,'Pset_Proyecto',$,(#99,#100));\n#98=IFCRELDEFINESBYPROPERTIES('1wu3df8XjAggiN3M_M8ds_',$,$,$,(#86),#97);\n#99=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-04'),$);\n#100=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#101=IFCCOLUMN('1c1bxyaDCChplbIkEFFXoG',$,'C-05',$,$,#111,$,$,$);\n#107=IFCCARTESIANPOINT((6000.,8000.,0.));\n#108=IFCDIRECTION((0.,0.,1.));\n#109=IFCDIRECTION((1.,0.,0.));\n#110=IFCAXIS2PLACEMENT3D(#107,#108,#109);\n#111=IFCLOCALPLACEMENT(#21,#110);\n#112=IFCPROPERTYSET('3UOlRfo8LARe8vZpsq3_ND',$,'Pset_Proyecto',$,(#114,#115));\n#113=IFCRELDEFINESBYPROPERTIES('2pec8kOvn2s97$p04e9k_1',$,$,$,(#101),#112);\n#114=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-05'),$);\n#115=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#116=IFCCOLUMN('0coSGzQ87k92EZSr4hkQb2',$,'C-06',$,$,#126,$,$,$);\n#122=IFCCARTESIANPOINT((12000.,8000.,0.));\n#123=IFCDIRECTION((0.,0.,1.));\n#124=IFCDIRECTION((1.,0.,0.));\n#125=IFCAXIS2PLACEMENT3D(#122,#123,#124);\n#126=IFCLOCALPLACEMENT(#21,#125);\n#127=IFCPROPERTYSET('2u128wJcr4EgefxInantPj',$,'Pset_Proyecto',$,(#129,#130));\n#128=IFCRELDEFINESBYPROPERTIES('2z9wrLmYj8xQxF1FKb$aat',$,$,$,(#116),#127);\n#129=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-06'),$);\n#130=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#131=IFCSLAB('10$gu_NGTSMc_837TETGs9',$,'Losa-N1',$,$,#141,$,$,$);\n#137=IFCCARTESIANPOINT((0.,0.,0.));\n#138=IFCDIRECTION((0.,0.,1.));\n#139=IFCDIRECTION((1.,0.,0.));\n#140=IFCAXIS2PLACEMENT3D(#137,#138,#139);\n#141=IFCLOCALPLACEMENT(#21,#140);\n#142=IFCPROPERTYSET('0z8pdph7b0VOyRDDKKL5hr',$,'Pset_Proyecto',$,(#144,#145));\n#143=IFCRELDEFINESBYPROPERTIES('0JRbT6rVj5ye5ewwN4yZvi',$,$,$,(#131),#142);\n#144=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-1'),$);\n#145=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#146=IFCCOLUMN('0Wdv4Ft1UVU3ZuGgZ_nsB9',$,'C-07',$,$,#157,$,$,$);\n#152=IFCRELCONTAINEDINSPATIALSTRUCTURE('0jTz2v8cL8PQDAlCrNtoxf',$,$,$,(#479,#177,#509,#207,#464,#237,#162,#146,#494,#192,#222),#22);\n#153=IFCCARTESIANPOINT((0.,0.,0.));\n#154=IFCDIRECTION((0.,0.,1.));\n#155=IFCDIRECTION((1.,0.,0.));\n#156=IFCAXIS2PLACEMENT3D(#153,#154,#155);\n#157=IFCLOCALPLACEMENT(#27,#156);\n#158=IFCPROPERTYSET('2wMgzyIPr42AIcyenI66kf',$,'Pset_Proyecto',$,(#160,#161));\n#159=IFCRELDEFINESBYPROPERTIES('0faiRn_YX8AuBrxs3I3a06',$,$,$,(#146),#158);\n#160=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-07'),$);\n#161=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#162=IFCCOLUMN('10bGcFlJFxZqRP053AaCH6',$,'C-08',$,$,#172,$,$,$);\n#168=IFCCARTESIANPOINT((6000.,0.,0.));\n#169=IFCDIRECTION((0.,0.,1.));\n#170=IFCDIRECTION((1.,0.,0.));\n#171=IFCAXIS2PLACEMENT3D(#168,#169,#170);\n#172=IFCLOCALPLACEMENT(#27,#171);\n#173=IFCPROPERTYSET('14C7c1PDj4LQqA$wN3m0jR',$,'Pset_Proyecto',$,(#175,#176));\n#174=IFCRELDEFINESBYPROPERTIES('2fSn1fWdbFugSxTSCNm5_8',$,$,$,(#162),#173);\n#175=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-08'),$);\n#176=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#177=IFCCOLUMN('1$R8saGJMHjMLryXtdOOQn',$,'C-09',$,$,#187,$,$,$);\n#183=IFCCARTESIANPOINT((12000.,0.,0.));\n#184=IFCDIRECTION((0.,0.,1.));\n#185=IFCDIRECTION((1.,0.,0.));\n#186=IFCAXIS2PLACEMENT3D(#183,#184,#185);\n#187=IFCLOCALPLACEMENT(#27,#186);\n#188=IFCPROPERTYSET('23bJjZqB50uht_m$JBS7UC',$,'Pset_Proyecto',$,(#190,#191));\n#189=IFCRELDEFINESBYPROPERTIES('3OAJyuSRL0qeX92VMXgA1A',$,$,$,(#177),#188);\n#190=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-09'),$);\n#191=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#192=IFCCOLUMN('1Fev6fMQANstwMFm6hfhot',$,'C-10',$,$,#202,$,$,$);\n#198=IFCCARTESIANPOINT((0.,8000.,0.));\n#199=IFCDIRECTION((0.,0.,1.));\n#200=IFCDIRECTION((1.,0.,0.));\n#201=IFCAXIS2PLACEMENT3D(#198,#199,#200);\n#202=IFCLOCALPLACEMENT(#27,#201);\n#203=IFCPROPERTYSET('3MkjVFjaDAivvJenMXRWrN',$,'Pset_Proyecto',$,(#205,#206));\n#204=IFCRELDEFINESBYPROPERTIES('0CYWDnQPX4a8cjGraXLdcd',$,$,$,(#192),#203);\n#205=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-10'),$);\n#206=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#207=IFCCOLUMN('0RZpn4kwrmz1I1q$BiAzAG',$,'C-11',$,$,#217,$,$,$);\n#213=IFCCARTESIANPOINT((6000.,8000.,0.));\n#214=IFCDIRECTION((0.,0.,1.));\n#215=IFCDIRECTION((1.,0.,0.));\n#216=IFCAXIS2PLACEMENT3D(#213,#214,#215);\n#217=IFCLOCALPLACEMENT(#27,#216);\n#218=IFCPROPERTYSET('1kX2FvHrbDE9sXN0B$vZp3',$,'Pset_Proyecto',$,(#220,#221));\n#219=IFCRELDEFINESBYPROPERTIES('3AGKivdXT3Iwqhw6UGeWKb',$,$,$,(#207),#218);\n#220=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-11'),$);\n#221=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#222=IFCCOLUMN('1EPxAVxS3bjWMVv4UEhkuD',$,'C-12',$,$,#232,$,$,$);\n#228=IFCCARTESIANPOINT((12000.,8000.,0.));\n#229=IFCDIRECTION((0.,0.,1.));\n#230=IFCDIRECTION((1.,0.,0.));\n#231=IFCAXIS2PLACEMENT3D(#228,#229,#230);\n#232=IFCLOCALPLACEMENT(#27,#231);\n#233=IFCPROPERTYSET('1BxfRgb0jBExkeS$GWwHeC',$,'Pset_Proyecto',$,(#235,#236));\n#234=IFCRELDEFINESBYPROPERTIES('0ocLEeX8vEzwTU8IYqiHZb',$,$,$,(#222),#233);\n#235=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-12'),$);\n#236=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#237=IFCSLAB('0kFUQJLy_BQaoHIwRILUGO',$,'Losa-N2',$,$,#247,$,$,$);\n#243=IFCCARTESIANPOINT((0.,0.,0.));\n#244=IFCDIRECTION((0.,0.,1.));\n#245=IFCDIRECTION((1.,0.,0.));\n#246=IFCAXIS2PLACEMENT3D(#243,#244,#245);\n#247=IFCLOCALPLACEMENT(#27,#246);\n#248=IFCPROPERTYSET('1M6hgl5L94subwqjSKtf27',$,'Pset_Proyecto',$,(#250,#251));\n#249=IFCRELDEFINESBYPROPERTIES('1Uz7rpWLP3V8bYeKvLiwOA',$,$,$,(#237),#248);\n#250=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-2'),$);\n#251=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#252=IFCCOLUMN('04aIlVEEtQ1K7du7eI7ex2',$,'C-13',$,$,#263,$,$,$);\n#258=IFCRELCONTAINEDINSPATIALSTRUCTURE('1weTNV4LzEEw9GZCf5gaBi',$,$,$,(#554,#252,#328,#268,#584,#612,#283,#539,#313,#569,#343,#598,#524,#298),#28);\n#259=IFCCARTESIANPOINT((0.,0.,0.));\n#260=IFCDIRECTION((0.,0.,1.));\n#261=IFCDIRECTION((1.,0.,0.));\n#262=IFCAXIS2PLACEMENT3D(#259,#260,#261);\n#263=IFCLOCALPLACEMENT(#33,#262);\n#264=IFCPROPERTYSET('1FZc8xwyb4tuwopCUJ8wsx',$,'Pset_Proyecto',$,(#266,#267));\n#265=IFCRELDEFINESBYPROPERTIES('37DOzK2L5FLu4mX1Lve86c',$,$,$,(#252),#264);\n#266=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-13'),$);\n#267=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#268=IFCCOLUMN('0xhAEN$36X$tLbmEjdUoh4',$,'C-14',$,$,#278,$,$,$);\n#274=IFCCARTESIANPOINT((6000.,0.,0.));\n#275=IFCDIRECTION((0.,0.,1.));\n#276=IFCDIRECTION((1.,0.,0.));\n#277=IFCAXIS2PLACEMENT3D(#274,#275,#276);\n#278=IFCLOCALPLACEMENT(#33,#277);\n#279=IFCPROPERTYSET('0UTL5YLRD5FPeWj6JMi1NC',$,'Pset_Proyecto',$,(#281,#282));\n#280=IFCRELDEFINESBYPROPERTIES('3EK14wCGX2iu5J8Gpj5B97',$,$,$,(#268),#279);\n#281=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-14'),$);\n#282=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#283=IFCCOLUMN('1GYdnaQMSyk47EcsSuVxaQ',$,'C-15',$,$,#293,$,$,$);\n#289=IFCCARTESIANPOINT((12000.,0.,0.));\n#290=IFCDIRECTION((0.,0.,1.));\n#291=IFCDIRECTION((1.,0.,0.));\n#292=IFCAXIS2PLACEMENT3D(#289,#290,#291);\n#293=IFCLOCALPLACEMENT(#33,#292);\n#294=IFCPROPERTYSET('3qkYThLm56EfNgd9xsApCI',$,'Pset_Proyecto',$,(#296,#297));\n#295=IFCRELDEFINESBYPROPERTIES('0NckNWfRjCF9kd8fsB$zAm',$,$,$,(#283),#294);\n#296=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-15'),$);\n#297=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#298=IFCCOLUMN('0$cOnveXKYmX_kaQUmZsQ4',$,'C-16',$,$,#308,$,$,$);\n#304=IFCCARTESIANPOINT((0.,8000.,0.));\n#305=IFCDIRECTION((0.,0.,1.));\n#306=IFCDIRECTION((1.,0.,0.));\n#307=IFCAXIS2PLACEMENT3D(#304,#305,#306);\n#308=IFCLOCALPLACEMENT(#33,#307);\n#309=IFCPROPERTYSET('04VeouyEnEw9iYgCH36npB',$,'Pset_Proyecto',$,(#311,#312));\n#310=IFCRELDEFINESBYPROPERTIES('2KlDyoStT6hQ93$phs3Oxp',$,$,$,(#298),#309);\n#311=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-16'),$);\n#312=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#313=IFCCOLUMN('01WdTq$oBUGHYWeYeCSCtJ',$,'C-17',$,$,#323,$,$,$);\n#319=IFCCARTESIANPOINT((6000.,8000.,0.));\n#320=IFCDIRECTION((0.,0.,1.));\n#321=IFCDIRECTION((1.,0.,0.));\n#322=IFCAXIS2PLACEMENT3D(#319,#320,#321);\n#323=IFCLOCALPLACEMENT(#33,#322);\n#324=IFCPROPERTYSET('0Z$MR1TAj8OeKzOmO28LRC',$,'Pset_Proyecto',$,(#326,#327));\n#325=IFCRELDEFINESBYPROPERTIES('2qG6jhnIz1GuwnYjAScSvH',$,$,$,(#313),#324);\n#326=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-17'),$);\n#327=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#328=IFCCOLUMN('1Ob88lV0Z9lXcjUojmu3zF',$,'C-18',$,$,#338,$,$,$);\n#334=IFCCARTESIANPOINT((12000.,8000.,0.));\n#335=IFCDIRECTION((0.,0.,1.));\n#336=IFCDIRECTION((1.,0.,0.));\n#337=IFCAXIS2PLACEMENT3D(#334,#335,#336);\n#338=IFCLOCALPLACEMENT(#33,#337);\n#339=IFCPROPERTYSET('0Jx2aqU1rFzhA2ySeSA0nA',$,'Pset_Proyecto',$,(#341,#342));\n#340=IFCRELDEFINESBYPROPERTIES('15pwgJ0lH1FgbUA3je2ucT',$,$,$,(#328),#339);\n#341=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-18'),$);\n#342=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#343=IFCSLAB('07bOxD3TfZz36TwpfKW0CC',$,'Losa-N3',$,$,#353,$,$,$);\n#349=IFCCARTESIANPOINT((0.,0.,0.));\n#350=IFCDIRECTION((0.,0.,1.));\n#351=IFCDIRECTION((1.,0.,0.));\n#352=IFCAXIS2PLACEMENT3D(#349,#350,#351);\n#353=IFCLOCALPLACEMENT(#33,#352);\n#354=IFCPROPERTYSET('29NZY2r0X1gRb5YKi2RZEO',$,'Pset_Proyecto',$,(#356,#357));\n#355=IFCRELDEFINESBYPROPERTIES('3Ai3EeUhf2bgi8fW6Ut_x8',$,$,$,(#343),#354);\n#356=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-3'),$);\n#357=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#358=IFCCOLUMN('0lJFT0N4ZpaG1wNHU_c0QV',$,'C-19',$,$,#369,$,$,$);\n#364=IFCRELCONTAINEDINSPATIALSTRUCTURE('0G$_Jj6YX6$vJr$hjeeNio',$,$,$,(#389,#358,#404,#419,#434,#449,#374),#34);\n#365=IFCCARTESIANPOINT((0.,0.,0.));\n#366=IFCDIRECTION((0.,0.,1.));\n#367=IFCDIRECTION((1.,0.,0.));\n#368=IFCAXIS2PLACEMENT3D(#365,#366,#367);\n#369=IFCLOCALPLACEMENT(#39,#368);\n#370=IFCPROPERTYSET('0hI_xG67f4s9IL8FqVZGUP',$,'Pset_Proyecto',$,(#372,#373));\n#371=IFCRELDEFINESBYPROPERTIES('1ynEvBV6HAIO3PnUGtrS4f',$,$,$,(#358),#370);\n#372=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-19'),$);\n#373=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#374=IFCCOLUMN('1gFm46pmkTD1F5ONNKyyNo',$,'C-20',$,$,#384,$,$,$);\n#380=IFCCARTESIANPOINT((6000.,0.,0.));\n#381=IFCDIRECTION((0.,0.,1.));\n#382=IFCDIRECTION((1.,0.,0.));\n#383=IFCAXIS2PLACEMENT3D(#380,#381,#382);\n#384=IFCLOCALPLACEMENT(#39,#383);\n#385=IFCPROPERTYSET('0SZQjJbPP9vugtVaxbHRjv',$,'Pset_Proyecto',$,(#387,#388));\n#386=IFCRELDEFINESBYPROPERTIES('3RDNrSaWLCOO3id1Y2b7jB',$,$,$,(#374),#385);\n#387=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-20'),$);\n#388=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#389=IFCCOLUMN('0YGB6gn5EXZd2kkLbxWRDr',$,'C-21',$,$,#399,$,$,$);\n#395=IFCCARTESIANPOINT((12000.,0.,0.));\n#396=IFCDIRECTION((0.,0.,1.));\n#397=IFCDIRECTION((1.,0.,0.));\n#398=IFCAXIS2PLACEMENT3D(#395,#396,#397);\n#399=IFCLOCALPLACEMENT(#39,#398);\n#400=IFCPROPERTYSET('0mB3xj2qr1thQTaW0HeUg0',$,'Pset_Proyecto',$,(#402,#403));\n#401=IFCRELDEFINESBYPROPERTIES('3$sEYE2010SvljDRp6Eqdx',$,$,$,(#389),#400);\n#402=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-21'),$);\n#403=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#404=IFCCOLUMN('11GDD45zPp3snlQrLuISl3',$,'C-22',$,$,#414,$,$,$);\n#410=IFCCARTESIANPOINT((0.,8000.,0.));\n#411=IFCDIRECTION((0.,0.,1.));\n#412=IFCDIRECTION((1.,0.,0.));\n#413=IFCAXIS2PLACEMENT3D(#410,#411,#412);\n#414=IFCLOCALPLACEMENT(#39,#413);\n#415=IFCPROPERTYSET('2uEw_DrLnEhud8vSzs9Ilj',$,'Pset_Proyecto',$,(#417,#418));\n#416=IFCRELDEFINESBYPROPERTIES('0fJwiG87fCKPga86qr6fYI',$,$,$,(#404),#415);\n#417=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-22'),$);\n#418=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#419=IFCCOLUMN('1Hua2BMfqt25xoMRG5O$yw',$,'C-23',$,$,#429,$,$,$);\n#425=IFCCARTESIANPOINT((6000.,8000.,0.));\n#426=IFCDIRECTION((0.,0.,1.));\n#427=IFCDIRECTION((1.,0.,0.));\n#428=IFCAXIS2PLACEMENT3D(#425,#426,#427);\n#429=IFCLOCALPLACEMENT(#39,#428);\n#430=IFCPROPERTYSET('06wfHC7UvBzhcDULNGW5BY',$,'Pset_Proyecto',$,(#432,#433));\n#431=IFCRELDEFINESBYPROPERTIES('3rvIquSyTA2P3szeNhu73m',$,$,$,(#419),#430);\n#432=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-23'),$);\n#433=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#434=IFCCOLUMN('0BjY33l9mLv4L4CsEVIqXs',$,'C-24',$,$,#444,$,$,$);\n#440=IFCCARTESIANPOINT((12000.,8000.,0.));\n#441=IFCDIRECTION((0.,0.,1.));\n#442=IFCDIRECTION((1.,0.,0.));\n#443=IFCAXIS2PLACEMENT3D(#440,#441,#442);\n#444=IFCLOCALPLACEMENT(#39,#443);\n#445=IFCPROPERTYSET('22q6PoKrv2D8w8NBYNRuFQ',$,'Pset_Proyecto',$,(#447,#448));\n#446=IFCRELDEFINESBYPROPERTIES('3z7mjBIDbDyeL0pkvi11do',$,$,$,(#434),#445);\n#447=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('C-24'),$);\n#448=IFCPROPERTYSINGLEVALUE('Seccion',$,IFCLABEL('40x40'),$);\n#449=IFCSLAB('0fMK57J9OG6HCvlgOSuYIM',$,'Losa-N4',$,$,#459,$,$,$);\n#455=IFCCARTESIANPOINT((0.,0.,0.));\n#456=IFCDIRECTION((0.,0.,1.));\n#457=IFCDIRECTION((1.,0.,0.));\n#458=IFCAXIS2PLACEMENT3D(#455,#456,#457);\n#459=IFCLOCALPLACEMENT(#39,#458);\n#460=IFCPROPERTYSET('2gNWrxKCH0W8rqLAlSYywV',$,'Pset_Proyecto',$,(#462,#463));\n#461=IFCRELDEFINESBYPROPERTIES('3xv0TRIw56wxXGZkuYT7Iw',$,$,$,(#449),#460);\n#462=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('L-4'),$);\n#463=IFCPROPERTYSINGLEVALUE('Espesor_mm',$,IFCLABEL('200'),$);\n#464=IFCWALL('1eVSHPCDUrBJ2HiJ2pK_VN',$,'M-01',$,$,#474,$,$,$);\n#470=IFCCARTESIANPOINT((3000.,2000.,0.));\n#471=IFCDIRECTION((0.,0.,1.));\n#472=IFCDIRECTION((1.,0.,0.));\n#473=IFCAXIS2PLACEMENT3D(#470,#471,#472);\n#474=IFCLOCALPLACEMENT(#27,#473);\n#475=IFCPROPERTYSET('2H4EdJTF9Bzwf0qeDr_04m',$,'Pset_Proyecto',$,(#477,#478));\n#476=IFCRELDEFINESBYPROPERTIES('0JQMikuH9B4vH0hx6I9sny',$,$,$,(#464),#475);\n#477=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-01'),$);\n#478=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL(''),$);\n#479=IFCWALL('1zHvnLIQOx3qk4sGaoDGLU',$,'M-02',$,$,#489,$,$,$);\n#485=IFCCARTESIANPOINT((3000.,5000.,0.));\n#486=IFCDIRECTION((0.,0.,1.));\n#487=IFCDIRECTION((1.,0.,0.));\n#488=IFCAXIS2PLACEMENT3D(#485,#486,#487);\n#489=IFCLOCALPLACEMENT(#27,#488);\n#490=IFCPROPERTYSET('0buyuz4rP6CODtAyeGHrV2',$,'Pset_Proyecto',$,(#492,#493));\n#491=IFCRELDEFINESBYPROPERTIES('36f3iqZtP1LBHOvBPQ9Jfw',$,$,$,(#479),#490);\n#492=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-02'),$);\n#493=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#494=IFCWALL('1MbUljHWaLeXDD1PLwTqK7',$,'M-03',$,$,#504,$,$,$);\n#500=IFCCARTESIANPOINT((2000.,3500.,0.));\n#501=IFCDIRECTION((0.,0.,1.));\n#502=IFCDIRECTION((6.123233995736766E-17,1.,0.));\n#503=IFCAXIS2PLACEMENT3D(#500,#501,#502);\n#504=IFCLOCALPLACEMENT(#27,#503);\n#505=IFCPROPERTYSET('334EK$_Lb5z8UZ4ru0DTvP',$,'Pset_Proyecto',$,(#507,#508));\n#506=IFCRELDEFINESBYPROPERTIES('3KUcJDsAL1YQyNho4H9oI_',$,$,$,(#494),#505);\n#507=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-03'),$);\n#508=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#509=IFCWALL('0uN34In_Edwnwg22gjqik8',$,'M-04',$,$,#519,$,$,$);\n#515=IFCCARTESIANPOINT((4000.,3500.,0.));\n#516=IFCDIRECTION((0.,0.,1.));\n#517=IFCDIRECTION((6.123233995736766E-17,1.,0.));\n#518=IFCAXIS2PLACEMENT3D(#515,#516,#517);\n#519=IFCLOCALPLACEMENT(#27,#518);\n#520=IFCPROPERTYSET('39qg8xVRz7fQ6rur3qh80T',$,'Pset_Proyecto',$,(#522,#523));\n#521=IFCRELDEFINESBYPROPERTIES('3hGnD9miT7eeF6WcYifhSU',$,$,$,(#509),#520);\n#522=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('M-04'),$);\n#523=IFCPROPERTYSINGLEVALUE('Resistencia_fuego',$,IFCLABEL('EI60'),$);\n#524=IFCFLOWTERMINAL('0pXH1nXh1samnWpBnflvWa',$,'EQ-011',$,$,#534,$,$);\n#530=IFCCARTESIANPOINT((2000.,6000.,0.));\n#531=IFCDIRECTION((0.,0.,1.));\n#532=IFCDIRECTION((1.,0.,0.));\n#533=IFCAXIS2PLACEMENT3D(#530,#531,#532);\n#534=IFCLOCALPLACEMENT(#33,#533);\n#535=IFCPROPERTYSET('0ZzEpY4Fv15959VgT5YaW6',$,'Pset_Proyecto',$,(#537,#538));\n#536=IFCRELDEFINESBYPROPERTIES('01R3su0wjAUfhAJO0qxalh',$,$,$,(#524),#535);\n#537=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-011'),$);\n#538=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('15'),$);\n#539=IFCFLOWTERMINAL('1xuSeXi$jDG1k5G9PvoQ$L',$,'EQ-012',$,$,#549,$,$);\n#545=IFCCARTESIANPOINT((4000.,6000.,0.));\n#546=IFCDIRECTION((0.,0.,1.));\n#547=IFCDIRECTION((1.,0.,0.));\n#548=IFCAXIS2PLACEMENT3D(#545,#546,#547);\n#549=IFCLOCALPLACEMENT(#33,#548);\n#550=IFCPROPERTYSET('035N1ErvP5ffZlqNgJmVqd',$,'Pset_Proyecto',$,(#552,#553));\n#551=IFCRELDEFINESBYPROPERTIES('2ETZfEO9X0pgnNUTwFZR2f',$,$,$,(#539),#550);\n#552=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-012'),$);\n#553=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('15'),$);\n#554=IFCFLOWTERMINAL('1L$6QU0FYzvIPqAao1qrf5',$,'EQ-013',$,$,#564,$,$);\n#560=IFCCARTESIANPOINT((10000.,6000.,0.));\n#561=IFCDIRECTION((0.,0.,1.));\n#562=IFCDIRECTION((1.,0.,0.));\n#563=IFCAXIS2PLACEMENT3D(#560,#561,#562);\n#564=IFCLOCALPLACEMENT(#33,#563);\n#565=IFCPROPERTYSET('1DpreW1c10K9hIoSE5HHwx',$,'Pset_Proyecto',$,(#567,#568));\n#566=IFCRELDEFINESBYPROPERTIES('1Lihmge4T2OuGNoutJzsIG',$,$,$,(#554),#565);\n#567=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-013'),$);\n#568=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('12'),$);\n#569=IFCFLOWTERMINAL('0GsCbyH3flrMmhPJLiFHn8',$,'EQ-015',$,$,#579,$,$);\n#575=IFCCARTESIANPOINT((8000.,6000.,0.));\n#576=IFCDIRECTION((0.,0.,1.));\n#577=IFCDIRECTION((1.,0.,0.));\n#578=IFCAXIS2PLACEMENT3D(#575,#576,#577);\n#579=IFCLOCALPLACEMENT(#33,#578);\n#580=IFCPROPERTYSET('1GLO_6MNH6bfVnvkgNyWV8',$,'Pset_Proyecto',$,(#582,#583));\n#581=IFCRELDEFINESBYPROPERTIES('1T$u8ungvC5AN_4O8YYYO0',$,$,$,(#569),#580);\n#582=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-015'),$);\n#583=IFCPROPERTYSINGLEVALUE('Capacidad_kW',$,IFCLABEL('12'),$);\n#584=IFCFLOWTERMINAL('1luS68lv_TtrJ3SzeBuhh1',$,'EQ-014',$,$,#594,$,$);\n#590=IFCCARTESIANPOINT((6000.,4000.,0.));\n#591=IFCDIRECTION((0.,0.,1.));\n#592=IFCDIRECTION((1.,0.,0.));\n#593=IFCAXIS2PLACEMENT3D(#590,#591,#592);\n#594=IFCLOCALPLACEMENT(#33,#593);\n#595=IFCPROPERTYSET('0GOQwR5j9BN8ZE$1k_LfKG',$,'Pset_Proyecto',$,(#597));\n#596=IFCRELDEFINESBYPROPERTIES('3T9xEO5L5B3wWYYo42LV_L',$,$,$,(#584),#595);\n#597=IFCPROPERTYSINGLEVALUE('Codigo',$,IFCLABEL('B-014'),$);\n#598=IFCFLOWSEGMENT('0OegJGI0jfUdR5dGpW1ogQ',$,'Ducto-03',$,$,#608,$,$);\n#604=IFCCARTESIANPOINT((6000.,7000.,0.));\n#605=IFCDIRECTION((0.,0.,1.));\n#606=IFCDIRECTION((1.,0.,0.));\n#607=IFCAXIS2PLACEMENT3D(#604,#605,#606);\n#608=IFCLOCALPLACEMENT(#33,#607);\n#609=IFCPROPERTYSET('0gIaVEKVTDMhkVELu$2nj2',$,'Pset_Proyecto',$,(#611));\n#610=IFCRELDEFINESBYPROPERTIES('1Q0_DHal11rPS5VDLv6eGJ',$,$,$,(#598),#609);\n#611=IFCPROPERTYSINGLEVALUE('Sistema',$,IFCLABEL('Extracci\\X2\\00F3\\X0\\n'),$);\n#612=IFCFLOWSEGMENT('18x8wP_lHjYHAUReWZym2$',$,'Ducto-02',$,$,#622,$,$);\n#618=IFCCARTESIANPOINT((2500.,7000.,0.));\n#619=IFCDIRECTION((0.,0.,1.));\n#620=IFCDIRECTION((1.,0.,0.));\n#621=IFCAXIS2PLACEMENT3D(#618,#619,#620);\n#622=IFCLOCALPLACEMENT(#33,#621);\nENDSEC;\nEND-ISO-10303-21;\n", "bep": "PLAN DE EJECUCIÓN BIM (extracto de ejemplo, no corresponde a un proyecto real)\nSección 4.2 - Información mínima de equipos\nR-03. Todo equipo mecánico (terminales de climatización) deberá incluir su código de equipo y su capacidad en kW antes de la entrega de diseño de detalle.\nSección 5.1 - Muros\nR-07. Los muros que delimitan escaleras de evacuación deberán indicar su resistencia al fuego, con valores EI60 o EI120.\nActa de coordinación N.° 12, punto 3\nA-12.3. Se acordó que los ductos deben llevar el sistema al que pertenecen (por definir el nombre del parámetro).\n", "rules": [{"id": "R-03", "src": "BEP 4.2", "cita": "Todo equipo mecánico (terminales de climatización) deberá incluir su código de equipo y su capacidad en kW", "cls": "IfcFlowTerminal", "props": [{"key": "Pset_Proyecto.Codigo", "allowed": []}, {"key": "Pset_Proyecto.Capacidad_kW", "allowed": []}], "amb": "", "st": "prop"}, {"id": "R-07", "src": "BEP 5.1", "cita": "Los muros que delimitan escaleras de evacuación deberán indicar su resistencia al fuego, con valores EI60 o EI120.", "cls": "IfcWall", "props": [{"key": "Pset_Proyecto.Resistencia_fuego", "allowed": ["EI60", "EI120"]}], "amb": "El modelo no indica qué muros delimitan escaleras: se aplica a todos los muros.", "st": "prop"}, {"id": "A-12.3", "src": "Acta 12 · punto 3", "cita": "Se acordó que los ductos deben llevar el sistema al que pertenecen (por definir el nombre del parámetro).", "cls": "IfcFlowSegment", "props": [], "amb": "El acta no define el nombre del parámetro.", "st": "prop"}]};
+const C={teal:'#22B8CC',purple:'#8B74F0',red:'#E5554B',grey:'#9AA8B8',green:'#2DB37A',amber:'#E9A23B',orange:'#F08A3C'};
+const chColor={'Agregado':C.teal,'Modificado':C.purple,'ID modificado':C.amber,'Eliminado':C.red,'Sin cambio':C.grey};
+const cuColor={'Cumple':C.green,'Incumple':C.red,'No evaluable':C.grey};
+const S={m1:null,m2:null,name1:'',name2:'',bep:'',demo:false,rules:[],cmp:null,chk:null,sum:null,mode:'ch',sel:null,obs:[],red:{},
+  t:{cfg:0,rev:0,cfgOn:null,revOn:null},ia:{proposed:0,calls:0}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+let capS=null,capD=null;
+(async()=>{ if(!window.claude?.use) return; capS=await claude.use('sample'); capD=await claude.use('downloads');
+  if(!capS){ $('btnIA').disabled=true; $('btnRedact').hidden=true; $('iaStatus').textContent='La IA no está disponible en esta vista. Agregue reglas manualmente.'; }
+  })();
+setTimeout(()=>{ if(!capS && !window.claude?.use){ $('btnIA').disabled=true; $('btnRedact').hidden=true; $('iaStatus').textContent='La IA no está disponible en esta versión. Agregue reglas manualmente.'; } },1500);
+
+/* ---------- tiempos ---------- */
+function tick(){ const now=Date.now(); const f=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+  $('tCfg').textContent=f(S.t.cfg+(S.t.cfgOn?now-S.t.cfgOn:0)); $('tRev').textContent=f(S.t.rev+(S.t.revOn?now-S.t.revOn:0)); }
+setInterval(tick,1000);
+function timers(step){ const now=Date.now();
+  if(S.t.cfgOn&&step!==2){S.t.cfg+=now-S.t.cfgOn;S.t.cfgOn=null} if(step===2&&!S.t.cfgOn)S.t.cfgOn=now;
+  if(S.t.revOn&&step<3){S.t.rev+=now-S.t.revOn;S.t.revOn=null} if(step>=3&&!S.t.revOn)S.t.revOn=now; }
+
+/* ---------- navegación ---------- */
+let step=1;
+function go(n){ if(n>1&&!(S.m1&&S.m2)) n=1; step=n; timers(n);
+  document.querySelectorAll('nav.steps button').forEach(b=>{b.setAttribute('aria-current',+b.dataset.step===n?'step':'false'); b.disabled=+b.dataset.step>1&&!(S.m1&&S.m2)});
+  for(let i=1;i<=5;i++) $('s'+i).hidden=i!==n;
+  if(n===2) renderBep(), renderRules();
+  if(n>=3) run();
+  if(n===3){ initViewer(); buildScene(); refresh(); }
+  if(n===4) renderAvance(); if(n===5) renderReport(); }
+document.querySelectorAll('nav.steps button').forEach(b=>b.onclick=()=>go(+b.dataset.step));
+$('go2').onclick=()=>go(2); $('go3').onclick=()=>go(3);
+$('btnGuide').onclick=()=>{const g=$('guide');g.hidden=!g.hidden;$('btnGuide').setAttribute('aria-expanded',!g.hidden)};
+
+/* ---------- 1 carga ---------- */
+function summarizeModel(m,box){ const cls={}; const lv=new Set(); for(const e of m.elements.values()){cls[e.cls]=(cls[e.cls]||0)+1; lv.add(e.level)}
+  const top=Object.entries(cls).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>`${k.replace('Ifc','')} ${v}`).join(' · ');
+  box.innerHTML=`<dl class="stat"><dt>Esquema</dt><dd>${esc(m.schema)}</dd><dt>Unidad</dt><dd>${esc(m.unitName)}</dd><dt>Elementos</dt><dd>${m.elements.size}</dd><dt>Niveles</dt><dd>${lv.size}</dd><dt>Clases</dt><dd>${esc(top)}</dd><dt>Lectura</dt><dd>${Math.round(m.ms)} ms</dd></dl>`+
+   (m.warnings?`<p class="warn">${m.warnings} ${m.warnings===1?'elemento':'elementos'} sin propiedades: revise si la exportación incluyó los Psets.</p>`:''); }
+async function loadIfc(file,k){ const box=$('i'+k); box.innerHTML='<span class="sub"><span class="spin"></span> Leyendo…</span>';
+  try{ const txt=await file.text(); if(!/ISO-10303-21/.test(txt.slice(0,200))) throw new Error('No parece un archivo IFC (STEP).');
+    const m=Engine.parse(txt); if(!m.elements.size) throw new Error('No se encontraron elementos contenidos en niveles.');
+    S['m'+k]=m; S['name'+k]=file.name; S.cmp=null; $('d'+k).classList.add('done'); summarizeModel(m,box); box.insertAdjacentHTML('afterbegin',`<b>${esc(file.name)}</b>`); checks(); }
+  catch(err){ box.innerHTML=`<p class="warn">${esc(err.message)}</p>`; S['m'+k]=null; checks(); } }
+function checks(){ const ok=S.m1&&S.m2; $('go2').disabled=!ok; const w=[];
+  if(ok){ if(S.m1.schema!==S.m2.schema) w.push('esquemas distintos'); if(S.m1.scale!==S.m2.scale) w.push('unidades distintas (se normalizan a metros)');
+    if(S.m2.elements.size<0.7*S.m1.elements.size) w.push('V02 tiene 30% menos elementos: ¿exportación incompleta?'); }
+  $('checks').innerHTML= ok? (w.length?`<span class="warn">Revise: ${w.join('; ')}.</span>`:'<span style="color:var(--green)">Controles previos correctos.</span>'):'';
+  document.querySelectorAll('nav.steps button').forEach(b=>b.disabled=+b.dataset.step>1&&!ok); }
+for(const k of [1,2]){ const inp=$('f'+k), d=$('d'+k);
+  inp.onchange=()=>inp.files[0]&&(S.demo=false,$('demoChip').hidden=true,loadIfc(inp.files[0],k));
+  d.ondragover=e=>{e.preventDefault();d.classList.add('over')}; d.ondragleave=()=>d.classList.remove('over');
+  d.ondrop=e=>{e.preventDefault();d.classList.remove('over');const f=e.dataTransfer.files[0];if(f){S.demo=false;$('demoChip').hidden=true;loadIfc(f,k)}}; }
+$('f3').onchange=async()=>{const f=$('f3').files[0]; if(f){$('bepText').value=await f.text(); S.bep=$('bepText').value}};
+$('bepText').oninput=()=>S.bep=$('bepText').value;
+$('tol').onchange=()=>{S.cmp=null; try{localStorage.setItem('ama_tol',$('tol').value)}catch(e){}};
+try{const t=localStorage.getItem('ama_tol'); if(t) $('tol').value=t}catch(e){}
+$('btnDemo').onclick=async()=>{ S.demo=true; $('demoChip').hidden=false;
+  await loadIfc(new File([DEMO.v1],'V01_edificio_demo.ifc'),1); await loadIfc(new File([DEMO.v2],'V02_edificio_demo.ifc'),2);
+  $('bepText').value=DEMO.bep; S.bep=DEMO.bep; S.rules=[]; $('btnSampleRules').hidden=false; toast('Caso de ejemplo cargado'); };
+
+/* ---------- 2 requisitos ---------- */
+function vocab(){ const v={}; for(const m of [S.m1,S.m2]) for(const [c,set] of Object.entries(m.vocab)){ (v[c]||=new Set()); set.forEach(x=>v[c].add(x)); }
+  const out={}; for(const [c,s] of Object.entries(v)) out[c]=[...s].sort(); return out; }
+function allProps(){ return [...new Set(Object.values(vocab()).flat())].sort(); }
+function renderBep(){ const t=S.bep||''; if(!t.trim()){ $('bepView').innerHTML='<span class="sub">Sin texto de acuerdos. Vuelva al paso 1 o agregue reglas manualmente.</span>'; return; }
+  let h=esc(t); for(const r of S.rules) if(r.cita){ const c=esc(r.cita.slice(0,80)); const i=h.indexOf(c); if(i>=0) h=h.slice(0,i)+`<mark style="background:rgba(139,116,240,.25);color:var(--fg)">${c}</mark>`+h.slice(i+c.length); }
+  $('bepView').innerHTML=h; }
+let ruleSeq=1;
+function newRule(o={}){ return Object.assign({uid:'r'+(ruleSeq++),id:'M-'+ruleSeq,src:'Manual',cita:'',cls:Object.keys(vocab())[0]||'*',props:[{key:'',allowed:[]}],amb:'',st:'prop',origin:'manual',edited:false},o); }
+function renderRules(){ const box=$('rules'); box.innerHTML=''; const V=vocab(); const classes=Object.keys(V).sort();
+  if(!S.rules.length) box.innerHTML='<p class="sub">Aún no hay reglas. Use «Proponer reglas con IA» o agregue una manual.</p>';
+  for(const r of S.rules){ const d=document.createElement('div'); d.className='rule'+(r.st==='ap'?' ap':r.st==='dv'?' dv':'');
+    const props=r.cls==='*'?allProps():(V[r.cls]||[]);
+    d.innerHTML=`<div class="row" style="justify-content:space-between"><div class="row" style="gap:6px"><input type="text" value="${esc(r.id)}" aria-label="Código" style="width:90px" data-f="id"><span class="sub">${esc(r.src)}</span></div>
+      <span class="chip" style="color:${r.st==='ap'?C.green:r.st==='dv'?C.red:C.purple}">${r.st==='ap'?'Aprobada':r.st==='dv'?'Devuelta':(r.origin==='ia'?'Propuesta por IA':'Borrador')}</span></div>
+      ${r.cita?`<div class="cita">«${esc(r.cita)}»</div>`:''}
+      <div class="row"><label class="sub" for="c-${r.uid}">Aplica a</label><select id="c-${r.uid}" data-f="cls"><option value="*">Todas las clases</option>${classes.map(c=>`<option ${c===r.cls?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="col" style="gap:6px">${r.props.map((p,i)=>`<div class="cond"><select data-p="${i}" aria-label="Propiedad"><option value="">— propiedad —</option>${props.map(x=>`<option ${x===p.key?'selected':''}>${esc(x)}</option>`).join('')}</select>
+        <input type="text" data-a="${i}" value="${esc((p.allowed||[]).join(', '))}" placeholder="valores permitidos (opcional)"><button class="btn sm ghost" data-x="${i}" aria-label="Quitar condición">✕</button></div>`).join('')}
+        <button class="btn sm ghost" data-add style="align-self:flex-start">+ condición</button></div>
+      ${r.amb?`<div class="amb">⚠ ${esc(r.amb)}</div>`:''}
+      <div class="row"><button class="btn sm ok" aria-pressed="${r.st==='ap'}" data-s="ap">Aprobar</button><button class="btn sm no" aria-pressed="${r.st==='dv'}" data-s="dv">Devolver al equipo</button><button class="btn sm ghost" data-del>Eliminar</button></div>`;
+    const mark=()=>{ if(r.origin==='ia') r.edited=true; if(r.st==='ap') r.st='prop'; };
+    d.querySelector('[data-f=id]').onchange=e=>{r.id=e.target.value};
+    d.querySelector('[data-f=cls]').onchange=e=>{r.cls=e.target.value; r.props=r.props.map(p=>({...p,key:''})); mark(); renderRules()};
+    d.querySelectorAll('[data-p]').forEach(s=>s.onchange=()=>{r.props[+s.dataset.p].key=s.value; mark(); renderRules()});
+    d.querySelectorAll('[data-a]').forEach(s=>s.onchange=()=>{r.props[+s.dataset.a].allowed=s.value.split(',').map(x=>x.trim()).filter(Boolean); mark(); renderRules()});
+    d.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{r.props.splice(+b.dataset.x,1); mark(); renderRules()});
+    d.querySelector('[data-add]').onclick=()=>{r.props.push({key:'',allowed:[]}); mark(); renderRules()};
+    d.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{ const s=b.dataset.s;
+      if(s==='ap'&&(!r.props.length||r.props.some(p=>!p.key))){ toast('Complete la propiedad de cada condición antes de aprobar'); return; }
+      r.st=r.st===s?'prop':s; S.cmp=null; renderRules(); });
+    d.querySelector('[data-del]').onclick=()=>{ if(r.origin==='ia') S.ia.discarded=(S.ia.discarded||0)+1; S.rules=S.rules.filter(x=>x!==r); renderRules(); };
+    box.appendChild(d); }
+  const ap=S.rules.filter(r=>r.st==='ap').length, dv=S.rules.filter(r=>r.st==='dv').length;
+  $('ruleCount').textContent=`${ap} aprobadas · ${dv} devueltas · ${S.rules.length-ap-dv} por revisar`; renderBep(); }
+$('btnManual').onclick=()=>{ S.rules.push(newRule()); renderRules(); };
+$('btnSampleRules').onclick=()=>{ S.rules=DEMO.rules.map(r=>newRule({...JSON.parse(JSON.stringify(r)),origin:'ejemplo'})); renderRules(); toast('Reglas de ejemplo cargadas (no provienen de la IA)'); };
+
+let iaCtl=null;
+$('btnIA').onclick=async()=>{
+  if(!capS){ toast('La IA no está disponible en esta vista'); return; }
+  const txt=(S.bep||'').trim(); if(!txt){ toast('Pegue primero el texto de los acuerdos (paso 1)'); return; }
+  const V=vocab(); const vtxt=Object.entries(V).map(([c,ps])=>`${c}: ${ps.slice(0,60).join(' | ')||'(sin propiedades)'}`).join('\n');
+  const prompt=`Eres asistente de coordinación BIM. Convierte cada requisito VERIFICABLE del texto de acuerdos en una regla para revisar un modelo IFC.
+Responde SOLO un arreglo JSON. Cada objeto: {"id": string (usa el código del documento si existe, p. ej. "R-03"; si no, "R-1", "R-2"...), "fuente": string (documento y sección), "cita": string (copia LITERAL del texto, máximo 200 caracteres), "clase": string, "condiciones": [{"propiedad": string, "valores_permitidos": [string] (solo si el texto fija valores; si no, omítelo)}], "ambiguedad": string o null}.
+"clase" debe ser EXACTAMENTE una de las clases listadas abajo, o "*" si aplica a todas.
+"propiedad" debe ser EXACTAMENTE una de las propiedades listadas para esa clase. No inventes propiedades.
+Si un requisito no define un criterio medible, o la propiedad necesaria no existe en el modelo, deja "condiciones": [] y explica en "ambiguedad" qué falta. Si la regla se aplica a un subconjunto que el modelo no permite distinguir, dilo en "ambiguedad".
+
+CLASES Y PROPIEDADES DEL MODELO:
+${vtxt}
+
+TEXTO DE ACUERDOS:
+${txt.slice(0,30000)}`;
+  iaCtl?.abort(); iaCtl=new AbortController(); const b=$('btnIA'); b.disabled=true; $('iaStatus').innerHTML='<span class="spin"></span> La IA está leyendo los acuerdos… (puede tardar hasta un minuto)';
+  try{ const arr=await capS.json(prompt,{signal:iaCtl.signal}); if(!Array.isArray(arr)) throw {code:'invalid_json'};
+    const all=new Set(allProps()); let n=0;
+    for(const x of arr){ const cls=(x.clase==='*'||V[x.clase])?x.clase:'*'; const valid=new Set(cls==='*'?all:V[cls]); const bad=[];
+      const props=(x.condiciones||[]).filter(c=>{ if(valid.has(c.propiedad)) return true; if(c.propiedad) bad.push(c.propiedad); return false; })
+        .map(c=>({key:c.propiedad,allowed:Array.isArray(c.valores_permitidos)?c.valores_permitidos.map(String):[]}));
+      let amb=x.ambiguedad||''; if(bad.length) amb=(amb?amb+' ':'')+`Propiedad no encontrada en el modelo: ${bad.join(', ')}.`;
+      if(x.clase && cls==='*' && x.clase!=='*') amb=(amb?amb+' ':'')+`Clase «${x.clase}» no existe en el modelo.`;
+      S.rules.push(newRule({id:String(x.id||'R-'+(n+1)),src:String(x.fuente||'Acuerdos'),cita:String(x.cita||''),cls,props,amb,origin:'ia'})); n++; }
+    S.ia.proposed+=n; S.ia.calls++; $('iaStatus').textContent=`La IA propuso ${n} reglas. Revíselas: apruebe, corrija o devuelva cada una.`; renderRules();
+  }catch(e){ const m={not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Demasiadas solicitudes; intente en un momento.',invalid_json:'La IA no devolvió reglas legibles; intente de nuevo o reduzca el texto.',prompt_too_large:'El texto es demasiado largo; pegue solo las secciones de requisitos.',cancelled:''};
+    $('iaStatus').textContent= m[e.code]??'No se pudo completar la solicitud a la IA. Intente de nuevo.'; if(e.code==='not_granted'||e.code==='sampling_disabled'){b.hidden=true} }
+  finally{ b.disabled=false; } };
+
+/* ---------- motor ---------- */
+function run(){ if(!S.m1||!S.m2) return; const tol=Math.max(0,+$('tol').value||0.01); const selId=S.sel?.el.id;
+  S.cmp=Engine.compare(S.m1,S.m2,tol); S.chk=Engine.check(S.m1,S.m2,S.rules,S.cmp); S.sum=Engine.summary(S.cmp,S.chk);
+  const prev=JSON.stringify((S.obs||[]).map(o=>o.ev)); S.obs=buildObs(); if(JSON.stringify(S.obs.map(o=>o.ev))!==prev) S.red={};
+  S.sel=selId?S.cmp.find(r=>r.el.id===selId)||null:null; }
+function stateOf(id){ const cs=S.chk.filter(c=>c.el&&c.el.id===id); if(!cs.length) return 'No evaluable'; return cs.some(c=>c.ahora==='Incumple')?'Incumple':'Cumple'; }
+function rowOf(e){ return S.cmp.find(r=>r.el===e); }
+
+/* ---------- 3 visor ---------- */
+let R3=null;
+function initViewer(){ if(R3||!window.THREE) { if(!window.THREE&&!$('noGl')) $('cv').insertAdjacentHTML('beforeend','<p id="noGl" class="sub" style="padding:80px 16px">El visor 3D no pudo cargarse. Use la lista de elementos.</p>'); return; }
+  const cv=$('cv'); const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); renderer.setPixelRatio(Math.min(2,devicePixelRatio)); cv.prepend(renderer.domElement);
+  const scene=new THREE.Scene(); const camera=new THREE.OrthographicCamera(-1,1,1,-1,-1000,1000);
+  scene.add(new THREE.AmbientLight(0xffffff,.6)); const dl=new THREE.DirectionalLight(0xffffff,.7); dl.position.set(4,10,6); scene.add(dl);
+  const root=new THREE.Group(); scene.add(root);
+  R3={renderer,scene,camera,root,meshes:[],rot:{x:.6,y:-.8},zoom:1,span:20};
+  let drag=null; const el=renderer.domElement;
+  el.addEventListener('pointerdown',ev=>{drag={x:ev.clientX,y:ev.clientY,m:0};el.setPointerCapture(ev.pointerId)});
+  el.addEventListener('pointermove',ev=>{if(!drag)return;const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;drag.m+=Math.abs(dx)+Math.abs(dy);R3.rot.y+=dx*.008;R3.rot.x=Math.max(.05,Math.min(1.45,R3.rot.x+dy*.006));drag.x=ev.clientX;drag.y=ev.clientY;draw()});
+  el.addEventListener('pointerup',ev=>{if(drag&&drag.m<6)pick(ev);drag=null});
+  el.addEventListener('wheel',ev=>{ev.preventDefault();R3.zoom=Math.max(.3,Math.min(8,R3.zoom*(ev.deltaY<0?1.12:1/1.12)));resize()},{passive:false});
+  el.addEventListener('dblclick',()=>{R3.zoom=1;R3.rot={x:.6,y:-.8};resize()});
+  new ResizeObserver(resize).observe(cv); }
+const SIZE={IfcColumn:[.4,3,.4],IfcWall:[2.5,2.8,.2],IfcWallStandardCase:[2.5,2.8,.2],IfcBeam:[3,.4,.3],IfcDoor:[.9,2.1,.1],IfcWindow:[1.2,1.2,.1],IfcFlowTerminal:[1.2,.7,.8],IfcAirTerminal:[.6,.3,.6],IfcFlowSegment:[2.5,.4,.4],IfcDuctSegment:[2.5,.4,.4],IfcPipeSegment:[2.5,.15,.15],IfcFurnishingElement:[1,.8,.6]};
+function buildScene(){ if(!R3) return; const {root}=R3; while(root.children.length) root.remove(root.children[0]); R3.meshes=[];
+  const all=[...S.cmp.map(r=>r.el)]; if(!all.length) return;
+  // bbox (IFC z up -> three y up)
+  const xs=all.map(e=>e.pos[0]), ys=all.map(e=>e.pos[1]), zs=all.map(e=>e.pos[2]);
+  const cx=(Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2, cz=(Math.min(...zs)+Math.max(...zs))/2;
+  R3.span=Math.max(10,Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys),Math.max(...zs)-Math.min(...zs)+3);
+  const T=p=>new THREE.Vector3(p[0]-cx,p[2]-cz,-(p[1]-cy));
+  // losas por nivel (bbox de sus elementos)
+  const byLvl={}; for(const e of all){ (byLvl[e.level]||=[]).push(e) }
+  const slabM=new THREE.MeshLambertMaterial({color:0x8E9DB1,transparent:true,opacity:.18,depthWrite:false});
+  for(const els of Object.values(byLvl)){ const lx=els.map(e=>e.pos[0]),ly=els.map(e=>e.pos[1]); const z=Math.min(...els.map(e=>e.pos[2]));
+    const w=Math.max(...lx)-Math.min(...lx)+2,d=Math.max(...ly)-Math.min(...ly)+2;
+    const s=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),slabM); const c=T([(Math.min(...lx)+Math.max(...lx))/2,(Math.min(...ly)+Math.max(...ly))/2,z]); s.position.copy(c); s.position.y-=.06; root.add(s); }
+  for(const r of S.cmp){ const e=r.el; if(/Slab|Roof|Covering/.test(e.cls)) continue; const sz=SIZE[e.cls]||[.7,.7,.7];
+    const g=new THREE.BoxGeometry(sz[0],sz[1],sz[2]); const mat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:!!r.removed,opacity:r.removed?.28:1});
+    const m=new THREE.Mesh(g,mat); const p=T(e.pos); p.y+=sz[1]/2; m.position.copy(p); m.rotation.y=Math.atan2(e.dir?.[1]||0,e.dir?.[0]||1); m.userData.r=r; root.add(m); R3.meshes.push(m);
+    const edges=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:r.removed?0xE5554B:0x0B1522})); m.add(edges);
+    if(r.geo&&r.v1){ const gh=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x9AA8B8})); const q=T(r.v1.pos); q.y+=sz[1]/2; gh.position.copy(q); gh.rotation.y=m.rotation.y; root.add(gh); } }
+  resize(); }
+function resize(){ if(!R3) return; const cv=$('cv'); const w=cv.clientWidth,h=Math.max(480,cv.clientHeight); R3.renderer.setSize(w,h,false); R3.renderer.domElement.style.height=h+'px';
+  const a=w/h, s=R3.span*.8/R3.zoom; Object.assign(R3.camera,{left:-s*a,right:s*a,top:s,bottom:-s}); R3.camera.updateProjectionMatrix(); draw(); }
+function draw(){ if(!R3) return; const {camera,rot}=R3; const d=100; camera.position.set(d*Math.cos(rot.x)*Math.sin(rot.y),d*Math.sin(rot.x),d*Math.cos(rot.x)*Math.cos(rot.y)); camera.lookAt(0,0,0); R3.renderer.render(R3.scene,camera); }
+function pick(ev){ const r=R3.renderer.domElement.getBoundingClientRect(); const v=new THREE.Vector2(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);
+  const rc=new THREE.Raycaster(); rc.setFromCamera(v,R3.camera); const hit=rc.intersectObjects(R3.meshes,false)[0]; if(hit){S.sel=hit.object.userData.r; refresh();} }
+function statusOf(r){ return S.mode==='ch'?r.kind:(r.removed?'No evaluable':stateOf(r.el.id)); }
+function refresh(){ const map=S.mode==='ch'?chColor:cuColor;
+  if(R3){ for(const m of R3.meshes){ const r=m.userData.r; m.material.color.set(map[statusOf(r)]||C.grey); m.material.emissive=new THREE.Color(r===S.sel?0x444444:0x000000); } draw(); }
+  $('legend').innerHTML=Object.entries(map).map(([k,c])=>`<span class="row" style="gap:4px"><i class="sw" style="background:${c}"></i>${k}</span>`).join('');
+  $('mCh').setAttribute('aria-pressed',S.mode==='ch'); $('mCu').setAttribute('aria-pressed',S.mode==='cu');
+  const retro=S.chk.filter(c=>c.antes==='Cumple'&&c.ahora==='Incumple');
+  $('retro').innerHTML= retro.length?`<div class="alert"><b style="color:var(--red)">${retro.length} retroceso${retro.length>1?'s':''}</b> · ${retro.slice(0,3).map(c=>`${esc(c.el.name||c.el.id)} cumplía ${esc(c.rule.id)} en V01 y ahora falla`).join('; ')}${retro.length>3?'…':''} <button class="btn sm" id="goRetro">Ver</button></div>`
+    : S.rules.some(r=>r.st==='ap')?'<div class="okbox">Sin retrocesos con las reglas aprobadas.</div>':'<div class="alert" style="border-color:var(--amber);background:rgba(233,162,59,.08)">No hay reglas aprobadas: el modo Cumplimiento no tiene qué verificar (paso 2).</div>';
+  const gr=$('goRetro'); if(gr) gr.onclick=()=>{S.mode='cu';S.sel=rowOf(retro[0].el);refresh()};
+  // filtros
+  const lv=$('lvl'); const levels=[...new Set(S.cmp.map(r=>r.el.level))].sort(); if(lv.options.length!==levels.length+1){ lv.innerHTML='<option value="">Todos los niveles</option>'+levels.map(l=>`<option>${esc(l)}</option>`).join(''); }
+  const q=$('q').value.trim().toLowerCase(), only=$('onlyObs').checked;
+  const list=S.cmp.filter(r=>(!lv.value||r.el.level===lv.value)&&(!q||(r.el.name||'').toLowerCase().includes(q))&&(!only||r.kind!=='Sin cambio'||stateOf(r.el.id)==='Incumple'));
+  $('elist').innerHTML=list.slice(0,300).map((r,i)=>{const st=statusOf(r);return `<button data-i="${S.cmp.indexOf(r)}" aria-current="${r===S.sel}"><span>${esc(r.el.name||r.el.id)} <span class="sub">${esc(r.el.level)}</span></span><span class="chip" style="color:${map[st]||C.grey}">${st}</span></button>`}).join('')||'<p class="sub">Sin elementos para este filtro.</p>';
+  $('elist').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.sel=S.cmp[+b.dataset.i];refresh()});
+  renderDetail(); }
+['q','lvl','onlyObs'].forEach(i=>$(i).addEventListener('input',refresh));
+$('mCh').onclick=()=>{S.mode='ch';refresh()}; $('mCu').onclick=()=>{S.mode='cu';refresh()};
+function fmtProps(e){ if(!e) return '<span class="sub">No existía</span>'; const ks=Object.keys(e.props); if(!ks.length) return '<span class="sub">Sin propiedades</span>';
+  return ks.slice(0,12).map(k=>`${esc(k.split('.').pop())}: ${e.props[k]===''?'<span style="color:var(--red)">vacío</span>':esc(e.props[k])}`).join('<br>'); }
+function renderDetail(){ const d=$('detail'), r=S.sel; if(!r){ d.innerHTML='<div class="lbl">Detalle</div><p class="sub" style="margin-top:6px">Seleccione un elemento en el modelo o en la lista para ver antes, ahora y lo esperado.</p>'; return; }
+  const e=r.el; const cs=S.chk.filter(c=>c.el&&c.el.id===e.id); const rs=S.rules.filter(x=>x.cls==='*'||x.cls===e.cls);
+  const det=[]; if(r.geo) det.push(`Desplazado ${r.geo.toFixed(3)} m`); if(r.oldId) det.push(`GlobalId cambió (antes ${esc(r.oldId)}): correspondencia propuesta por nombre y posición`); r.info.forEach(x=>det.push(`${esc(x.k.split('.').pop())}: «${esc(x.a)||'vacío'}» → «${esc(x.b)||'vacío'}»`));
+  d.innerHTML=`<div class="lbl">${esc(e.cls)} · ${esc(e.level)}</div><h2 style="margin-top:4px">${esc(e.name||e.id)} · ${esc(statusOf(r))}</h2>${det.length?`<p class="sub">${det.join('<br>')}</p>`:''}
+   <div class="trip" style="margin-top:10px"><div><div class="lbl">Antes · V01</div>${r.removed?fmtProps(r.v1):fmtProps(r.v1)}</div><div class="a"><div class="lbl" style="color:var(--teal)">Ahora · V02</div>${r.removed?'<span style="color:var(--red)">Eliminado en V02</span>':fmtProps(e)}</div>
+   <div class="e"><div class="lbl" style="color:var(--orange)">Esperado</div>${rs.length?rs.map(x=>`<b>${esc(x.id)}</b> (${esc(x.src)}): ${x.props.length?x.props.map(p=>esc(p.key.split('.').pop())+(p.allowed?.length?' ∈ '+esc(p.allowed.join('/')):' completo')).join(' y '):'sin criterio medible'} · <i>${x.st==='ap'?'aprobada':x.st==='dv'?'devuelta':'sin aprobar'}</i>`).join('<br>'):'<span class="sub">Ninguna regla aplica a esta clase</span>'}</div></div>
+   ${cs.length?`<p class="sub" style="margin-top:8px">${cs.map(c=>`${esc(c.rule.id)}: ${c.antes} → <b style="color:${cuColor[c.ahora]}">${c.ahora}</b>${c.miss?.length?' · '+esc(c.miss.join(', ')):''}`).join('<br>')}</p>`:''}`; }
+
+/* ---------- 4 avance ---------- */
+function renderAvance(){ const s=S.sum; const pct=(a,b)=>b?Math.round(100*a/b):0;
+  $('kpis').innerHTML=[['Agregados',s.agregados,C.teal],['Eliminados',s.eliminados,C.red],['Modificados',s.modificados,C.purple],['ID a revisar',s.ids,C.amber],['Retrocesos',s.retrocesos,C.red],['No evaluables',s.noEval,C.grey]]
+   .map(([l,v,c])=>`<div class="kpi"><div class="lbl">${l}</div><div class="v" style="color:${c}">${v}</div></div>`).join('');
+  const i1=pct(s.cumpleV1,s.evaluablesV1), i2=pct(s.cumple,s.evaluables);
+  $('bars').innerHTML=`<div class="lbl" style="margin-bottom:10px">V01 → V02 · por separado, sin promediar</div>
+   <div class="row" style="justify-content:space-between"><span>Información · comprobaciones que cumplen</span><span class="mono">${i1}% → <b>${i2}%</b></span></div>
+   <div class="bar" style="margin-top:4px"><i style="width:${i1}%;background:var(--grey)"></i></div><div class="bar" style="margin:3px 0 6px"><i style="width:${i2}%;background:var(--teal)"></i></div>
+   <p class="sub">Cumplían en V01 ${s.cumpleV1} + recuperadas ${s.recuperadas} − retrocesos ${s.retrocesos} + nuevas que cumplen = ${s.cumple} de ${s.evaluables} evaluables. No evaluables: ${s.noEval}.</p>
+   <div class="row" style="justify-content:space-between;margin-top:14px"><span>Geometría · cambios detectados</span><span class="mono">${s.agregados} agregados · ${s.eliminados} eliminados · ${s.geo} desplazados</span></div>
+   <p class="sub" style="margin-top:4px">Sin un alcance geométrico aprobado no se calcula un % de avance geométrico. Se agregará al cargar el alcance en el MVP.</p>`;
+  const rules=S.rules.filter(r=>r.st==='ap');
+  $('perRule').innerHTML=`<div class="lbl" style="margin-bottom:6px">Por regla aprobada</div>`+(rules.length?`<table><tr><th>Regla</th><th>Evaluados</th><th>V01</th><th>V02</th><th>Retrocesos</th></tr>${rules.map(r=>{const c=S.chk.filter(x=>x.rule===r&&x.el);const ok1=c.filter(x=>x.antes==='Cumple').length,ev1=c.filter(x=>x.antes==='Cumple'||x.antes==='Incumple').length;const ok2=c.filter(x=>x.ahora==='Cumple').length;
+     return `<tr><td><b>${esc(r.id)}</b><br><span class="sub">${esc(r.cls)}</span></td><td>${c.length}</td><td class="mono">${ok1}/${ev1}</td><td class="mono">${ok2}/${c.length}</td><td style="color:${c.some(x=>x.antes==='Cumple'&&x.ahora==='Incumple')?C.red:'inherit'}">${c.filter(x=>x.antes==='Cumple'&&x.ahora==='Incumple').length}</td></tr>`}).join('')}</table>`:'<p class="sub">Apruebe reglas en el paso 2.</p>'); }
+
+/* ---------- 5 reporte ---------- */
+function buildObs(){ const out=[]; let n=1; const O=()=>'OBS-'+String(n++).padStart(2,'0'); const kv=o=>Object.entries(o||{}).map(([k,v])=>k.split('.').pop()+'='+(v===''?'vacío':v)).join(', ');
+  for(const c of S.chk.filter(c=>c.ahora==='Incumple')) out.push({n:O(),el:`${c.el.name||c.el.id} · ${c.el.level}`,st:c.antes==='Cumple'?'Retroceso':'Incumple',
+    ev:`Antes: ${c.antes==='No existía'?'no existía':kv(rowOf(c.el)?.v1?.props)} · Ahora: ${kv(c.el.props)} · Falta: ${c.miss.join(', ')}`,regla:`${c.rule.id} · ${c.rule.src}${c.rule.cita?': «'+c.rule.cita.slice(0,120)+'»':''}`});
+  for(const r of S.cmp.filter(r=>r.geo)) out.push({n:O(),el:`${r.el.name||r.el.id} · ${r.el.level}`,st:'Informativo',ev:`Desplazado ${r.geo.toFixed(3)} m respecto de V01.`,regla:'Sin regla aprobada que lo regule'});
+  for(const r of S.cmp.filter(r=>r.kind==='ID modificado')) out.push({n:O(),el:`${r.el.name||r.el.id} · ${r.el.level}`,st:'Requiere revisión',ev:`GlobalId distinto en V02 (antes ${r.oldId}); mismo nombre, clase y posición.`,regla:'Control técnico de IDs'});
+  const rem=S.cmp.filter(r=>r.removed), add=S.cmp.filter(r=>r.kind==='Agregado');
+  for(const r of rem){ const sib=add.find(a=>a.el.cls===r.el.cls&&a.el.level===r.el.level); out.push({n:O(),el:`${r.el.name||r.el.id} · ${r.el.level}`,st:'Requiere revisión',ev:`Eliminado en V02.${sib?` Se agregó ${sib.el.name} del mismo tipo y nivel: posible reemplazo.`:''}`,regla:'Cambio de alcance a confirmar'}); }
+  for(const c of S.chk.filter(c=>!c.el)) out.push({n:O(),el:'—',st:'No evaluable',ev:c.why+(c.rule.amb?'. '+c.rule.amb:''),regla:`${c.rule.id} · ${c.rule.src}`});
+  return out; }
+const stC={'Retroceso':C.red,'Incumple':C.red,'Informativo':C.grey,'Requiere revisión':C.amber,'No evaluable':C.grey};
+function renderReport(){ $('rep').innerHTML=S.obs.map(o=>`<tr><td class="mono" style="white-space:nowrap">${o.n}</td><td>${esc(o.el)}</td><td><span class="chip" style="color:${stC[o.st]}">${o.st}</span></td><td>${S.red[o.n]?`<div>${esc(S.red[o.n])}</div><div class="sub" style="margin-top:4px">${esc(o.ev)}</div>`:esc(o.ev)}</td><td class="sub">${esc(o.regla)}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Sin observaciones.</td></tr>';
+  const L=log(); $('logKpis').innerHTML=[['Configuración',L.config_min+' min'],['Revisión',L.revision_min+' min'],['Reglas propuestas IA',L.ia_propuestas],['Útiles (aprob. + corr.)',L.ia_utiles_pct==null?'—':L.ia_utiles_pct+'%'],['Observaciones',L.observaciones]]
+   .map(([l,v])=>`<div class="kpi"><div class="lbl">${l}</div><div class="v" style="font-size:20px">${v}</div></div>`).join(''); }
+function log(){ timers(step); const ia=S.rules.filter(r=>r.origin==='ia'); const ap=ia.filter(r=>r.st==='ap');
+  return { fecha:new Date().toISOString(), caso:S.demo?'ejemplo sintético':`${S.name1} → ${S.name2}`, config_min:+(S.t.cfg/60000).toFixed(1), revision_min:+(S.t.rev/60000).toFixed(1),
+    ia_propuestas:S.ia.proposed, ia_aprobadas_sin_cambio:ap.filter(r=>!r.edited).length, ia_corregidas:ap.filter(r=>r.edited).length, ia_devueltas:ia.filter(r=>r.st==='dv').length,
+    ia_utiles_pct:S.ia.proposed?Math.round(100*ap.length/S.ia.proposed):null, reglas_aprobadas:S.rules.filter(r=>r.st==='ap').length, observaciones:S.obs.length, resumen:S.sum }; }
+async function save(filename,data){
+  if(capD){ try{ await capD.save({filename,data}); toast('Archivo listo'); return; }catch(e){ if(e.code==='declined') return; } }
+  const blob=new Blob([data],{type:filename.endsWith('.json')?'application/json;charset=utf-8':filename.endsWith('.html')?'text/html;charset=utf-8':'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob), link=document.createElement('a'); link.href=url; link.download=filename; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url); toast('Archivo descargado');
+}
+const csvq=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+$('dlCsv').onclick=()=>save('reporte_observaciones.csv','﻿'+['Obs;Elemento;Estado;Evidencia;Redacción;Regla y fuente',...S.obs.map(o=>[o.n,o.el,o.st,o.ev,S.red[o.n]||'',o.regla].map(csvq).join(';'))].join('\n'));
+$('dlHtml').onclick=()=>{ const s=S.sum; const html=`<!doctype html><meta charset="utf-8"><title>Reporte de revisión</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#14202E}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #ccd;padding:6px;text-align:left;vertical-align:top}th{background:#eef2f6}</style>
+<h1>Reporte de revisión</h1><p>${esc(S.demo?'Caso de ejemplo sintético':S.name1+' → '+S.name2)} · ${new Date().toLocaleString('es-PE')}</p>
+<p>Agregados ${s.agregados} · Eliminados ${s.eliminados} · Modificados ${s.modificados} · ID a revisar ${s.ids} · Retrocesos ${s.retrocesos} · Cumplimiento V02 ${s.cumple}/${s.evaluables} (no evaluables ${s.noEval})</p>
+<table><tr><th>Obs.</th><th>Elemento</th><th>Estado</th><th>Evidencia</th><th>Regla y fuente</th></tr>${S.obs.map(o=>`<tr><td>${o.n}</td><td>${esc(o.el)}</td><td>${o.st}</td><td>${S.red[o.n]?esc(S.red[o.n])+'<br><small>'+esc(o.ev)+'</small>':esc(o.ev)}</td><td>${esc(o.regla)}</td></tr>`).join('')}</table>
+<h2>Reglas aprobadas</h2><ul>${S.rules.filter(r=>r.st==='ap').map(r=>`<li><b>${esc(r.id)}</b> (${esc(r.src)}) · ${esc(r.cls)} · ${r.props.map(p=>esc(p.key)+(p.allowed?.length?' ∈ '+esc(p.allowed.join('/')):'')).join(' y ')}</li>`).join('')}</ul>
+<p><small>Generado con AI model audit v1. Las reglas fueron propuestas por IA y aprobadas por el coordinador; el cumplimiento lo calcula el motor.</small></p>`; save('reporte_revision.html',html); };
+$('dlLog').onclick=()=>save('registro_medicion.json',JSON.stringify(log(),null,2));
+$('copy').onclick=()=>{ const t='Revisión '+(S.demo?'(ejemplo)':S.name1+' → '+S.name2)+'\n'+S.obs.map(o=>`${o.n} | ${o.el} | ${o.st} | ${S.red[o.n]||o.ev} | ${o.regla}`).join('\n');
+  navigator.clipboard.writeText(t).then(()=>toast('Resumen copiado')).catch(()=>toast('No se pudo copiar en esta vista')); };
+$('btnRedact').onclick=async()=>{ if(!capS||!S.obs.length) return; const b=$('btnRedact'); b.disabled=true; $('redStatus').innerHTML='<span class="spin"></span> Redactando observaciones…';
+  const data=S.obs.slice(0,40).map(o=>({n:o.n,elemento:o.el,estado:o.st,evidencia:o.ev,regla:o.regla}));
+  try{ const arr=await capS.json(`Redacta cada observación de revisión BIM en español técnico, en una sola oración de máximo 30 palabras, dirigida al modelador: qué corregir y por qué, citando la regla. No inventes datos que no estén en la evidencia. Responde SOLO un arreglo JSON de {"n": string, "texto": string}.\n\n${JSON.stringify(data)}`,{modelTier:'quick'});
+    for(const x of arr||[]) if(x&&x.n) S.red[x.n]=String(x.texto||''); $('redStatus').textContent='Redacción lista. Revísela antes de enviarla.'; renderReport();
+  }catch(e){ $('redStatus').textContent=e.code==='not_granted'?'No se dio permiso para usar la IA.':'No se pudo redactar. Intente de nuevo.'; }
+  finally{ b.disabled=false; } };
+
+go(1);
+</script>
+
+</body></html>
