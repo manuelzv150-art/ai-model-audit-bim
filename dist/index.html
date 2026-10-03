@@ -604,9 +604,10 @@ async function renderIfcGeometry(file){
         const mesh=new THREE.Mesh(g,mat); mesh.applyMatrix4(new THREE.Matrix4().fromArray(pg.flatTransformation)); mesh.userData.r=row; group.add(mesh); if(row) R3.meshes.push(mesh); pieces++; try{geo.delete()}catch(e){}
       } try{item.delete()}catch(e){}
     }
+    if(!pieces) throw new Error('el archivo no contiene representaciones geométricas');
     IFCG.model=model; const box=new THREE.Box3().setFromObject(group), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3()); group.position.sub(center); R3.span=Math.max(10,size.x,size.y,size.z); resize(); refresh();
     if(note) note.textContent=`Geometría real IFC cargada: ${pieces} piezas trianguladas. Arrastre para girar, rueda para acercar y haga clic para seleccionar.`;
-  }catch(err){ if(token!==IFCG.token) return; if(note) note.textContent=`No se pudo generar la geometría real (${err.message||'error de lectura'}). Se mantiene la vista esquemática.`; }
+  }catch(err){ if(token!==IFCG.token) return; buildScene(); refresh(); if(note) note.textContent=`No se pudo generar la geometría real (${err.message||'error de lectura'}). Se mantiene la vista esquemática.`; }
 }
 function resize(){ if(!R3) return; const cv=$('cv'); const w=cv.clientWidth,h=Math.max(480,cv.clientHeight); R3.renderer.setSize(w,h,false); R3.renderer.domElement.style.height=h+'px';
   const a=w/h, s=R3.span*.8/R3.zoom; Object.assign(R3.camera,{left:-s*a,right:s*a,top:s,bottom:-s}); R3.camera.updateProjectionMatrix(); draw(); }
