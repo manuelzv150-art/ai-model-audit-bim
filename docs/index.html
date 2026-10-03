@@ -189,6 +189,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/web-ifc-api-iife.js"></script>
 <script>
 /* AI model audit · motor (lectura IFC STEP, comparación y verificación). Sin dependencias. */
 const Engine = (() => {
@@ -424,7 +425,7 @@ function go(n){ if(n>1&&!(S.m1&&S.m2)) n=1; step=n; timers(n);
   for(let i=1;i<=5;i++) $('s'+i).hidden=i!==n;
   if(n===2) renderBep(), renderRules();
   if(n>=3) run();
-  if(n===3){ initViewer(); buildScene(); refresh(); }
+  if(n===3){ initViewer(); buildScene(); refresh(); if(S.file2) renderIfcGeometry(S.file2); }
   if(n===4) renderAvance(); if(n===5) renderReport(); }
 document.querySelectorAll('nav.steps button').forEach(b=>b.onclick=()=>go(+b.dataset.step));
 $('go2').onclick=()=>go(2); $('go3').onclick=()=>go(3);
@@ -442,7 +443,7 @@ async function loadIfc(file,k){ const box=$('i'+k); box.innerHTML='<span class="
       throw new Error(xml?'El archivo está en IFCXML. Exporte el modelo como IFC STEP (.ifc).':zip?'El archivo parece comprimido (IFCZIP). Descomprímalo y cargue el .ifc interno.':'No se encontró la cabecera IFC STEP (ISO-10303-21). Verifique que la exportación sea IFC STEP (.ifc).');
     }
     const m=Engine.parse(txt); if(!m.elements.size) throw new Error('No se encontraron elementos contenidos en niveles.');
-    S['m'+k]=m; S['name'+k]=file.name; S.cmp=null; $('d'+k).classList.add('done'); summarizeModel(m,box); box.insertAdjacentHTML('afterbegin',`<b>${esc(file.name)}</b>`); checks(); }
+    S['m'+k]=m; S['file'+k]=file; S['name'+k]=file.name; S.cmp=null; $('d'+k).classList.add('done'); summarizeModel(m,box); box.insertAdjacentHTML('afterbegin',`<b>${esc(file.name)}</b>`); checks(); }
   catch(err){ box.innerHTML=`<p class="warn">${esc(err.message)}</p>`; S['m'+k]=null; checks(); } }
 function checks(){ const ok=S.m1&&S.m2; $('go2').disabled=!ok; const w=[];
   if(ok){ if(S.m1.schema!==S.m2.schema) w.push('esquemas distintos'); if(S.m1.scale!==S.m2.scale) w.push('unidades distintas (se normalizan a metros)');
@@ -580,6 +581,33 @@ function buildScene(){ if(!R3) return; const {root}=R3; while(root.children.leng
     if(r.geo&&r.v1){ const gh=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x9AA8B8})); const q=T(r.v1.pos); q.y+=sz[1]/2; gh.position.copy(q); gh.rotation.y=m.rotation.y; root.add(gh); } }
   const note=$('viewerNote'); if(note) note.textContent=separated?`Se muestran ${all.length} elementos IFC. ${separated} comparten la misma ubicación en la exportación y se separaron visualmente para poder inspeccionarlos.`:`Se muestran ${all.length} elementos IFC en sus ubicaciones exportadas.`;
   resize(); }
+let IFCG={api:null,model:null,token:0};
+async function renderIfcGeometry(file){
+  if(!R3||!file) return; const token=++IFCG.token, note=$('viewerNote');
+  if(note) note.textContent='Cargando la geometría real del IFC…';
+  try{
+    if(!window.WebIFC?.IfcAPI) throw new Error('No se pudo cargar el motor de geometría IFC.');
+    if(!IFCG.api){ IFCG.api=new WebIFC.IfcAPI(); IFCG.api.SetWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/'); await IFCG.api.Init(); }
+    if(IFCG.model!==null){ try{IFCG.api.CloseModel(IFCG.model)}catch(e){} IFCG.model=null; }
+    const model=IFCG.api.OpenModel(new Uint8Array(await file.arrayBuffer()),{COORDINATE_TO_ORIGIN:true,OPTIMIZE_PROFILES:true});
+    const flat=IFCG.api.LoadAllGeometry(model); if(token!==IFCG.token){ IFCG.api.CloseModel(model); return; }
+    const {root}=R3; while(root.children.length) root.remove(root.children[0]); R3.meshes=[];
+    const group=new THREE.Group(), rows=new Map(S.cmp.map(r=>[r.el.step,r])); group.rotation.x=-Math.PI/2; root.add(group);
+    let pieces=0;
+    for(let i=0;i<flat.size();i++){
+      const item=flat.get(i), row=rows.get(item.expressID)||null, placed=item.geometries;
+      for(let j=0;j<placed.size();j++){
+        const pg=placed.get(j), geo=IFCG.api.GetGeometry(model,pg.geometryExpressID);
+        const verts=IFCG.api.GetVertexArray(geo.GetVertexData(),geo.GetVertexDataSize()), idx=IFCG.api.GetIndexArray(geo.GetIndexData(),geo.GetIndexDataSize());
+        const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(verts.filter((_,n)=>n%6<3)),3)); g.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(verts.filter((_,n)=>n%6>=3)),3)); g.setIndex(new THREE.BufferAttribute(new Uint32Array(idx),1)); g.computeBoundingSphere();
+        const c=pg.color||{x:.65,y:.7,z:.75,w:1}, mat=new THREE.MeshLambertMaterial({color:new THREE.Color(c.x,c.y,c.z),transparent:c.w<.99,opacity:c.w,side:THREE.DoubleSide});
+        const mesh=new THREE.Mesh(g,mat); mesh.applyMatrix4(new THREE.Matrix4().fromArray(pg.flatTransformation)); mesh.userData.r=row; group.add(mesh); if(row) R3.meshes.push(mesh); pieces++; try{geo.delete()}catch(e){}
+      } try{item.delete()}catch(e){}
+    }
+    IFCG.model=model; const box=new THREE.Box3().setFromObject(group), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3()); group.position.sub(center); R3.span=Math.max(10,size.x,size.y,size.z); resize(); refresh();
+    if(note) note.textContent=`Geometría real IFC cargada: ${pieces} piezas trianguladas. Arrastre para girar, rueda para acercar y haga clic para seleccionar.`;
+  }catch(err){ if(token!==IFCG.token) return; if(note) note.textContent=`No se pudo generar la geometría real (${err.message||'error de lectura'}). Se mantiene la vista esquemática.`; }
+}
 function resize(){ if(!R3) return; const cv=$('cv'); const w=cv.clientWidth,h=Math.max(480,cv.clientHeight); R3.renderer.setSize(w,h,false); R3.renderer.domElement.style.height=h+'px';
   const a=w/h, s=R3.span*.8/R3.zoom; Object.assign(R3.camera,{left:-s*a,right:s*a,top:s,bottom:-s}); R3.camera.updateProjectionMatrix(); draw(); }
 function draw(){ if(!R3) return; const {camera,rot}=R3; const d=100; camera.position.set(d*Math.cos(rot.x)*Math.sin(rot.y),d*Math.sin(rot.x),d*Math.cos(rot.x)*Math.cos(rot.y)); camera.lookAt(0,0,0); R3.renderer.render(R3.scene,camera); }
