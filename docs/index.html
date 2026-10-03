@@ -587,7 +587,7 @@ async function renderIfcGeometry(file){
   if(note) note.textContent='Cargando la geometría real del IFC…';
   try{
     if(!window.WebIFC?.IfcAPI) throw new Error('No se pudo cargar el motor de geometría IFC.');
-    if(!IFCG.api){ IFCG.api=new WebIFC.IfcAPI(); IFCG.api.SetWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/'); await IFCG.api.Init(); }
+    if(!IFCG.api){ IFCG.api=new WebIFC.IfcAPI(); IFCG.api.SetWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/',true); await IFCG.api.Init(); }
     if(IFCG.model!==null){ try{IFCG.api.CloseModel(IFCG.model)}catch(e){} IFCG.model=null; }
     const model=IFCG.api.OpenModel(new Uint8Array(await file.arrayBuffer()),{COORDINATE_TO_ORIGIN:true,OPTIMIZE_PROFILES:true});
     const flat=IFCG.api.LoadAllGeometry(model); if(token!==IFCG.token){ IFCG.api.CloseModel(model); return; }
