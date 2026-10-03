@@ -426,7 +426,11 @@ function summarizeModel(m,box){ const cls={}; const lv=new Set(); for(const e of
   box.innerHTML=`<dl class="stat"><dt>Esquema</dt><dd>${esc(m.schema)}</dd><dt>Unidad</dt><dd>${esc(m.unitName)}</dd><dt>Elementos</dt><dd>${m.elements.size}</dd><dt>Niveles</dt><dd>${lv.size}</dd><dt>Clases</dt><dd>${esc(top)}</dd><dt>Lectura</dt><dd>${Math.round(m.ms)} ms</dd></dl>`+
    (m.warnings?`<p class="warn">${m.warnings} ${m.warnings===1?'elemento':'elementos'} sin propiedades: revise si la exportación incluyó los Psets.</p>`:''); }
 async function loadIfc(file,k){ const box=$('i'+k); box.innerHTML='<span class="sub"><span class="spin"></span> Leyendo…</span>';
-  try{ const txt=await file.text(); if(!/ISO-10303-21/.test(txt.slice(0,200))) throw new Error('No parece un archivo IFC (STEP).');
+  try{ const txt=await file.text();
+    if(!/ISO-10303-21\s*;/i.test(txt)){
+      const xml=/<\s*ifcXML\b/i.test(txt.slice(0,65536)), zip=/^PK/.test(txt);
+      throw new Error(xml?'El archivo está en IFCXML. Exporte el modelo como IFC STEP (.ifc).':zip?'El archivo parece comprimido (IFCZIP). Descomprímalo y cargue el .ifc interno.':'No se encontró la cabecera IFC STEP (ISO-10303-21). Verifique que la exportación sea IFC STEP (.ifc).');
+    }
     const m=Engine.parse(txt); if(!m.elements.size) throw new Error('No se encontraron elementos contenidos en niveles.');
     S['m'+k]=m; S['name'+k]=file.name; S.cmp=null; $('d'+k).classList.add('done'); summarizeModel(m,box); box.insertAdjacentHTML('afterbegin',`<b>${esc(file.name)}</b>`); checks(); }
   catch(err){ box.innerHTML=`<p class="warn">${esc(err.message)}</p>`; S['m'+k]=null; checks(); } }
