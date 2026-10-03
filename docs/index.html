@@ -137,7 +137,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
   <section id="s2" class="grid" hidden>
     <div class="panel row" style="justify-content:space-between">
       <div class="col" style="gap:2px"><h2>La IA propone reglas; usted decide</h2><p class="sub">Cada regla cita el texto de origen y solo usa propiedades que existen en el modelo. Solo las reglas aprobadas se verifican.</p></div>
-      <div class="row"><button class="btn ia" id="btnIA">Proponer reglas con IA</button><button class="btn" id="btnManual">+ Regla manual</button><button class="btn ghost sm" id="btnSampleRules" hidden>Usar reglas de ejemplo</button></div>
+      <div class="row"><button class="btn sm" id="btnGemini">Conectar Gemini</button><button class="btn ia" id="btnIA">Proponer reglas con IA</button><button class="btn" id="btnManual">+ Regla manual</button><button class="btn ghost sm" id="btnSampleRules" hidden>Usar reglas de ejemplo</button></div>
     </div>
     <p class="sub" id="iaStatus" aria-live="polite"></p>
     <div class="grid g2">
@@ -393,11 +393,21 @@ const S={m1:null,m2:null,name1:'',name2:'',bep:'',demo:false,rules:[],cmp:null,c
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
-let capS=null,capD=null;
-(async()=>{ if(!window.claude?.use) return; capS=await claude.use('sample'); capD=await claude.use('downloads');
-  if(!capS){ $('btnIA').disabled=true; $('btnRedact').hidden=true; $('iaStatus').textContent='La IA no está disponible en esta vista. Agregue reglas manualmente.'; }
-  })();
-setTimeout(()=>{ if(!capS && !window.claude?.use){ $('btnIA').disabled=true; $('btnRedact').hidden=true; $('iaStatus').textContent='La IA no está disponible en esta versión. Agregue reglas manualmente.'; } },1500);
+let capS=null,capD=null,geminiKey='';
+const GEMINI_MODEL='gemini-2.5-flash';
+try{geminiKey=sessionStorage.getItem('ama_gemini_key')||''}catch(e){}
+function configureGemini(){ const key=window.prompt('Pegue su clave de Gemini API. Se guardará solo durante esta sesión del navegador y se enviará únicamente a Google Gemini.');
+  if(!key) return false; geminiKey=key.trim(); try{sessionStorage.setItem('ama_gemini_key',geminiKey)}catch(e){} $('iaStatus').textContent=`Gemini conectado (${GEMINI_MODEL}). Ya puede proponer reglas.`; toast('Gemini conectado para esta sesión'); return true; }
+async function aiJson(prompt,{signal,modelTier}={}){ if(capS) return capS.json(prompt,{signal,modelTier});
+  if(!geminiKey&&!configureGemini()) throw {code:'missing_key'};
+  const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':geminiKey},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.1,responseMimeType:'application/json'}})});
+  const body=await response.json().catch(()=>({})); if(!response.ok) throw {code:response.status===401||response.status===403?'invalid_key':response.status===429?'rate_limited':'gemini_error',message:body.error?.message};
+  const raw=body.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('').trim(); if(!raw) throw {code:'invalid_json'};
+  try{return JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g,''))}catch(e){throw {code:'invalid_json'}}
+}
+(async()=>{ if(!window.claude?.use) return; capS=await claude.use('sample'); capD=await claude.use('downloads'); })();
+$('btnGemini').onclick=configureGemini;
+setTimeout(()=>{ if(!capS&&!geminiKey) $('iaStatus').textContent='Conecte Gemini para que la IA proponga reglas, o agregue una regla manual.'; },1500);
 
 /* ---------- tiempos ---------- */
 function tick(){ const now=Date.now(); const f=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -492,7 +502,6 @@ $('btnSampleRules').onclick=()=>{ S.rules=DEMO.rules.map(r=>newRule({...JSON.par
 
 let iaCtl=null;
 $('btnIA').onclick=async()=>{
-  if(!capS){ toast('La IA no está disponible en esta vista'); return; }
   const txt=(S.bep||'').trim(); if(!txt){ toast('Pegue primero el texto de los acuerdos (paso 1)'); return; }
   const V=vocab(); const vtxt=Object.entries(V).map(([c,ps])=>`${c}: ${ps.slice(0,60).join(' | ')||'(sin propiedades)'}`).join('\n');
   const prompt=`Eres asistente de coordinación BIM. Convierte cada requisito VERIFICABLE del texto de acuerdos en una regla para revisar un modelo IFC.
@@ -507,7 +516,7 @@ ${vtxt}
 TEXTO DE ACUERDOS:
 ${txt.slice(0,30000)}`;
   iaCtl?.abort(); iaCtl=new AbortController(); const b=$('btnIA'); b.disabled=true; $('iaStatus').innerHTML='<span class="spin"></span> La IA está leyendo los acuerdos… (puede tardar hasta un minuto)';
-  try{ const arr=await capS.json(prompt,{signal:iaCtl.signal}); if(!Array.isArray(arr)) throw {code:'invalid_json'};
+  try{ const arr=await aiJson(prompt,{signal:iaCtl.signal}); if(!Array.isArray(arr)) throw {code:'invalid_json'};
     const all=new Set(allProps()); let n=0;
     for(const x of arr){ const cls=(x.clase==='*'||V[x.clase])?x.clase:'*'; const valid=new Set(cls==='*'?all:V[cls]); const bad=[];
       const props=(x.condiciones||[]).filter(c=>{ if(valid.has(c.propiedad)) return true; if(c.propiedad) bad.push(c.propiedad); return false; })
@@ -516,8 +525,8 @@ ${txt.slice(0,30000)}`;
       if(x.clase && cls==='*' && x.clase!=='*') amb=(amb?amb+' ':'')+`Clase «${x.clase}» no existe en el modelo.`;
       S.rules.push(newRule({id:String(x.id||'R-'+(n+1)),src:String(x.fuente||'Acuerdos'),cita:String(x.cita||''),cls,props,amb,origin:'ia'})); n++; }
     S.ia.proposed+=n; S.ia.calls++; $('iaStatus').textContent=`La IA propuso ${n} reglas. Revíselas: apruebe, corrija o devuelva cada una.`; renderRules();
-  }catch(e){ const m={not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Demasiadas solicitudes; intente en un momento.',invalid_json:'La IA no devolvió reglas legibles; intente de nuevo o reduzca el texto.',prompt_too_large:'El texto es demasiado largo; pegue solo las secciones de requisitos.',cancelled:''};
-    $('iaStatus').textContent= m[e.code]??'No se pudo completar la solicitud a la IA. Intente de nuevo.'; if(e.code==='not_granted'||e.code==='sampling_disabled'){b.hidden=true} }
+  }catch(e){ const m={missing_key:'Conecte Gemini para proponer reglas.',invalid_key:'Gemini rechazó la clave. Vuelva a conectarlo con una clave válida.',not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Gemini recibió demasiadas solicitudes; intente en un momento.',invalid_json:'La IA no devolvió reglas legibles; intente de nuevo o reduzca el texto.',prompt_too_large:'El texto es demasiado largo; pegue solo las secciones de requisitos.',gemini_error:e.message?'Gemini no pudo completar la solicitud: '+e.message:'Gemini no pudo completar la solicitud.',cancelled:''};
+    $('iaStatus').textContent= m[e.code]??'No se pudo completar la solicitud a la IA. Intente de nuevo.'; }
   finally{ b.disabled=false; } };
 
 /* ---------- motor ---------- */
