@@ -156,13 +156,13 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
         <div class="ov modes" role="group" aria-label="Modo" style="right:10px;top:10px;display:flex;gap:4px;padding:4px"><button id="mCh" aria-pressed="true">CAMBIOS</button><button id="mCu" aria-pressed="false">CUMPLIMIENTO</button></div>
         <div class="ov" id="legend" style="left:10px;bottom:10px;display:flex;gap:10px;flex-wrap:wrap"></div>
       </div>
-      <p class="sub">Vista esquemática: cada elemento se dibuja en su ubicación real del IFC con una caja tipo por clase. La geometría completa llega en el MVP.</p>
+      <p class="sub" id="viewerNote">Vista de elementos IFC: se representan sus ubicaciones y clases. Si varios elementos comparten exactamente la misma ubicación exportada, se separan solo para poder inspeccionarlos.</p>
     </div>
     <div class="col" style="gap:10px">
       <div id="retro"></div>
       <div class="panel" id="detail"></div>
       <div class="panel col"><div class="row" style="justify-content:space-between"><div class="lbl">Elementos</div>
-        <label class="sub row" style="gap:4px"><input type="checkbox" id="onlyObs" checked> solo con cambios u observaciones</label></div>
+        <label class="sub row" style="gap:4px"><input type="checkbox" id="onlyObs"> solo con cambios u observaciones</label></div>
         <div class="row"><input type="text" id="q" placeholder="Buscar por nombre…" style="flex:1"><select id="lvl" aria-label="Nivel"></select></div>
         <div class="elist" id="elist"></div></div>
     </div>
@@ -555,22 +555,30 @@ function initViewer(){ if(R3||!window.THREE) { if(!window.THREE&&!$('noGl')) $('
 const SIZE={IfcColumn:[.4,3,.4],IfcWall:[2.5,2.8,.2],IfcWallStandardCase:[2.5,2.8,.2],IfcBeam:[3,.4,.3],IfcDoor:[.9,2.1,.1],IfcWindow:[1.2,1.2,.1],IfcFlowTerminal:[1.2,.7,.8],IfcAirTerminal:[.6,.3,.6],IfcFlowSegment:[2.5,.4,.4],IfcDuctSegment:[2.5,.4,.4],IfcPipeSegment:[2.5,.15,.15],IfcFurnishingElement:[1,.8,.6]};
 function buildScene(){ if(!R3) return; const {root}=R3; while(root.children.length) root.remove(root.children[0]); R3.meshes=[];
   const all=[...S.cmp.map(r=>r.el)]; if(!all.length) return;
+  // Algunas exportaciones Revit dan a piezas anidadas la misma colocación. Separamos solo esos empates para que no queden ocultas unas detrás de otras.
+  const groups=new Map(), visual=new Map();
+  for(const e of all){ const k=e.pos.map(v=>Math.round(v*100)/100).join('|'); (groups.get(k)||groups.set(k,[]).get(k)).push(e); }
+  let separated=0;
+  for(const es of groups.values()){ if(es.length===1){ visual.set(es[0],es[0].pos); continue; } const cols=Math.ceil(Math.sqrt(es.length)), gap=1.15;
+    es.sort((a,b)=>(a.name||a.id).localeCompare(b.name||b.id)).forEach((e,i)=>{ const x=(i%cols-(cols-1)/2)*gap, y=(Math.floor(i/cols)-(Math.ceil(es.length/cols)-1)/2)*gap; visual.set(e,[e.pos[0]+x,e.pos[1]+y,e.pos[2]]); }); separated+=es.length; }
+  const P=e=>visual.get(e)||e.pos, vp=all.map(P);
   // bbox (IFC z up -> three y up)
-  const xs=all.map(e=>e.pos[0]), ys=all.map(e=>e.pos[1]), zs=all.map(e=>e.pos[2]);
+  const xs=vp.map(p=>p[0]), ys=vp.map(p=>p[1]), zs=vp.map(p=>p[2]);
   const cx=(Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2, cz=(Math.min(...zs)+Math.max(...zs))/2;
   R3.span=Math.max(10,Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys),Math.max(...zs)-Math.min(...zs)+3);
   const T=p=>new THREE.Vector3(p[0]-cx,p[2]-cz,-(p[1]-cy));
   // losas por nivel (bbox de sus elementos)
   const byLvl={}; for(const e of all){ (byLvl[e.level]||=[]).push(e) }
   const slabM=new THREE.MeshLambertMaterial({color:0x8E9DB1,transparent:true,opacity:.18,depthWrite:false});
-  for(const els of Object.values(byLvl)){ const lx=els.map(e=>e.pos[0]),ly=els.map(e=>e.pos[1]); const z=Math.min(...els.map(e=>e.pos[2]));
+  for(const els of Object.values(byLvl)){ const lx=els.map(e=>P(e)[0]),ly=els.map(e=>P(e)[1]); const z=Math.min(...els.map(e=>P(e)[2]));
     const w=Math.max(...lx)-Math.min(...lx)+2,d=Math.max(...ly)-Math.min(...ly)+2;
     const s=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),slabM); const c=T([(Math.min(...lx)+Math.max(...lx))/2,(Math.min(...ly)+Math.max(...ly))/2,z]); s.position.copy(c); s.position.y-=.06; root.add(s); }
   for(const r of S.cmp){ const e=r.el; if(/Slab|Roof|Covering/.test(e.cls)) continue; const sz=SIZE[e.cls]||[.7,.7,.7];
     const g=new THREE.BoxGeometry(sz[0],sz[1],sz[2]); const mat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:!!r.removed,opacity:r.removed?.28:1});
-    const m=new THREE.Mesh(g,mat); const p=T(e.pos); p.y+=sz[1]/2; m.position.copy(p); m.rotation.y=Math.atan2(e.dir?.[1]||0,e.dir?.[0]||1); m.userData.r=r; root.add(m); R3.meshes.push(m);
+    const m=new THREE.Mesh(g,mat); const p=T(P(e)); p.y+=sz[1]/2; m.position.copy(p); m.rotation.y=Math.atan2(e.dir?.[1]||0,e.dir?.[0]||1); m.userData.r=r; root.add(m); R3.meshes.push(m);
     const edges=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:r.removed?0xE5554B:0x0B1522})); m.add(edges);
     if(r.geo&&r.v1){ const gh=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x9AA8B8})); const q=T(r.v1.pos); q.y+=sz[1]/2; gh.position.copy(q); gh.rotation.y=m.rotation.y; root.add(gh); } }
+  const note=$('viewerNote'); if(note) note.textContent=separated?`Se muestran ${all.length} elementos IFC. ${separated} comparten la misma ubicación en la exportación y se separaron visualmente para poder inspeccionarlos.`:`Se muestran ${all.length} elementos IFC en sus ubicaciones exportadas.`;
   resize(); }
 function resize(){ if(!R3) return; const cv=$('cv'); const w=cv.clientWidth,h=Math.max(480,cv.clientHeight); R3.renderer.setSize(w,h,false); R3.renderer.domElement.style.height=h+'px';
   const a=w/h, s=R3.span*.8/R3.zoom; Object.assign(R3.camera,{left:-s*a,right:s*a,top:s,bottom:-s}); R3.camera.updateProjectionMatrix(); draw(); }
