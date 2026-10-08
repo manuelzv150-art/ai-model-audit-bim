@@ -571,6 +571,17 @@ tr:last-child td{border-bottom:0}
 .stage.app3d:fullscreen{height:100vh;max-height:none;border-radius:0}
 .stage.app3d .hint{bottom:56px}
 @media (max-width:900px){.vtools{top:auto;bottom:58px;transform:none;flex-direction:row;flex-wrap:wrap;max-width:calc(100% - 24px)}.vtools .sep{width:1px;height:auto;margin:5px 2px}.vcut{top:auto;bottom:108px;right:12px;transform:none}.vbadge{display:none}}
+/* sección de validación IDS (página principal) */
+.clx-vis.idsv{flex-direction:column;align-items:stretch;justify-content:center;gap:10px;padding:26px 22px}
+.idsv .ih{display:flex;justify-content:space-between;align-items:center;font:500 12px var(--mono);color:var(--muted);margin-bottom:4px}
+.idsv .ih b{color:var(--fg);font:600 13px var(--mono)}
+.idsr{background:rgba(9,17,28,.82);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
+.idsr .c{font:600 11.5px var(--mono);color:var(--acc)}
+.idsr b{font-size:14px;font-weight:500;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idsr em{font:600 12px var(--mono);font-style:normal;color:var(--c)}
+.idsr .bar{grid-column:1/-1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.05)}
+.idsr .bar i{display:block;height:100%}
+.idsr small{grid-column:1/-1;font:400 11.5px var(--mono);color:var(--dim)}
 /* sección de interferencias (página principal) */
 .clx{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:stretch}
 .clx-vis{position:relative;border-radius:22px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 35%,#132339 0%,#0A1320 72%);padding:28px 22px 76px;overflow:hidden;min-height:420px;display:flex;align-items:center}
@@ -642,9 +653,9 @@ tr:last-child td{border-bottom:0}
 
 /* inicio de la demo: dos caminos */
 .chooser{flex:1;display:grid;place-items:center;padding:40px 20px;background:radial-gradient(70% 60% at 50% 0%,rgba(242,136,58,.08),transparent 60%)}
-.chin{width:min(980px,100%);text-align:center}
+.chin{width:min(1180px,100%);text-align:center}
 .chin h2{font-size:clamp(30px,3.6vw,44px);font-weight:600;letter-spacing:-.04em;margin:8px 0 8px}
-.chcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;text-align:left}
+.chcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px;text-align:left}
 .chcard{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:22px;border:1px solid var(--line2);background:radial-gradient(90% 80% at 0% 0%,rgba(242,136,58,.12),transparent 60%),var(--s1);color:var(--fg);cursor:pointer;font:inherit;text-align:left;transition:transform .2s var(--ease),border-color .2s}
 .chcard:hover{transform:translateY(-2px);border-color:rgba(242,136,58,.6)}
 .chcard.plus{background:radial-gradient(90% 80% at 0% 0%,rgba(152,136,246,.16),transparent 60%),var(--s1)}
@@ -658,6 +669,7 @@ tr:last-child td{border-bottom:0}
 .chflow .ph{color:var(--dim);font-size:12px}
 .chplan{font:500 12px var(--mono);color:var(--acc);margin-top:auto}
 .chcard.plus .chplan{color:var(--purple)}
+@media (max-width:1100px){.chcards{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.chcards{grid-template-columns:1fr}}
 </style>
 </head>
@@ -675,6 +687,7 @@ tr:last-child td{border-bottom:0}
       <li><a href="#problema">Problema</a></li>
       <li><a href="#como">Cómo funciona</a></li>
       <li><a href="#interferencias">Interferencias</a></li>
+      <li><a href="#ids">IDS</a></li>
       <li><a href="#ia">IA</a></li>
       <li><a href="#mercado">Mercado</a></li>
       <li><a href="#precio">Planes</a></li>
@@ -693,7 +706,7 @@ tr:last-child td{border-bottom:0}
     <div class="hero-copy">
       <span class="pill rv"><i class="ph ph-sparkle"></i>Auditoría de entregas BIM con IA</span>
       <h1 class="rv" style="--i:1"><span>Lo que cambió,</span><span class="serif">lo que falta</span><span>y la evidencia.</span></h1>
-      <p class="lead rv" style="--i:2">Compare dos versiones IFC contra el BEP y las actas. La IA convierte los acuerdos en reglas y usted las aprueba. Con el plan Plus, también detecta interferencias y las exporta en BCF.</p>
+      <p class="lead rv" style="--i:2">Compare dos versiones IFC contra el BEP y las actas. La IA convierte los acuerdos en reglas y usted las aprueba. Con el plan Plus, también detecta interferencias, las exporta en BCF y valida el modelo contra el IDS.</p>
       <div class="ctas rv" style="--i:3">
         <a class="btn pri" href="#app" data-demo><i class="ph ph-play"></i>Probar la demo</a>
         <a class="btn ghost" href="#piloto">Solicitar piloto</a>
@@ -846,6 +859,29 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     </div>
   </div>
 </section>
+<section class="block" id="ids" style="padding-top:0">
+  <div class="container">
+    <div class="head rv">
+      <div class="eyebrow">Plan Plus · Validación IDS</div>
+      <h2 class="h2">Los requisitos de información, <span class="serif">verificados uno por uno.</span></h2>
+      <p class="lead">Cargue el IDS de buildingSMART con lo que debe traer la entrega (clases, propiedades, materiales, clasificación y ubicación) y vea qué elementos cumplen. Si no tiene IDS, la IA lo arma desde su BEP o sus actas.</p>
+    </div>
+    <div class="clx">
+      <div class="clx-vis idsv rv" role="img" aria-label="Ejemplo de validación IDS: cinco especificaciones con su porcentaje de cumplimiento">
+        <div class="ih"><span>requisitos_ejemplo.ids · V02</span><b>89% cumplido</b></div>
+        <div class="idsr" style="--c:var(--red)"><span class="c">IDS-01</span><b>Vigas portantes con resistencia al fuego</b><em>2/4</em><span class="bar"><i style="width:50%;background:var(--green)"></i><i style="width:50%;background:var(--red)"></i></span><small>V-03 sin FireRating</small></div><div class="idsr" style="--c:var(--red)"><span class="c">IDS-02</span><b>Columnas de concreto</b><em>3/4</em><span class="bar"><i style="width:75%;background:var(--green)"></i><i style="width:25%;background:var(--red)"></i></span><small>C-03 con material «Acero A36»</small></div><div class="idsr" style="--c:var(--green)"><span class="c">IDS-03</span><b>Muros con datos de incendio</b><em>1/1</em><span class="bar"><i style="width:100%;background:var(--green)"></i><i style="width:0%;background:var(--red)"></i></span></div><div class="idsr" style="--c:var(--red)"><span class="c">IDS-04</span><b>Instalaciones con disciplina y Uniclass</b><em>3/5</em><span class="bar"><i style="width:60%;background:var(--green)"></i><i style="width:40%;background:var(--red)"></i></span><small>D-02 · Disciplina «Mecánica»</small></div><div class="idsr" style="--c:var(--red)"><span class="c">IDS-05</span><b>Elementos ubicados en un nivel</b><em>13/14</em><span class="bar"><i style="width:93%;background:var(--green)"></i><i style="width:7%;background:var(--red)"></i></span><small>«Tub 1» fuera del código X-00</small></div>
+      </div>
+      <div class="clx-feats">
+        <div class="clx-f rv"><i class="ph ph-sparkle"></i><div><h3>IDS con IA desde el BEP</h3><p>La IA convierte los requisitos escritos en especificaciones IDS con las clases y propiedades que existen en el modelo, y valida la entrega. Usted revisa cada requisito y descarga el .ids.</p></div></div>
+        <div class="clx-f rv" style="--i:1"><i class="ph ph-seal-check"></i><div><h3>Compatible con IDS 1.0</h3><p>Facetas de clase, atributo, propiedad, clasificación, material y «parte de», con valores exactos, listas, patrones y rangos. Resultados contrastados con el validador de referencia de IfcOpenShell.</p></div></div>
+        <div class="clx-f rv" style="--i:2"><i class="ph ph-cube"></i><div><h3>Cumplimiento en el visor 3D</h3><p>Cada elemento se pinta en verde o rojo; al seleccionarlo se ve qué requisito falla y qué valor trae, junto con todas sus propiedades.</p></div></div>
+        <div class="clx-f rv" style="--i:3"><i class="ph ph-chart-donut"></i><div><h3>Reporte, BCF y resumen con IA</h3><p>Tablero por especificación y clase, tabla de fallas, reporte con capturas, BCF con un tema por elemento y un resumen de acciones por disciplina.</p></div></div>
+        <div class="ctas rv" style="--i:4"><a class="btn pri sm" href="#app" data-ids><i class="ph ph-list-checks"></i>Abrir la validación IDS</a><a class="btn ghost sm" href="#app" data-ids="ejemplo">Ver el caso de ejemplo</a></div>
+        <p class="clx-note rv" style="--i:5">Incluido en el plan Plus. En la demo está en el botón «Validación IDS», junto a «Avance del modelo» e «Interferencias».</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="block ia-sec" id="ia">
   <div class="container">
@@ -925,15 +961,16 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
       </div>
       <div class="plan plus rv" style="--i:2">
         <div><div class="ptier">Plus</div><div class="amt">US$ 260<small>/ mes</small></div><div class="muted pnote">Por proyecto activo · + US$ 250 de configuración inicial</div></div>
-        <p class="pdesc">La auditoría completa más la coordinación de interferencias.</p>
+        <p class="pdesc">La auditoría completa más la coordinación de interferencias y la validación IDS.</p>
         <ul>
           <li><i class="ph ph-check"></i>Todo el plan Auditoría IA</li>
           <li><i class="ph ph-check"></i>Detección de interferencias entre disciplinas</li>
           <li><i class="ph ph-check"></i>Reglas de interferencia con IA desde BEP, actas o matriz CSV/Excel</li>
           <li><i class="ph ph-check"></i>Choques nuevos, activos y resueltos entre entregas</li>
           <li><i class="ph ph-check"></i>Tablero de interferencias y exportación BCF 2.1</li>
+          <li><i class="ph ph-check"></i>Validación de modelos según IDS 1.0, con IDS generado por IA desde el BEP</li>
         </ul>
-        <a class="btn ia" href="#app" data-cl="ejemplo" style="align-self:flex-start;margin-top:auto"><i class="ph ph-intersect"></i>Ver interferencias</a>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto"><a class="btn ia" href="#app" data-cl="ejemplo"><i class="ph ph-intersect"></i>Ver interferencias</a><a class="btn ia" href="#app" data-ids="ejemplo"><i class="ph ph-list-checks"></i>Ver validación IDS</a></div>
       </div>
     </div>
     <p class="src plansrc">Precios en validación con clientes (hipótesis H4).</p>
@@ -1022,7 +1059,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     </div>
     <div>
       <h4>Producto</h4>
-      <ul><li><a href="#app" data-demo>Prototipo navegable</a></li><li><a href="#como">Cómo funciona</a></li><li><a href="#app" data-cl>Interferencias (Plan Plus)</a></li><li><a href="#precio">Planes</a></li><li><a href="#ia">Integración de IA</a></li><li><a href="#precio">Precio</a></li></ul>
+      <ul><li><a href="#app" data-demo>Prototipo navegable</a></li><li><a href="#como">Cómo funciona</a></li><li><a href="#app" data-cl>Interferencias (Plan Plus)</a></li><li><a href="#app" data-ids>Validación IDS (Plan Plus)</a></li><li><a href="#precio">Planes</a></li><li><a href="#ia">Integración de IA</a></li><li><a href="#precio">Precio</a></li></ul>
     </div>
     <div>
       <h4>Transparencia</h4>
@@ -1040,6 +1077,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     <div class="modsw" role="tablist" aria-label="Módulo de la demo">
       <button role="tab" id="mAv" aria-selected="true"><i class="ph ph-chart-line-up"></i><span>Avance del modelo</span></button>
       <button role="tab" id="mIn" aria-selected="false"><i class="ph ph-intersect"></i><span>Interferencias</span><em>Plus</em></button>
+      <button role="tab" id="mIds" aria-selected="false"><i class="ph ph-list-checks"></i><span>Validación IDS</span><em>Plus</em></button>
     </div>
     <div class="sp"></div>
     <div class="timers">
@@ -1067,7 +1105,14 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
           <span class="chic"><i class="ph ph-intersect"></i></span>
           <b>Interferencias</b>
           <span class="chd">Detecte choques entre disciplinas sobre la geometría real del IFC y expórtelos en BCF.</span>
-          <span class="chflow"><em>Visor</em><i class="ph ph-caret-right"></i><em>Reporte</em></span>
+          <span class="chflow"><em>Reglas</em><i class="ph ph-caret-right"></i><em>Visor</em><i class="ph ph-caret-right"></i><em>Reporte</em></span>
+          <span class="chplan">Plan Plus</span>
+        </button>
+        <button class="chcard plus" data-go="ids">
+          <span class="chic"><i class="ph ph-list-checks"></i></span>
+          <b>Validación IDS</b>
+          <span class="chd">Valide el modelo contra los requisitos de información del IDS de buildingSMART, o deje que la IA lo arme desde el BEP.</span>
+          <span class="chflow"><em>Requisitos</em><i class="ph ph-caret-right"></i><em>Visor</em><i class="ph ph-caret-right"></i><em>Reporte</em></span>
           <span class="chplan">Plan Plus</span>
         </button>
       </div>
@@ -1213,6 +1258,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
   </div>
 
   <div class="clwrap" id="clWrap" hidden><iframe id="clFrame" title="Módulo de interferencias (plan Plus)"></iframe></div>
+  <div class="clwrap" id="idsWrap" hidden><iframe id="idsFrame" title="Módulo de validación IDS (plan Plus)"></iframe></div>
 
   <aside class="tour" id="tour" hidden aria-label="Recorrido guiado">
     <div class="hd"><b><i class="ph ph-flag-checkered" style="color:var(--acc)"></i> Recorrido de prueba</b><button class="iconbtn" id="tourX" aria-label="Cerrar recorrido"><i class="ph ph-x"></i></button></div>
@@ -1920,7 +1966,7 @@ let capS=null,capD=null,AI='demo';
 function setAiMode(){ AI=capS?'live':'demo';
   $('aiMode').innerHTML=AI==='live'?'<i class="ph ph-sparkle"></i><span>IA conectada. Las reglas las propone el modelo en vivo.</span>'
    :'<i class="ph ph-sparkle"></i><span>Modo demostración. Con el caso de ejemplo la IA responde con una salida pregrabada; con sus archivos, un asistente local aproximado.</span>'; }
-(async()=>{ try{ if(window.claude?.use){ capS=await claude.use('sample'); capD=await claude.use('downloads'); } }catch(e){} setAiMode(); if(typeof sendModels==='function') sendModels(); })();
+(async()=>{ try{ if(window.claude?.use){ capS=await claude.use('sample'); capD=await claude.use('downloads'); } }catch(e){} setAiMode(); try{ sendModels('in'); sendModels('ids'); }catch(e){} })();
 setAiMode();
 
 /* tiempos */
@@ -1946,28 +1992,32 @@ $('go2').onclick=()=>go(4); $('go4b').onclick=()=>go(2); $('go3').onclick=()=>go
 
 /* ruta: sitio o app */
 /* módulos de la demo: avance del modelo (pasos 1 a 5) e interferencias (plan Plus, embebido) */
-let mod=null, wantClash=false, clSample=false;
-function clWin(){ return document.getElementById('clFrame')?.contentWindow; }
-function setModule(m){ mod=m; const on=m==='in'; $('chooser').hidden=true; document.querySelector('.modsw').hidden=false; $('mAv').setAttribute('aria-selected',!on); $('mIn').setAttribute('aria-selected',on);
-  document.querySelector('.appbody').hidden=on; $('clWrap').hidden=!on; document.querySelector('.apptop .timers').style.visibility=on?'hidden':'';
-  if(on){ const f=$('clFrame'); if(!f.getAttribute('src')){ f.src='interferencias.html?embed=1'; } else { sendModels(); if(clSample){ clWin()?.postMessage({type:'ama-sample'},'*'); clSample=false; } } }
+let mod=null, wantMod=null; const sampleFor=new Set();
+const FR={in:{frame:'clFrame',wrap:'clWrap',src:'interferencias.html?embed=1'},ids:{frame:'idsFrame',wrap:'idsWrap',src:'ids.html?embed=1'}};
+const MB=[['mAv','av'],['mIn','in'],['mIds','ids']];
+function frWin(k){ return document.getElementById(FR[k].frame)?.contentWindow; }
+function clWin(){ return frWin('in'); }
+const needSample=()=>!(S.m2&&S.m2.hasGeo);
+function setModule(m){ mod=m; $('chooser').hidden=true; document.querySelector('.modsw').hidden=false; MB.forEach(([id,k])=>$(id).setAttribute('aria-selected',k===m));
+  document.querySelector('.appbody').hidden=m!=='av'; for(const k in FR) $(FR[k].wrap).hidden=k!==m; document.querySelector('.apptop .timers').style.visibility=m==='av'?'':'hidden';
+  if(FR[m]){ const f=$(FR[m].frame); if(!f.getAttribute('src')){ f.src=FR[m].src; } else { sendModels(m); if(sampleFor.has(m)){ frWin(m)?.postMessage({type:'ama-sample'},'*'); sampleFor.delete(m); } } }
   else go(S.m1&&S.m2?step:1); }
-$('mAv').onclick=()=>setModule('av'); $('mIn').onclick=()=>{ if(!(S.m2&&S.m2.hasGeo)) clSample=true; setModule('in'); };
-function showChooser(){ mod=null; $('chooser').hidden=false; document.querySelector('.appbody').hidden=true; $('clWrap').hidden=true; document.querySelector('.modsw').hidden=true; document.querySelector('.apptop .timers').style.visibility='hidden'; }
-document.querySelectorAll('.chcard').forEach(b=>b.onclick=()=>{ if(b.dataset.go==='in'&&!(S.m2&&S.m2.hasGeo)) clSample=true; setModule(b.dataset.go); });
-function sendModels(){ const w=clWin(); if(!w||!$('clFrame').getAttribute('src')) return;
+MB.forEach(([id,k])=>$(id).onclick=()=>{ if(k!=='av'&&needSample()) sampleFor.add(k); setModule(k); });
+function showChooser(){ mod=null; $('chooser').hidden=false; document.querySelector('.appbody').hidden=true; for(const k in FR) $(FR[k].wrap).hidden=true; document.querySelector('.modsw').hidden=true; document.querySelector('.apptop .timers').style.visibility='hidden'; }
+document.querySelectorAll('.chcard').forEach(b=>b.onclick=()=>{ const k=b.dataset.go; if(k!=='av'&&needSample()) sampleFor.add(k); setModule(k); });
+function sendModels(k='in'){ const w=frWin(k); if(!w||!$(FR[k].frame).getAttribute('src')) return;
   const pack=(m,n)=>m?.buf?{name:n,buf:m.buf.slice(),geo:!!m.hasGeo}:null;
   w.postMessage({type:'ama-models',hasAI:!!capS,bep:S.bep||'',v1:pack(S.m1,S.name1),v2:pack(S.m2,S.name2)},'*'); }
-async function clSave(name,blob){ if(capD){ await capD.save({filename:name.replace(/\.bcfzip$/i,'.bcf.zip'),data:blob}); toast('Archivo listo'); return; }
+async function clSave(name,blob){ if(capD){ await capD.save({filename:name.replace(/\.bcfzip$/i,'.bcf.zip').replace(/\.ids$/i,'.ids.xml'),data:blob}); toast('Archivo listo'); return; }
   const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000); toast('Descarga lista: '+name); }
-window.addEventListener('message',async e=>{ const w=clWin(); if(!w||e.source!==w) return; const d=e.data||{};
+window.addEventListener('message',async e=>{ const k=Object.keys(FR).find(k=>frWin(k)&&e.source===frWin(k)); if(!k) return; const w=frWin(k), d=e.data||{};
   const reply=(ok,data,err)=>w.postMessage({type:'ama-res',id:d.id,ok,data,err},'*');
-  if(d.type==='ama-hello'){ sendModels(); if(clSample){ w.postMessage({type:'ama-sample'},'*'); clSample=false; } }
+  if(d.type==='ama-hello'){ sendModels(k); if(sampleFor.has(k)){ w.postMessage({type:'ama-sample'},'*'); sampleFor.delete(k); } }
   else if(d.type==='ama-ai'){ try{ if(!capS) throw {code:'unavailable'}; reply(true,await capS.json(d.prompt)); }catch(err){ reply(false,null,{code:err?.code||'error'}); } }
   else if(d.type==='ama-save'){ try{ await clSave(d.name,d.blob); reply(true); }catch(err){ reply(false,null,{code:err?.code||'error'}); } } });
-document.addEventListener('click',e=>{ const a=e.target.closest('[data-cl]'); if(!a) return; e.preventDefault(); e.stopPropagation(); wantClash=true; clSample=a.dataset.cl==='ejemplo'; if(location.hash!=='#app') location.hash='#app'; else route(); },true);
+document.addEventListener('click',e=>{ const a=e.target.closest('[data-cl],[data-ids]'); if(!a) return; e.preventDefault(); e.stopPropagation(); const k=a.hasAttribute('data-ids')?'ids':'in'; wantMod=k; if((a.dataset.cl||a.dataset.ids)==='ejemplo'||needSample()) sampleFor.add(k); if(location.hash!=='#app') location.hash='#app'; else route(); },true);
 function route(){ const app=location.hash==='#app'; $('app').hidden=!app; $('site').hidden=app; document.title=app?'AI model audit · Demo':'AI model audit';
-  if(app){ if(wantClash){ wantClash=false; setModule('in'); } else if(!mod) showChooser(); else setModule(mod); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
+  if(app){ if(wantMod){ const m=wantMod; wantMod=null; setModule(m); } else if(!mod) showChooser(); else setModule(mod); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
 window.addEventListener('hashchange',route);
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-demo]'); if(!a) return; e.preventDefault(); if(location.hash!=='#app') location.hash='#app'; else route(); if(!S.m1) loadDemo(); });
 

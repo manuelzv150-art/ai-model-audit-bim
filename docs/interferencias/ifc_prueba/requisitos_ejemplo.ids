@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids xmlns="http://standards.buildingsmart.org/IDS" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.buildingsmart.org/IDS http://standards.buildingsmart.org/IDS/1.0/ids.xsd">
+  <info>
+    <title>Requisitos de información · Edificio demo</title>
+    <copyright>AI model audit (ejemplo sintético)</copyright>
+    <version>1.0</version>
+    <description>Requisitos de entrega del modelo para coordinación: propiedades, materiales, clasificación y ubicación.</description>
+    <author>coordinacion@ejemplo.com</author>
+    <date>2026-10-08</date>
+    <purpose>Validación de entrega V02</purpose>
+    <milestone>Proyecto de ejecución</milestone>
+  </info>
+  <specifications>
+    <specification name="IDS-01 · Vigas portantes con resistencia al fuego" ifcVersion="IFC4" identifier="IDS-01" description="Toda viga debe declararse portante y tener resistencia al fuego en formato RF-xx." instructions="Complete Pset_BeamCommon en el modelo estructural.">
+      <applicability minOccurs="1" maxOccurs="unbounded">
+        <entity><name><simpleValue>IFCBEAM</simpleValue></name></entity>
+      </applicability>
+      <requirements>
+        <property dataType="IFCBOOLEAN" cardinality="required">
+          <propertySet><simpleValue>Pset_BeamCommon</simpleValue></propertySet>
+          <baseName><simpleValue>LoadBearing</simpleValue></baseName>
+          <value><simpleValue>TRUE</simpleValue></value>
+        </property>
+        <property dataType="IFCLABEL" cardinality="required">
+          <propertySet><simpleValue>Pset_BeamCommon</simpleValue></propertySet>
+          <baseName><simpleValue>FireRating</simpleValue></baseName>
+          <value><xs:restriction base="xs:string"><xs:pattern value="RF-[0-9]{2,3}"/></xs:restriction></value>
+        </property>
+      </requirements>
+    </specification>
+    <specification name="IDS-02 · Columnas de concreto" ifcVersion="IFC4" identifier="IDS-02" description="Las columnas deben tener material de concreto asignado y ser portantes.">
+      <applicability minOccurs="1" maxOccurs="unbounded">
+        <entity><name><simpleValue>IFCCOLUMN</simpleValue></name></entity>
+      </applicability>
+      <requirements>
+        <material cardinality="required">
+          <value><xs:restriction base="xs:string"><xs:pattern value="Concreto.*"/></xs:restriction></value>
+        </material>
+        <property dataType="IFCBOOLEAN" cardinality="required">
+          <propertySet><simpleValue>Pset_ColumnCommon</simpleValue></propertySet>
+          <baseName><simpleValue>LoadBearing</simpleValue></baseName>
+          <value><simpleValue>TRUE</simpleValue></value>
+        </property>
+      </requirements>
+    </specification>
+    <specification name="IDS-03 · Muros con datos de incendio" ifcVersion="IFC4" identifier="IDS-03" description="Los muros deben indicar resistencia al fuego y si son portantes.">
+      <applicability minOccurs="0" maxOccurs="unbounded">
+        <entity><name><simpleValue>IFCWALL</simpleValue></name></entity>
+      </applicability>
+      <requirements>
+        <property dataType="IFCLABEL" cardinality="required">
+          <propertySet><simpleValue>Pset_WallCommon</simpleValue></propertySet>
+          <baseName><simpleValue>FireRating</simpleValue></baseName>
+        </property>
+        <property dataType="IFCBOOLEAN" cardinality="required">
+          <propertySet><simpleValue>Pset_WallCommon</simpleValue></propertySet>
+          <baseName><simpleValue>LoadBearing</simpleValue></baseName>
+        </property>
+      </requirements>
+    </specification>
+    <specification name="IDS-04 · Instalaciones con disciplina y clasificación" ifcVersion="IFC4" identifier="IDS-04" description="Ductos y tuberías deben indicar su disciplina y estar clasificados con Uniclass 2015 (Pr_)." instructions="Disciplinas válidas: HVAC, Sanitarias, Eléctricas.">
+      <applicability minOccurs="1" maxOccurs="unbounded">
+        <entity><name><xs:restriction base="xs:string"><xs:enumeration value="IFCDUCTSEGMENT"/><xs:enumeration value="IFCPIPESEGMENT"/></xs:restriction></name></entity>
+      </applicability>
+      <requirements>
+        <property dataType="IFCLABEL" cardinality="required">
+          <propertySet><simpleValue>Pset_Coordinacion</simpleValue></propertySet>
+          <baseName><simpleValue>Disciplina</simpleValue></baseName>
+          <value><xs:restriction base="xs:string"><xs:enumeration value="HVAC"/><xs:enumeration value="Sanitarias"/><xs:enumeration value="Eléctricas"/></xs:restriction></value>
+        </property>
+        <classification cardinality="required">
+          <value><xs:restriction base="xs:string"><xs:pattern value="Pr_.*"/></xs:restriction></value>
+          <system><simpleValue>Uniclass 2015</simpleValue></system>
+        </classification>
+      </requirements>
+    </specification>
+    <specification name="IDS-05 · Elementos ubicados en un nivel" ifcVersion="IFC4" identifier="IDS-05" description="Todo elemento constructivo o de instalaciones debe estar contenido en un nivel y tener código de nombre.">
+      <applicability minOccurs="1" maxOccurs="unbounded">
+        <entity><name><xs:restriction base="xs:string"><xs:enumeration value="IFCBEAM"/><xs:enumeration value="IFCCOLUMN"/><xs:enumeration value="IFCWALL"/><xs:enumeration value="IFCDUCTSEGMENT"/><xs:enumeration value="IFCPIPESEGMENT"/></xs:restriction></name></entity>
+      </applicability>
+      <requirements>
+        <partOf relation="IFCRELCONTAINEDINSPATIALSTRUCTURE" cardinality="required">
+          <entity><name><simpleValue>IFCBUILDINGSTOREY</simpleValue></name></entity>
+        </partOf>
+        <attribute cardinality="required">
+          <name><simpleValue>Name</simpleValue></name>
+          <value><xs:restriction base="xs:string"><xs:pattern value="[A-Z]-[0-9]{2}"/></xs:restriction></value>
+        </attribute>
+      </requirements>
+    </specification>
+  </specifications>
+</ids>

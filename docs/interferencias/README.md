@@ -32,9 +32,9 @@ El botón «Recorrido» guía las 4 tareas de la prueba con coordinadores (T1 a 
 |---|---|---|
 | **Comparador** | US$ 90 / proyecto-mes, sin configuración | Comparación V01 frente a V02, visor 3D de cambios y reporte de cambios |
 | **Auditoría IA** | US$ 180 / proyecto-mes + US$ 250 de configuración | Comparador + reglas propuestas por IA desde el BEP y las actas, cumplimiento, retrocesos, avance y reporte de observaciones |
-| **Plus** | US$ 260 / proyecto-mes + US$ 250 de configuración | Auditoría IA + visor de interferencias, reglas de interferencia con IA, tablero y BCF 2.1 |
+| **Plus** | US$ 260 / proyecto-mes + US$ 250 de configuración | Auditoría IA + visor de interferencias, reglas de interferencia con IA, tablero y BCF 2.1 + validación IDS con IA |
 
-La demo de `index.html` tiene dos botones arriba: **Avance del modelo** (Comparador y Auditoría IA, pasos 1 a 5) e **Interferencias** (plan Plus), que abre el visor de interferencias dentro de la demo con los modelos ya cargados. La calculadora de la sección de planes usa el precio del plan elegido.
+La demo de `index.html` empieza con «¿Qué quiere revisar?» y tiene tres botones arriba: **Avance del modelo** (Comparador y Auditoría IA: Entrega → Alcance → Requisitos → Visor → Reporte), **Interferencias** (plan Plus: Reglas → Visor → Reporte) y **Validación IDS** (plan Plus: Requisitos → Visor → Reporte). La calculadora de la sección de planes usa el precio del plan elegido.
 
 ## Visor de interferencias (Plan Plus)
 
@@ -68,3 +68,14 @@ Los datos del caso de ejemplo son sintéticos. Las cifras de mercado citan su fu
 - Rainer Luice Murrieta Huaranca
 
 Diplomado Internacional IA en Ingeniería y Construcción, AECODE ED.03. Eje Startup, Hito 2.
+
+## Validación IDS (Plan Plus)
+
+Página `ids.html`, que la demo muestra en el botón **Validación IDS**; también funciona sola (`ids.html#ejemplo` abre el caso de ejemplo).
+
+- **1 · Requisitos**: cargue un archivo IDS 1.0 (`.ids`) o use **Validar IDS con IA**: la IA lee el BEP o las actas, propone las especificaciones con las clases y propiedades del modelo, las valida y permite descargar el `.ids` generado (esquema IDS 1.0 válido). Sin IA conectada, un asistente local por palabras clave hace una propuesta aproximada.
+- **2 · Visor**: elementos en verde (cumple), rojo (no cumple) o gris (no aplica); panel de especificaciones con barras de cumplimiento y la lista de elementos; ficha de cada elemento con el requisito que falla, el valor encontrado y todas sus propiedades.
+- **3 · Reporte**: tablero por especificación, clase IFC y requisitos con más fallas; tabla de fallas; **Resumen con IA** con acciones por disciplina; descargas de reporte HTML con capturas, **BCF 2.1** (un tema por elemento que no cumple) y CSV.
+- Facetas soportadas: clase (con tipo predefinido), atributo, propiedad (con tipo de dato, herencia del tipo y cantidades), clasificación, material y «parte de»; valores exactos, listas, patrones, rangos y longitudes; obligatoriedad requerida, opcional o prohibida.
+- Verificado contra **ifctester** (IfcOpenShell): mismos resultados en el caso de ejemplo.
+- Ejemplo en `ifc_prueba/`: `V02_ids.ifc` (modelo con propiedades, materiales y clasificación Uniclass 2015) y `requisitos_ejemplo.ids` (5 especificaciones; 6 elementos no cumplen).
