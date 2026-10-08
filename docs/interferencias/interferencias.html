@@ -54,6 +54,8 @@ p{margin:0}
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;letter-spacing:-.03em;font-size:15.5px;white-space:nowrap}
 .logo svg{width:26px;height:26px;flex:none}
 .crumb{color:var(--dim)}
+.chip.plus{color:var(--purple)}
+@media (max-width:760px){.chip.plus{display:none}}
 .top h1{font-size:15.5px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
 .files{display:flex;gap:6px;min-width:0;overflow:hidden}
 .files .chip{max-width:220px;overflow:hidden;text-overflow:ellipsis}
@@ -259,7 +261,7 @@ html.embed .top{height:50px}
 <body>
 <header class="top">
   <a class="logo" href="index.html" aria-label="AI model audit, volver al sitio"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="#0F1B2A" stroke="#F2883A" stroke-width="2"/><path d="M16 16 28 10M16 16 4 10M16 16v13" stroke="#2EC4D6" stroke-width="1.6"/></svg><span>AI model audit</span></a>
-  <span class="crumb">/</span><h1>Interferencias</h1>
+  <span class="crumb">/</span><h1>Interferencias</h1><span class="chip plus" title="Módulo incluido en el plan Plus">Plan Plus</span>
   <div class="files" id="files"></div>
   <div class="sp"></div>
   <button class="btn sm" id="btnLoad"><i class="ph ph-upload-simple"></i>Cargar IFC</button>
@@ -319,7 +321,7 @@ html.embed .top{height:50px}
 
     <div class="loader" id="loader">
       <div class="lcard">
-        <div class="cap" style="color:var(--acc)">Visor de interferencias</div>
+        <div class="cap" style="color:var(--purple)">Plan Plus · Visor de interferencias</div>
         <h2 style="margin-top:6px">Cargue los modelos a coordinar</h2>
         <p>La nueva entrega (V02) es obligatoria. Si agrega la versión anterior (V01), cada choque se marca como nuevo, activo o resuelto. Los archivos se leen en su navegador.</p>
         <div class="slots">

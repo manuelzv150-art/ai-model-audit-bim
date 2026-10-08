@@ -26,13 +26,23 @@ El botón «Recorrido» guía las 4 tareas de la prueba con coordinadores (T1 a 
 - Los elementos eliminados se muestran con la geometría de V01; los movidos, con un fantasma punteado de su posición anterior.
 - `ifc_prueba/` contiene dos IFC sintéticos con geometría para probar el visor.
 
-## Visor de interferencias
+## Planes
 
-Está **integrado en `index.html`** como **paso 6 «Interferencias»** de la demo: usa directamente los modelos cargados en el paso 1 si traen geometría, y se abre también desde la sección **Interferencias** de la página principal («Abrir el visor» o «Ver el caso de ejemplo»). `index.html` funciona solo, sin otros archivos. `interferencias.html` queda como versión independiente opcional del mismo visor.
+| Plan | Precio (hipótesis H4) | Incluye |
+|---|---|---|
+| **Comparador** | US$ 90 / proyecto-mes, sin configuración | Comparación V01 frente a V02, visor 3D de cambios y reporte de cambios |
+| **Auditoría IA** | US$ 180 / proyecto-mes + US$ 250 de configuración | Comparador + reglas propuestas por IA desde el BEP y las actas, cumplimiento, retrocesos, avance y reporte de observaciones |
+| **Plus** | US$ 260 / proyecto-mes + US$ 250 de configuración | Auditoría IA + visor de interferencias, reglas de interferencia con IA, tablero y BCF 2.1 |
+
+La demo de `index.html` tiene dos botones arriba: **Avance del modelo** (Comparador y Auditoría IA, pasos 1 a 5) e **Interferencias** (plan Plus), que abre el visor de interferencias dentro de la demo con los modelos ya cargados. La calculadora de la sección de planes usa el precio del plan elegido.
+
+## Visor de interferencias (Plan Plus)
+
+Página `interferencias.html`, que la demo muestra en el botón **Interferencias**; también funciona sola.
 
 - **Carga**: la nueva entrega (V02, obligatoria) y la anterior (V01, opcional). Botón **Usar caso de ejemplo** (o `interferencias.html#ejemplo`).
 - **Reglas** por disciplina (MEP, Estructura, Arquitectura) o por clase IFC (ductos, tuberías, vigas, muros, columnas…), activables y con holgura editable.
-- **Proponer reglas con IA** (mismo botón del paso 2, también en el encabezado del paso 6): la IA lee el **BEP y las actas** de la revisión (o un texto pegado) o su **matriz en CSV o Excel**, convierte cada requisito de interferencia en una regla y la deja «por aprobar». Nada se verifica sin aprobación. Sin IA conectada, un asistente local interpreta la matriz por palabras clave (aproximado). Ejemplo: `ifc_prueba/matriz_interferencias_ejemplo.xlsx` y `.csv` (también «Usar matriz de ejemplo» dentro del visor).
+- **Proponer reglas con IA** (mismo botón del paso 2 de la demo): la IA lee el **BEP y las actas** de la revisión (o un texto pegado) o su **matriz en CSV o Excel**, convierte cada requisito de interferencia en una regla y la deja «por aprobar». Nada se verifica sin aprobación. Sin IA conectada, un asistente local interpreta la matriz por palabras clave (aproximado). Ejemplo: `ifc_prueba/matriz_interferencias_ejemplo.xlsx` y `.csv` (también «Usar matriz de ejemplo» dentro del visor).
 - **Motor determinista**: filtro por cajas envolventes y prueba exacta entre triángulos. Un choque duro exige penetración mayor a 1 mm; también detecta elementos contenidos dentro de otros. La holgura se mide entre cajas envolventes (aproximada).
 - **V02 frente a V01**: cada interferencia queda como Nueva, Activa o Resuelta; los contadores también filtran.
 - **Visor**: color por estado o por disciplina; A en rojo y B en ámbar, visibles a través de muros; rayos X, aislar el par, corte, vistas, captura y pantalla completa; flechas ← → para recorrer.
