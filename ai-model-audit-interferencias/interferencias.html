@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Visor de interferencias</title>
+<meta name="description" content="AI model audit · Visor de interferencias: choques entre disciplinas sobre la geometría real del IFC, con exportación BCF 2.1 y reporte.">
+<meta name="theme-color" content="#08101A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 28 10v12L16 29 4 22V10z' fill='%2308101A' stroke='%23F2883A' stroke-width='2.5'/%3E%3Cpath d='M16 16 28 10M16 16 4 10M16 16v13' stroke='%232EC4D6' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+/* AI model audit · Visor de interferencias (módulo independiente). Mismo sistema visual del sitio: tema oscuro, acento naranja. */
+:root{
+  --bg:#08101A; --bg2:#0B1520; --s1:#0F1B2A; --s2:#132235; --s3:#192B42; --line:#1E2F47; --line2:#2A3F5E;
+  --fg:#E8EEF5; --fg2:#C3CFDC; --muted:#97A7BA; --dim:#71839A;
+  --acc:#F2883A; --acc2:#F7A262; --accInk:#1F1006;
+  --teal:#2EC4D6; --purple:#9888F6; --red:#EF5A50; --green:#38C48E; --amber:#EDAA45; --grey:#8C9AAC;
+  --r-pill:999px;
+  --sans:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'Geist Mono',ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+h1,h2,h3{margin:0;letter-spacing:-.025em;line-height:1.1}
+p{margin:0}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+.cap{font:500 11px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--dim)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;border-radius:var(--r-pill);padding:9px 16px;font-weight:600;font-size:14px;border:1px solid var(--line2);background:var(--s2);color:var(--fg);cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s,transform .15s}
+.btn:hover{background:var(--s3);border-color:#3b5579}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
+.btn.pri:hover{background:var(--acc2);border-color:var(--acc2)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:7px 13px;font-size:13px}
+.btn.xs{padding:4px 10px;font-size:12px}
+.btn .ph{font-size:1.15em}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 11.5px var(--mono);padding:2px 9px;border-radius:var(--r-pill);border:1px solid color-mix(in srgb,currentColor 45%,transparent);background:color-mix(in srgb,currentColor 10%,transparent);white-space:nowrap}
+.iconbtn{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;padding:5px;border-radius:8px;display:grid;place-items:center}
+.iconbtn:hover{color:var(--fg);background:var(--s2)}
+
+/* barra superior */
+.top{flex:none;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--line);background:rgba(8,16,26,.92);backdrop-filter:blur(10px);z-index:20}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;letter-spacing:-.03em;font-size:15.5px;white-space:nowrap}
+.logo svg{width:26px;height:26px;flex:none}
+.crumb{color:var(--dim)}
+.top h1{font-size:15.5px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
+.files{display:flex;gap:6px;min-width:0;overflow:hidden}
+.files .chip{max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.top .sp{flex:1}
+@media (max-width:760px){.top .crumb,.top .logo span,.files,#btnDemo span{display:none}}
+
+/* distribución */
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr)}
+.side{border-right:1px solid var(--line);background:var(--bg2);display:flex;flex-direction:column;min-height:0}
+.blk{padding:14px 16px;border-bottom:1px solid var(--line)}
+details.blk>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}
+details.blk>summary::-webkit-details-marker{display:none}
+details.blk>summary::after{content:'▾';color:var(--dim);font-size:12px}
+details.blk:not([open])>summary::after{content:'▸'}
+details.blk[open]>summary{margin-bottom:10px}
+.rules{display:flex;flex-direction:column;gap:6px}
+.rule{display:flex;align-items:center;gap:10px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;line-height:1.3;background:var(--s1)}
+.rule input[type=checkbox]{accent-color:var(--acc)}
+.rule b{display:block;font-weight:600}
+.rule small{color:var(--muted);font:500 11px var(--mono)}
+.rule .tol{margin-left:auto;display:flex;align-items:center;gap:4px;font:500 12px var(--mono);color:var(--muted)}
+.rule .tol input{width:48px;background:var(--bg2);border:1px solid var(--line2);border-radius:6px;padding:3px 5px}
+.btn.ia{background:rgba(152,136,246,.14);border-color:rgba(152,136,246,.55);color:#D9D2FF}
+.btn.ia:hover{background:rgba(152,136,246,.24)}
+.aibox{display:flex;flex-direction:column;gap:8px;padding-top:12px;padding-bottom:12px}
+.aibox>.btn{align-self:flex-start}
+.aimenu{border:1px solid rgba(152,136,246,.35);background:rgba(152,136,246,.06);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--fg2)}
+.aimenu .acts{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.aimenu textarea{display:block;width:100%;margin-top:8px;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:8px 10px;font:400 12.5px/1.5 var(--mono);color:var(--fg);resize:vertical}
+.aimenu textarea::placeholder{color:#7C8DA2}
+.aiflow{border:1px solid rgba(152,136,246,.35);background:rgba(152,136,246,.06);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted)}
+.aiflow .st{display:flex;gap:8px;align-items:center}
+.aiflow .st.done{color:var(--fg2)} .aiflow .st.done .ph{color:var(--green)}
+.aiflow .st.run .ph{color:var(--purple);animation:spin 1s linear infinite}
+.aiflow .note{border-top:1px solid rgba(152,136,246,.2);padding-top:6px;color:var(--dim)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rule.ia{border-color:rgba(152,136,246,.45)}
+.rule .iatag{display:block;margin-top:3px;font:500 10.5px var(--mono);color:var(--purple)}
+.rule .amb{display:block;margin-top:3px;font-size:11.5px;color:var(--amber)}
+.rule input:disabled+span{opacity:.6}
+#apAll{align-self:flex-start;margin-bottom:2px;border-color:rgba(152,136,246,.55);color:#D9D2FF;background:rgba(152,136,246,.14)}
+html.embed .top .logo,html.embed .top .crumb,html.embed #btnDemo{display:none}
+html.embed .top{height:50px}
+.runrow{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.prog{font:500 12px var(--mono);color:var(--muted)}
+.counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.count{border-radius:12px;background:var(--s1);border:1px solid var(--line);border-top:3px solid var(--c);padding:9px 10px;cursor:pointer;text-align:left;color:var(--fg)}
+.count[aria-pressed=true]{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,var(--s1))}
+.count b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.count span{font-size:12px;color:var(--muted)}
+.exports{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.listblk{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 16px 0;border-bottom:0}
+.filters{display:flex;gap:6px;margin-bottom:8px}
+.filters input,.filters select{min-width:0;background:var(--s1);border:1px solid var(--line2);border-radius:9px;padding:7px 9px;font-size:13px}
+.filters input{flex:1}
+.filters input::placeholder{color:#7C8DA2}
+.clist{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:4px;padding-bottom:14px}
+.ci{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:8px 9px;cursor:pointer;color:var(--fg)}
+.ci:hover{background:var(--s1)}
+.ci[aria-current=true]{background:var(--s1);border-color:var(--acc)}
+.ci .dot{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.ci .t{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci small{grid-column:2/4;font:400 11.5px var(--mono);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci .n{font:500 11px var(--mono);color:var(--muted)}
+.none{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 12px;color:var(--muted);font-size:13.5px}
+.none .ph{font-size:30px;color:var(--dim)}
+
+/* escenario 3D */
+.stage{position:relative;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#132339 0%,#0A1320 72%)}
+.stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
+.ov{position:absolute;z-index:3}
+.glass{background:rgba(8,16,26,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px}
+.tbl{left:12px;top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;padding:3px;border-radius:var(--r-pill)}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 12px var(--mono);letter-spacing:.04em;padding:6px 12px;border-radius:var(--r-pill);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.tools{right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px;padding:5px;border-radius:14px}
+.tools button{width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;color:var(--muted);border-radius:9px;cursor:pointer;font-size:17px}
+.tools button:hover{background:var(--s2);color:var(--fg)}
+.tools button[aria-pressed=true]{color:var(--acc);background:rgba(242,136,58,.13)}
+.tools .sep{height:1px;background:var(--line);margin:3px 5px}
+.cut{right:60px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:10px;padding:8px 12px;font:500 12px var(--mono);color:var(--muted)}
+.cut input{width:120px;accent-color:var(--acc)}
+.legend{left:12px;bottom:12px;display:flex;gap:12px;flex-wrap:wrap;padding:7px 11px;font:500 12px var(--mono);color:var(--muted);pointer-events:none}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.badge{right:12px;top:12px;padding:6px 10px;font:500 12px var(--mono);color:var(--muted);display:flex;gap:7px;align-items:center;pointer-events:none}
+.badge .ph{color:var(--green)}
+.hint{left:14px;bottom:54px;max-width:calc(100% - 460px);overflow:hidden;text-overflow:ellipsis;font:400 11.5px var(--mono);color:var(--dim);pointer-events:none;white-space:nowrap}
+.tip{position:absolute;z-index:4;pointer-events:none;background:rgba(9,17,28,.95);border:1px solid var(--line2);border-radius:9px;padding:6px 9px;font-size:12.5px;white-space:nowrap;transform:translate(14px,14px)}
+
+/* ficha de la interferencia */
+.det{right:60px;bottom:12px;width:min(370px,calc(100% - 84px));max-height:calc(100% - 80px);overflow:auto;padding:14px 16px;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.det .hd{display:flex;align-items:center;gap:6px}
+.det .hd .cap{flex:1}
+.det h2{font-size:18px;font-weight:600;margin:6px 0 4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.det dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px;margin:8px 0}
+.det dt{color:var(--muted)} .det dd{margin:0}
+.el{border-left:3px solid var(--c);background:var(--s1);border-radius:10px;padding:8px 11px;margin-top:7px;font-size:13.5px}
+.el b{display:block}
+.el .mono{font-size:11.5px;color:var(--muted);word-break:break-all}
+.meta{display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.meta select,.meta textarea{display:block;width:100%;margin-top:4px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:6px 9px;font-size:13px;color:var(--fg);resize:vertical}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.det.min .body{display:none}
+
+/* carga de modelos */
+.loader{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(8,16,26,.6);backdrop-filter:blur(6px)}
+.lcard{width:min(720px,100%);max-height:100%;overflow:auto;border-radius:22px;border:1px solid var(--line2);background:radial-gradient(90% 120% at 0% 0%,rgba(242,136,58,.12),transparent 55%),var(--s1);padding:26px;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.lcard h2{font-size:26px;font-weight:600;letter-spacing:-.035em}
+.lcard>p{color:var(--muted);margin-top:6px;max-width:58ch}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 16px}
+.slot{border:1.5px dashed var(--line2);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:150px;cursor:pointer;transition:border-color .2s,background .2s}
+.slot:hover,.slot.over{border-color:var(--acc);background:rgba(242,136,58,.05)}
+.slot.done{border-style:solid;border-color:rgba(56,196,142,.5)}
+.slot .t{display:flex;justify-content:space-between;align-items:center}
+.slot .pick{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--muted);font-size:13.5px}
+.slot .pick .ph{font-size:28px;color:var(--dim)}
+.slot.done .pick .ph{color:var(--green)}
+.slot .fname{color:var(--fg);font-weight:600;word-break:break-all}
+.lacts{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lacts .sp{flex:1}
+.lnote{font-size:12.5px;color:var(--dim);margin-top:14px}
+.lstat{font:500 12.5px var(--mono);color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--bg);font-weight:500;padding:9px 15px;border-radius:var(--r-pill);font-size:13.5px;box-shadow:0 14px 40px rgba(0,0,0,.4);max-width:calc(100% - 32px)}
+
+@media (max-width:900px){
+  body{overflow:auto;height:auto}
+  .layout{grid-template-columns:minmax(0,1fr);flex:none}
+  .side,.stage{min-width:0}
+  .stage{height:62vh;min-height:380px;order:-1}
+  .side{border-right:0;border-top:1px solid var(--line)}
+  .clist{max-height:60vh}
+  .tools{top:auto;bottom:56px;transform:none;flex-direction:row;right:12px;max-width:calc(100% - 24px);flex-wrap:wrap}
+  .tools .sep{width:1px;height:auto;margin:5px 2px}
+  .cut{top:auto;bottom:104px;right:12px;transform:none}
+  .tools{top:56px;bottom:auto;left:12px;right:auto}
+  .cut{top:104px;bottom:auto;left:12px;right:auto}
+  .det{left:8px;right:8px;bottom:8px;width:auto;max-height:52%}
+  .hint,.badge,.legend{display:none}
+  .slots{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* tablero */
+.dash{position:absolute;inset:0;z-index:5;overflow:auto;padding:64px 18px 22px;background:radial-gradient(90% 60% at 50% 0%,#101D2E 0%,var(--bg) 70%)}
+.stage.dashon .tbl{z-index:7}
+.stage.dashon .tools,.stage.dashon .legend,.stage.dashon .hint,.stage.dashon .det,.stage.dashon .badge,.stage.dashon .cut,.stage.dashon #colorSeg{display:none!important}
+.seg button .ph{font-size:13px;vertical-align:-1px}
+.dfil{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;margin-bottom:14px}
+.dfil label{display:flex;flex-direction:column;gap:3px;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.dfil select{min-width:120px;max-width:220px;background:var(--s1);border:1px solid var(--line2);border-radius:9px;padding:6px 8px;font:400 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--fg)}
+.dsum{margin-left:auto;font:500 12px var(--mono);color:var(--muted);align-self:center}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.kp{border-radius:16px;padding:13px 15px;color:#fff;display:flex;flex-direction:column;gap:2px;min-width:0;border:1px solid rgba(255,255,255,.06);background:linear-gradient(135deg,var(--a),var(--b))}
+.kp span{font-size:13px;color:rgba(255,255,255,.85)}
+.kp b{font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kp small{font-size:11.5px;color:rgba(255,255,255,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k-acc{--a:#7A3B12;--b:#C2621F}.k-red{--a:#6E1E1B;--b:#B23A33}.k-amb{--a:#6B4A10;--b:#A97416}.k-grn{--a:#145239;--b:#1F8A5D}
+.k-blu{--a:#1B3E73;--b:#2A66B8}.k-blu2{--a:#183356;--b:#25538F}.k-pur{--a:#3A2F78;--b:#5B4BC0}.k-teal{--a:#0F4B55;--b:#1A7E8C}
+.dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.dc{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-width:0}
+.dc.w2{grid-column:span 2}
+.dc h3{font-size:14.5px;font-weight:600;letter-spacing:-.01em;margin-bottom:10px}
+.donut{display:flex;align-items:center;gap:14px}
+.donut svg{width:132px;height:132px;flex:none}
+.donut .seg{fill:none;cursor:pointer;transition:opacity .15s}
+.donut svg:hover .seg{opacity:.55}.donut svg .seg:hover{opacity:1}
+.donut .dv{font:600 24px var(--sans);fill:var(--fg)}
+.donut .dl{font:500 10px var(--mono);fill:var(--muted)}
+.dleg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.dleg li{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:7px;align-items:center;font-size:12.5px;color:var(--fg2);cursor:pointer;border-radius:6px;padding:2px 4px}
+.dleg li:hover{background:var(--s2)}
+.dleg i{width:10px;height:10px;border-radius:3px}
+.dleg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dleg b{font-variant-numeric:tabular-nums;color:var(--fg)}
+.dleg em{font:400 11px var(--mono);color:var(--muted);font-style:normal;min-width:32px;text-align:right}
+.tex{background-image:repeating-linear-gradient(135deg,rgba(15,27,42,.55) 0 2px,transparent 2px 6px)!important}
+.hb{display:flex;flex-direction:column;gap:7px}
+.hr{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr) 28px;gap:10px;align-items:center;font-size:12.5px;cursor:pointer;border-radius:6px;padding:1px 2px}
+.hr:hover{background:var(--s2)}
+.hl{color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ht{display:flex;gap:2px;height:12px}
+.ht i{display:block;height:100%;min-width:3px}
+.ht i:first-child{border-radius:4px 0 0 4px}.ht i:last-child{border-radius:0 4px 4px 0}.ht i:only-child{border-radius:4px}
+.hr b{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
+.evo{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0 6px}
+.evo div{display:flex;flex-direction:column;align-items:center}
+.evo span{font:500 11px var(--mono);color:var(--muted)}
+.evo b{font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.evo small{font-size:11.5px;color:var(--dim)}
+.evo .ph{font-size:22px;color:var(--dim)}
+.evtxt{font-size:12.5px;color:var(--fg2);text-align:center}
+.dempty,.dnote{font-size:12.5px;color:var(--dim)}
+.dnote{margin-top:8px}
+.dlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font:500 12px var(--mono);color:var(--fg2)}
+.dlegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.dtip{position:fixed;z-index:70;pointer-events:none;background:rgba(9,17,28,.96);border:1px solid var(--line2);border-radius:8px;padding:5px 9px;font-size:12.5px;color:var(--fg);white-space:nowrap}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dgrid{grid-template-columns:1fr 1fr}.dc.w2{grid-column:1/-1}}
+@media (max-width:900px){.stage.dashon{height:auto;min-height:62vh}.stage.dashon .dash{position:relative;inset:auto}.dgrid{grid-template-columns:1fr}.dsum{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="index.html" aria-label="AI model audit, volver al sitio"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="#0F1B2A" stroke="#F2883A" stroke-width="2"/><path d="M16 16 28 10M16 16 4 10M16 16v13" stroke="#2EC4D6" stroke-width="1.6"/></svg><span>AI model audit</span></a>
+  <span class="crumb">/</span><h1>Interferencias</h1>
+  <div class="files" id="files"></div>
+  <div class="sp"></div>
+  <button class="btn sm" id="btnLoad"><i class="ph ph-upload-simple"></i>Cargar IFC</button>
+  <a class="btn ghost sm" id="btnDemo" href="index.html#app"><i class="ph ph-arrow-square-out"></i><span>Revisión completa</span></a>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Panel de interferencias">
+    <details class="blk" id="rulesBox" open>
+      <summary><span class="cap">Reglas de interferencia</span><span class="mono muted" style="font-size:12px" id="rulesSum"></span></summary>
+      <div class="rules" id="rules"></div>
+      <div class="runrow"><button class="btn pri sm" id="run"><i class="ph ph-scan"></i>Detectar</button><span class="prog" id="prog"></span></div>
+    </details>
+      <div class="blk aibox">
+      <button class="btn sm ia" id="aiBtn" aria-expanded="false" aria-controls="aiMenu"><i class="ph ph-sparkle"></i>Proponer reglas con IA</button>
+      <div class="aimenu" id="aiMenu" hidden>
+        <p>La IA convierte sus acuerdos en reglas de interferencia. Usted las aprueba antes de detectar.</p>
+        <label class="sr" for="aiText">Texto del BEP o las actas</label>
+        <textarea id="aiText" rows="4" placeholder="Pegue el texto del BEP o las actas. Ej.: CI-01. Los ductos no deberán atravesar vigas y mantendrán 5 cm libres."></textarea>
+        <div class="acts"><button class="btn xs ia" id="aiFromText"><i class="ph ph-sparkle"></i>Proponer desde el texto</button><label class="btn xs" for="fM"><i class="ph ph-file-arrow-up"></i>Cargar CSV o Excel</label></div>
+        <div class="acts"><button class="btn xs ghost" id="aiSampleTxt">Texto de ejemplo</button><button class="btn xs ghost" id="aiSample">Matriz de ejemplo</button><button class="btn xs ghost" id="aiDl"><i class="ph ph-download-simple"></i>Descargar matriz</button></div>
+      </div>
+      <input class="sr" type="file" id="fM" accept=".csv,.txt,.xlsx,.xls">
+      <div class="aiflow" id="aiFlow" hidden aria-live="polite"></div>
+    </div>
+    <div class="blk" id="sumBox">
+      <div class="counts" id="counts"></div>
+      <div class="exports"><button class="btn xs" id="xBcf" disabled><i class="ph ph-package"></i>BCF</button><button class="btn xs" id="xRep" disabled><i class="ph ph-file-text"></i>Reporte</button><button class="btn xs" id="xCsv" disabled><i class="ph ph-file-csv"></i>CSV</button></div>
+    </div>
+    <div class="blk listblk">
+      <div class="filters"><label class="sr" for="q">Buscar</label><input id="q" type="text" placeholder="Buscar elemento o N.°"><label class="sr" for="fLv">Nivel</label><select id="fLv"><option value="">Todos los niveles</option></select></div>
+      <div class="clist" id="clist" role="listbox" aria-label="Interferencias"></div>
+    </div>
+  </aside>
+
+  <main class="stage" id="stage">
+    <div class="ov tbl"><div class="seg glass" role="group" aria-label="Vista"><button id="vV" aria-pressed="true"><i class="ph ph-cube"></i> VISOR 3D</button><button id="vT" aria-pressed="false"><i class="ph ph-chart-donut"></i> TABLERO</button></div><div class="seg glass" id="colorSeg" role="group" aria-label="Color del modelo"><button id="mSt" aria-pressed="true">ESTADO</button><button id="mDi" aria-pressed="false">DISCIPLINA</button></div></div>
+    <div class="ov badge glass" id="badge" hidden></div>
+    <div class="ov tools glass" role="toolbar" aria-label="Herramientas del visor">
+      <button data-v="iso" title="Vista 3D" aria-label="Vista 3D"><i class="ph ph-cube"></i></button>
+      <button data-v="top" title="Planta" aria-label="Planta"><i class="ph ph-square"></i></button>
+      <button data-v="front" title="Elevación" aria-label="Elevación"><i class="ph ph-buildings"></i></button>
+      <button id="tFit" title="Encuadrar la interferencia" aria-label="Encuadrar"><i class="ph ph-crosshair"></i></button>
+      <span class="sep"></span>
+      <button id="tIso" aria-pressed="false" title="Aislar: solo los dos elementos" aria-label="Aislar"><i class="ph ph-selection-foreground"></i></button>
+      <button id="tXray" aria-pressed="true" title="Rayos X: atenúa el resto" aria-label="Rayos X"><i class="ph ph-ghost"></i></button>
+      <button id="tCut" aria-pressed="false" title="Corte horizontal" aria-label="Corte"><i class="ph ph-scissors"></i></button>
+      <span class="sep"></span>
+      <button id="tShot" title="Descargar captura" aria-label="Captura"><i class="ph ph-camera"></i></button>
+      <button id="tFull" title="Pantalla completa" aria-label="Pantalla completa"><i class="ph ph-arrows-out"></i></button>
+    </div>
+    <div class="ov cut glass" id="cutBox" hidden><label for="cutR">Corte</label><input type="range" id="cutR" min="0" max="100" value="60"><output id="cutO">60%</output></div>
+    <div class="ov legend glass" id="legend"></div>
+    <div class="ov hint" id="hint">Arrastre: girar · clic der.: desplazar · rueda: zoom · ← →: anterior / siguiente</div>
+    <section class="ov det glass" id="det" hidden aria-live="polite"></section>
+    <section class="dash" id="dash" hidden aria-label="Tablero del reporte de interferencias"></section>
+
+    <div class="loader" id="loader">
+      <div class="lcard">
+        <div class="cap" style="color:var(--acc)">Visor de interferencias</div>
+        <h2 style="margin-top:6px">Cargue los modelos a coordinar</h2>
+        <p>La nueva entrega (V02) es obligatoria. Si agrega la versión anterior (V01), cada choque se marca como nuevo, activo o resuelto. Los archivos se leen en su navegador.</p>
+        <div class="slots">
+          <label class="slot" id="s2" for="f2"><div class="t"><span class="chip" style="color:var(--teal)">Ahora · V02</span><span class="cap">obligatorio</span></div><div class="pick"><i class="ph ph-cube"></i><span id="n2"><u>Elija</u> o arrastre el IFC</span></div></label>
+          <label class="slot" id="s1" for="f1"><div class="t"><span class="chip" style="color:var(--grey)">Antes · V01</span><span class="cap">opcional</span></div><div class="pick"><i class="ph ph-cube"></i><span id="n1"><u>Elija</u> o arrastre el IFC</span></div></label>
+        </div>
+        <input class="sr" type="file" id="f2" accept=".ifc,.IFC"><input class="sr" type="file" id="f1" accept=".ifc,.IFC">
+        <div class="lacts"><button class="btn pri" id="go" disabled><i class="ph ph-scan"></i>Analizar</button><button class="btn" id="sample"><i class="ph ph-buildings"></i>Usar caso de ejemplo</button><span class="sp"></span><span class="lstat" id="lstat"></span><button class="btn ghost sm" id="lclose" hidden>Cerrar</button></div>
+        <p class="lnote">Requiere IFC con geometría (IFC2x3 o IFC4). El motor de geometría y la exportación BCF se descargan al usarlos, por lo que se necesita conexión.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* Caso de ejemplo sintético (estructura, muro y MEP; no corresponde a un proyecto real) */
+const SAMPLE={"v1": "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition[DesignTransferView]'),'2;1');\nFILE_NAME('/dev/null','2026-10-08T08:43:48-05:00',(''),(''),'IfcOpenShell 0.9.0','IfcOpenShell 0.9.0','Nobody');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n#1=IFCPROJECT('36rzbrFcbCXRV6gm4vsp_Q',$,'Edificio MEP',$,$,$,$,(#10),#5);\n#2=IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);\n#3=IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.);\n#4=IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.);\n#5=IFCUNITASSIGNMENT((#2,#3,#4));\n#6=IFCCARTESIANPOINT((0.,0.,0.));\n#7=IFCDIRECTION((0.,0.,1.));\n#8=IFCDIRECTION((1.,0.,0.));\n#9=IFCAXIS2PLACEMENT3D(#6,#7,#8);\n#10=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-05,#9,$);\n#11=IFCGEOMETRICREPRESENTATIONSUBCONTEXT('Body','Model',*,*,*,*,#10,$,.MODEL_VIEW.,$);\n#12=IFCSITE('31G_hODy56VO$D0MFdSjWX',$,'Sitio',$,$,$,$,$,$,$,$,$,$,$);\n#13=IFCRELAGGREGATES('3C1myBuT11WR$E8$8TAFKs',$,$,$,#1,(#12));\n#14=IFCBUILDING('1$HsdJNqj4lAi1Nqs2Haie',$,'Edificio',$,$,$,$,$,$,$,$,$);\n#15=IFCRELAGGREGATES('0ufett1zv0s9HsVgthBzBb',$,$,$,#12,(#14));\n#16=IFCBUILDINGSTOREY('1TTHO$AQ9B88HKTYi4iY6b',$,'Nivel 1',$,$,$,$,$,$,$);\n#17=IFCRELAGGREGATES('32xx7QE1P1lA6yPhXs0GgR',$,$,$,#14,(#16));\n#18=IFCCOLUMN('3VqZgg1DPBa9CqVjo9j$Ds',$,'C-01',$,$,#40,#34,$,$);\n#24=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#25=IFCINDEXEDPOLYCURVE(#24,$,.F.);\n#26=IFCDIRECTION((0.,0.,1.));\n#27=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#25);\n#28=IFCCARTESIANPOINT((0.,0.,0.));\n#29=IFCDIRECTION((0.,0.,1.));\n#30=IFCDIRECTION((1.,0.,0.));\n#31=IFCAXIS2PLACEMENT3D(#28,#29,#30);\n#32=IFCEXTRUDEDAREASOLID(#27,#31,#26,3000.);\n#33=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#32));\n#34=IFCPRODUCTDEFINITIONSHAPE($,$,(#33));\n#35=IFCRELCONTAINEDINSPATIALSTRUCTURE('3FI9ydBMjAMuWYr8K1o4nQ',$,$,$,(#94,#244,#69,#219,#44,#194,#169,#18,#319,#144,#294,#119,#269),#16);\n#36=IFCCARTESIANPOINT((-200.,-200.,0.));\n#37=IFCDIRECTION((0.,0.,1.));\n#38=IFCDIRECTION((1.,0.,0.));\n#39=IFCAXIS2PLACEMENT3D(#36,#37,#38);\n#40=IFCLOCALPLACEMENT($,#39);\n#41=IFCPROPERTYSET('0$9_sDU81DyvJyCM3UTZQ4',$,'Pset_Coordinacion',$,(#43));\n#42=IFCRELDEFINESBYPROPERTIES('1oSY573FzFNwuTz0Tvy9dR',$,$,$,(#18),#41);\n#43=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#44=IFCCOLUMN('1jjWBEqvb3zgndKdBhD1na',$,'C-02',$,$,#65,#60,$,$);\n#50=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#51=IFCINDEXEDPOLYCURVE(#50,$,.F.);\n#52=IFCDIRECTION((0.,0.,1.));\n#53=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#51);\n#54=IFCCARTESIANPOINT((0.,0.,0.));\n#55=IFCDIRECTION((0.,0.,1.));\n#56=IFCDIRECTION((1.,0.,0.));\n#57=IFCAXIS2PLACEMENT3D(#54,#55,#56);\n#58=IFCEXTRUDEDAREASOLID(#53,#57,#52,3000.);\n#59=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#58));\n#60=IFCPRODUCTDEFINITIONSHAPE($,$,(#59));\n#61=IFCCARTESIANPOINT((7800.,-200.,0.));\n#62=IFCDIRECTION((0.,0.,1.));\n#63=IFCDIRECTION((1.,0.,0.));\n#64=IFCAXIS2PLACEMENT3D(#61,#62,#63);\n#65=IFCLOCALPLACEMENT($,#64);\n#66=IFCPROPERTYSET('1pPVUASAb8XgHaxFh6OqJx',$,'Pset_Coordinacion',$,(#68));\n#67=IFCRELDEFINESBYPROPERTIES('31IeGZFFLDse8xx8yQ8JYT',$,$,$,(#44),#66);\n#68=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#69=IFCCOLUMN('0wXFyoWCf5YfA0in$qwKpZ',$,'C-03',$,$,#90,#85,$,$);\n#75=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#76=IFCINDEXEDPOLYCURVE(#75,$,.F.);\n#77=IFCDIRECTION((0.,0.,1.));\n#78=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#76);\n#79=IFCCARTESIANPOINT((0.,0.,0.));\n#80=IFCDIRECTION((0.,0.,1.));\n#81=IFCDIRECTION((1.,0.,0.));\n#82=IFCAXIS2PLACEMENT3D(#79,#80,#81);\n#83=IFCEXTRUDEDAREASOLID(#78,#82,#77,3000.);\n#84=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#83));\n#85=IFCPRODUCTDEFINITIONSHAPE($,$,(#84));\n#86=IFCCARTESIANPOINT((-200.,5800.,0.));\n#87=IFCDIRECTION((0.,0.,1.));\n#88=IFCDIRECTION((1.,0.,0.));\n#89=IFCAXIS2PLACEMENT3D(#86,#87,#88);\n#90=IFCLOCALPLACEMENT($,#89);\n#91=IFCPROPERTYSET('3lqxe26LL3aAvdyTfJEnGJ',$,'Pset_Coordinacion',$,(#93));\n#92=IFCRELDEFINESBYPROPERTIES('1YCjzbEIjADOHZEzbm3TuG',$,$,$,(#69),#91);\n#93=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#94=IFCCOLUMN('3u$mgUMAb8TQ5Zo$0yynu4',$,'C-04',$,$,#115,#110,$,$);\n#100=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#101=IFCINDEXEDPOLYCURVE(#100,$,.F.);\n#102=IFCDIRECTION((0.,0.,1.));\n#103=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#101);\n#104=IFCCARTESIANPOINT((0.,0.,0.));\n#105=IFCDIRECTION((0.,0.,1.));\n#106=IFCDIRECTION((1.,0.,0.));\n#107=IFCAXIS2PLACEMENT3D(#104,#105,#106);\n#108=IFCEXTRUDEDAREASOLID(#103,#107,#102,3000.);\n#109=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#108));\n#110=IFCPRODUCTDEFINITIONSHAPE($,$,(#109));\n#111=IFCCARTESIANPOINT((7800.,5800.,0.));\n#112=IFCDIRECTION((0.,0.,1.));\n#113=IFCDIRECTION((1.,0.,0.));\n#114=IFCAXIS2PLACEMENT3D(#111,#112,#113);\n#115=IFCLOCALPLACEMENT($,#114);\n#116=IFCPROPERTYSET('1zDX0_Ke17Svx$dJQ7R1kD',$,'Pset_Coordinacion',$,(#118));\n#117=IFCRELDEFINESBYPROPERTIES('33H2JIUUX1_Qd_KErtStgF',$,$,$,(#94),#116);\n#118=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#119=IFCBEAM('0QLOTk7Mr5_8EgIa1880lC',$,'V-01',$,$,#140,#135,$,$);\n#125=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(8000.,300.),(8000.,0.),(0.,0.)));\n#126=IFCINDEXEDPOLYCURVE(#125,$,.F.);\n#127=IFCDIRECTION((0.,0.,1.));\n#128=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#126);\n#129=IFCCARTESIANPOINT((0.,0.,0.));\n#130=IFCDIRECTION((0.,0.,1.));\n#131=IFCDIRECTION((1.,0.,0.));\n#132=IFCAXIS2PLACEMENT3D(#129,#130,#131);\n#133=IFCEXTRUDEDAREASOLID(#128,#132,#127,500.);\n#134=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#133));\n#135=IFCPRODUCTDEFINITIONSHAPE($,$,(#134));\n#136=IFCCARTESIANPOINT((0.,-150.,2500.));\n#137=IFCDIRECTION((0.,0.,1.));\n#138=IFCDIRECTION((1.,0.,0.));\n#139=IFCAXIS2PLACEMENT3D(#136,#137,#138);\n#140=IFCLOCALPLACEMENT($,#139);\n#141=IFCPROPERTYSET('1HI1CDPIf2$hasQscEyh7v',$,'Pset_Coordinacion',$,(#143));\n#142=IFCRELDEFINESBYPROPERTIES('3d6Ro9bQr2kOXc9a$GHaLl',$,$,$,(#119),#141);\n#143=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#144=IFCBEAM('1uiXkM6B18YwYOTUdlBirL',$,'V-02',$,$,#165,#160,$,$);\n#150=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(8000.,300.),(8000.,0.),(0.,0.)));\n#151=IFCINDEXEDPOLYCURVE(#150,$,.F.);\n#152=IFCDIRECTION((0.,0.,1.));\n#153=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#151);\n#154=IFCCARTESIANPOINT((0.,0.,0.));\n#155=IFCDIRECTION((0.,0.,1.));\n#156=IFCDIRECTION((1.,0.,0.));\n#157=IFCAXIS2PLACEMENT3D(#154,#155,#156);\n#158=IFCEXTRUDEDAREASOLID(#153,#157,#152,500.);\n#159=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#158));\n#160=IFCPRODUCTDEFINITIONSHAPE($,$,(#159));\n#161=IFCCARTESIANPOINT((0.,5849.999999999999,2500.));\n#162=IFCDIRECTION((0.,0.,1.));\n#163=IFCDIRECTION((1.,0.,0.));\n#164=IFCAXIS2PLACEMENT3D(#161,#162,#163);\n#165=IFCLOCALPLACEMENT($,#164);\n#166=IFCPROPERTYSET('2XAQYWDlLBvO5OA1JieCXZ',$,'Pset_Coordinacion',$,(#168));\n#167=IFCRELDEFINESBYPROPERTIES('1$knGYkTrEvfKZwBy3Ylmq',$,$,$,(#144),#166);\n#168=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#169=IFCBEAM('1O4hnbXSH00eD4W9T9Ming',$,'V-03',$,$,#190,#185,$,$);\n#175=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,6000.),(300.,6000.),(300.,0.),(0.,0.)));\n#176=IFCINDEXEDPOLYCURVE(#175,$,.F.);\n#177=IFCDIRECTION((0.,0.,1.));\n#178=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#176);\n#179=IFCCARTESIANPOINT((0.,0.,0.));\n#180=IFCDIRECTION((0.,0.,1.));\n#181=IFCDIRECTION((1.,0.,0.));\n#182=IFCAXIS2PLACEMENT3D(#179,#180,#181);\n#183=IFCEXTRUDEDAREASOLID(#178,#182,#177,500.);\n#184=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#183));\n#185=IFCPRODUCTDEFINITIONSHAPE($,$,(#184));\n#186=IFCCARTESIANPOINT((-150.,0.,2500.));\n#187=IFCDIRECTION((0.,0.,1.));\n#188=IFCDIRECTION((1.,0.,0.));\n#189=IFCAXIS2PLACEMENT3D(#186,#187,#188);\n#190=IFCLOCALPLACEMENT($,#189);\n#191=IFCPROPERTYSET('0j0iV0yOf9fgmcaIGT$MRr',$,'Pset_Coordinacion',$,(#193));\n#192=IFCRELDEFINESBYPROPERTIES('1HZTXJ_3z8Iwtyd5wu_t10',$,$,$,(#169),#191);\n#193=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#194=IFCBEAM('2Bn7DsO011eAaGMPCpGMU8',$,'V-04',$,$,#215,#210,$,$);\n#200=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,6000.),(300.,6000.),(300.,0.),(0.,0.)));\n#201=IFCINDEXEDPOLYCURVE(#200,$,.F.);\n#202=IFCDIRECTION((0.,0.,1.));\n#203=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#201);\n#204=IFCCARTESIANPOINT((0.,0.,0.));\n#205=IFCDIRECTION((0.,0.,1.));\n#206=IFCDIRECTION((1.,0.,0.));\n#207=IFCAXIS2PLACEMENT3D(#204,#205,#206);\n#208=IFCEXTRUDEDAREASOLID(#203,#207,#202,500.);\n#209=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#208));\n#210=IFCPRODUCTDEFINITIONSHAPE($,$,(#209));\n#211=IFCCARTESIANPOINT((7849.999999999999,0.,2500.));\n#212=IFCDIRECTION((0.,0.,1.));\n#213=IFCDIRECTION((1.,0.,0.));\n#214=IFCAXIS2PLACEMENT3D(#211,#212,#213);\n#215=IFCLOCALPLACEMENT($,#214);\n#216=IFCPROPERTYSET('2ClYAgU756YeR55CME$m18',$,'Pset_Coordinacion',$,(#218));\n#217=IFCRELDEFINESBYPROPERTIES('2gzRTZDh9B3g6UY_FJR0Yo',$,$,$,(#194),#216);\n#218=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#219=IFCWALL('0vl43O6jb21Q5agI05t7LU',$,'M-01',$,$,#240,#235,$,$);\n#225=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,150.),(7599.999999999999,150.),(7599.999999999999,0.),(0.,0.)));\n#226=IFCINDEXEDPOLYCURVE(#225,$,.F.);\n#227=IFCDIRECTION((0.,0.,1.));\n#228=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#226);\n#229=IFCCARTESIANPOINT((0.,0.,0.));\n#230=IFCDIRECTION((0.,0.,1.));\n#231=IFCDIRECTION((1.,0.,0.));\n#232=IFCAXIS2PLACEMENT3D(#229,#230,#231);\n#233=IFCEXTRUDEDAREASOLID(#228,#232,#227,2500.);\n#234=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#233));\n#235=IFCPRODUCTDEFINITIONSHAPE($,$,(#234));\n#236=IFCCARTESIANPOINT((200.,2924.9999999999995,0.));\n#237=IFCDIRECTION((0.,0.,1.));\n#238=IFCDIRECTION((1.,0.,0.));\n#239=IFCAXIS2PLACEMENT3D(#236,#237,#238);\n#240=IFCLOCALPLACEMENT($,#239);\n#241=IFCPROPERTYSET('066_bFWXzCgOVtOtQKsHKB',$,'Pset_Coordinacion',$,(#243));\n#242=IFCRELDEFINESBYPROPERTIES('0FZn5jpO5D3x44kqQPN6Wb',$,$,$,(#219),#241);\n#243=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Arquitectura'),$);\n#244=IFCDUCTSEGMENT('12L6xxuDnE8x2ZbXhHww5O',$,'D-01',$,$,#265,#260,$,$);\n#250=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,7200.),(400.,7200.),(400.,0.),(0.,0.)));\n#251=IFCINDEXEDPOLYCURVE(#250,$,.F.);\n#252=IFCDIRECTION((0.,0.,1.));\n#253=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#251);\n#254=IFCCARTESIANPOINT((0.,0.,0.));\n#255=IFCDIRECTION((0.,0.,1.));\n#256=IFCDIRECTION((1.,0.,0.));\n#257=IFCAXIS2PLACEMENT3D(#254,#255,#256);\n#258=IFCEXTRUDEDAREASOLID(#253,#257,#252,300.);\n#259=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#258));\n#260=IFCPRODUCTDEFINITIONSHAPE($,$,(#259));\n#261=IFCCARTESIANPOINT((3799.9999999999995,-600.,2600.));\n#262=IFCDIRECTION((0.,0.,1.));\n#263=IFCDIRECTION((1.,0.,0.));\n#264=IFCAXIS2PLACEMENT3D(#261,#262,#263);\n#265=IFCLOCALPLACEMENT($,#264);\n#266=IFCPROPERTYSET('1h_feuItj98v5CKtD1pB40',$,'Pset_Coordinacion',$,(#268));\n#267=IFCRELDEFINESBYPROPERTIES('2tO8Jgxn97pAD3TI1QIdzQ',$,$,$,(#244),#266);\n#268=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('HVAC'),$);\n#269=IFCDUCTSEGMENT('2tKSl63IPEmAyXdHPvgi1l',$,'D-02',$,$,#290,#285,$,$);\n#275=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(6000.,300.),(6000.,0.),(0.,0.)));\n#276=IFCINDEXEDPOLYCURVE(#275,$,.F.);\n#277=IFCDIRECTION((0.,0.,1.));\n#278=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#276);\n#279=IFCCARTESIANPOINT((0.,0.,0.));\n#280=IFCDIRECTION((0.,0.,1.));\n#281=IFCDIRECTION((1.,0.,0.));\n#282=IFCAXIS2PLACEMENT3D(#279,#280,#281);\n#283=IFCEXTRUDEDAREASOLID(#278,#282,#277,300.);\n#284=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#283));\n#285=IFCPRODUCTDEFINITIONSHAPE($,$,(#284));\n#286=IFCCARTESIANPOINT((1000.,4400.,2000.));\n#287=IFCDIRECTION((0.,0.,1.));\n#288=IFCDIRECTION((1.,0.,0.));\n#289=IFCAXIS2PLACEMENT3D(#286,#287,#288);\n#290=IFCLOCALPLACEMENT($,#289);\n#291=IFCPROPERTYSET('3QarLpuYDDchxQnB3xl93x',$,'Pset_Coordinacion',$,(#293));\n#292=IFCRELDEFINESBYPROPERTIES('1iyEOIDVPEJO5QtQyzmOpi',$,$,$,(#269),#291);\n#293=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('HVAC'),$);\n#294=IFCPIPESEGMENT('3PoJHWLevBfewyOiuUqMMX',$,'T-01',$,$,#315,#310,$,$);\n#300=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,4000.),(100.,4000.),(100.,0.),(0.,0.)));\n#301=IFCINDEXEDPOLYCURVE(#300,$,.F.);\n#302=IFCDIRECTION((0.,0.,1.));\n#303=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#301);\n#304=IFCCARTESIANPOINT((0.,0.,0.));\n#305=IFCDIRECTION((0.,0.,1.));\n#306=IFCDIRECTION((1.,0.,0.));\n#307=IFCAXIS2PLACEMENT3D(#304,#305,#306);\n#308=IFCEXTRUDEDAREASOLID(#303,#307,#302,100.);\n#309=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#308));\n#310=IFCPRODUCTDEFINITIONSHAPE($,$,(#309));\n#311=IFCCARTESIANPOINT((6000.,1000.,1000.));\n#312=IFCDIRECTION((0.,0.,1.));\n#313=IFCDIRECTION((1.,0.,0.));\n#314=IFCAXIS2PLACEMENT3D(#311,#312,#313);\n#315=IFCLOCALPLACEMENT($,#314);\n#316=IFCPROPERTYSET('02caMlVhXAjRQdF8JisgBh',$,'Pset_Coordinacion',$,(#318));\n#317=IFCRELDEFINESBYPROPERTIES('0VV6huPaj6zgjGD2itCQzR',$,$,$,(#294),#316);\n#318=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Sanitarias'),$);\n#319=IFCPIPESEGMENT('3BawzoS1jBgQlx6Uq45kpa',$,'T-02',$,$,#340,#335,$,$);\n#325=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,100.),(6000.,100.),(6000.,0.),(0.,0.)));\n#326=IFCINDEXEDPOLYCURVE(#325,$,.F.);\n#327=IFCDIRECTION((0.,0.,1.));\n#328=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#326);\n#329=IFCCARTESIANPOINT((0.,0.,0.));\n#330=IFCDIRECTION((0.,0.,1.));\n#331=IFCDIRECTION((1.,0.,0.));\n#332=IFCAXIS2PLACEMENT3D(#329,#330,#331);\n#333=IFCEXTRUDEDAREASOLID(#328,#332,#327,100.);\n#334=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#333));\n#335=IFCPRODUCTDEFINITIONSHAPE($,$,(#334));\n#336=IFCCARTESIANPOINT((1000.,4450.,2330.));\n#337=IFCDIRECTION((0.,0.,1.));\n#338=IFCDIRECTION((1.,0.,0.));\n#339=IFCAXIS2PLACEMENT3D(#336,#337,#338);\n#340=IFCLOCALPLACEMENT($,#339);\n#341=IFCPROPERTYSET('2cGuXfchzBSfY5DJrK1lex',$,'Pset_Coordinacion',$,(#343));\n#342=IFCRELDEFINESBYPROPERTIES('3zJ57JFoP0rgYAumedTTq2',$,$,$,(#319),#341);\n#343=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Sanitarias'),$);\nENDSEC;\nEND-ISO-10303-21;\n", "v2": "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition[DesignTransferView]'),'2;1');\nFILE_NAME('/dev/null','2026-10-08T08:43:48-05:00',(''),(''),'IfcOpenShell 0.9.0','IfcOpenShell 0.9.0','Nobody');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n#1=IFCPROJECT('1OTbKTO6D13gxjIFuAc3eE',$,'Edificio MEP',$,$,$,$,(#10),#5);\n#2=IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);\n#3=IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.);\n#4=IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.);\n#5=IFCUNITASSIGNMENT((#2,#3,#4));\n#6=IFCCARTESIANPOINT((0.,0.,0.));\n#7=IFCDIRECTION((0.,0.,1.));\n#8=IFCDIRECTION((1.,0.,0.));\n#9=IFCAXIS2PLACEMENT3D(#6,#7,#8);\n#10=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-05,#9,$);\n#11=IFCGEOMETRICREPRESENTATIONSUBCONTEXT('Body','Model',*,*,*,*,#10,$,.MODEL_VIEW.,$);\n#12=IFCSITE('3FbxZouJj3xPV8kLtU3m8o',$,'Sitio',$,$,$,$,$,$,$,$,$,$,$);\n#13=IFCRELAGGREGATES('1593BOKw15ZQhjLWXGCT0H',$,$,$,#1,(#12));\n#14=IFCBUILDING('3WAr6KDLj0aB9N2gkWrjkg',$,'Edificio',$,$,$,$,$,$,$,$,$);\n#15=IFCRELAGGREGATES('0pP_PbT$nEpelmci0a2eEs',$,$,$,#12,(#14));\n#16=IFCBUILDINGSTOREY('1qUYEjS0rE0vZ$gonS$Mqq',$,'Nivel 1',$,$,$,$,$,$,$);\n#17=IFCRELAGGREGATES('0rdIg0nlf4VOdoh0FxVdQU',$,$,$,#14,(#16));\n#18=IFCCOLUMN('3VqZgg1DPBa9CqVjo9j$Ds',$,'C-01',$,$,#40,#34,$,$);\n#24=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#25=IFCINDEXEDPOLYCURVE(#24,$,.F.);\n#26=IFCDIRECTION((0.,0.,1.));\n#27=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#25);\n#28=IFCCARTESIANPOINT((0.,0.,0.));\n#29=IFCDIRECTION((0.,0.,1.));\n#30=IFCDIRECTION((1.,0.,0.));\n#31=IFCAXIS2PLACEMENT3D(#28,#29,#30);\n#32=IFCEXTRUDEDAREASOLID(#27,#31,#26,3000.);\n#33=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#32));\n#34=IFCPRODUCTDEFINITIONSHAPE($,$,(#33));\n#35=IFCRELCONTAINEDINSPATIALSTRUCTURE('1NOik6wtb9NgKQwYneh_H1',$,$,$,(#44,#194,#18,#344,#169,#319,#144,#294,#119,#269,#94,#244,#69,#219),#16);\n#36=IFCCARTESIANPOINT((-200.,-200.,0.));\n#37=IFCDIRECTION((0.,0.,1.));\n#38=IFCDIRECTION((1.,0.,0.));\n#39=IFCAXIS2PLACEMENT3D(#36,#37,#38);\n#40=IFCLOCALPLACEMENT($,#39);\n#41=IFCPROPERTYSET('0$rLS4_kj6xfWXt3jZPioL',$,'Pset_Coordinacion',$,(#43));\n#42=IFCRELDEFINESBYPROPERTIES('28P_zBLebDnxVefr9sXtdz',$,$,$,(#18),#41);\n#43=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#44=IFCCOLUMN('1jjWBEqvb3zgndKdBhD1na',$,'C-02',$,$,#65,#60,$,$);\n#50=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#51=IFCINDEXEDPOLYCURVE(#50,$,.F.);\n#52=IFCDIRECTION((0.,0.,1.));\n#53=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#51);\n#54=IFCCARTESIANPOINT((0.,0.,0.));\n#55=IFCDIRECTION((0.,0.,1.));\n#56=IFCDIRECTION((1.,0.,0.));\n#57=IFCAXIS2PLACEMENT3D(#54,#55,#56);\n#58=IFCEXTRUDEDAREASOLID(#53,#57,#52,3000.);\n#59=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#58));\n#60=IFCPRODUCTDEFINITIONSHAPE($,$,(#59));\n#61=IFCCARTESIANPOINT((7800.,-200.,0.));\n#62=IFCDIRECTION((0.,0.,1.));\n#63=IFCDIRECTION((1.,0.,0.));\n#64=IFCAXIS2PLACEMENT3D(#61,#62,#63);\n#65=IFCLOCALPLACEMENT($,#64);\n#66=IFCPROPERTYSET('2t2TT3VPP2wg4jl3PEQn64',$,'Pset_Coordinacion',$,(#68));\n#67=IFCRELDEFINESBYPROPERTIES('3erGEZ$790XwjMt3l9KWNQ',$,$,$,(#44),#66);\n#68=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#69=IFCCOLUMN('0wXFyoWCf5YfA0in$qwKpZ',$,'C-03',$,$,#90,#85,$,$);\n#75=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#76=IFCINDEXEDPOLYCURVE(#75,$,.F.);\n#77=IFCDIRECTION((0.,0.,1.));\n#78=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#76);\n#79=IFCCARTESIANPOINT((0.,0.,0.));\n#80=IFCDIRECTION((0.,0.,1.));\n#81=IFCDIRECTION((1.,0.,0.));\n#82=IFCAXIS2PLACEMENT3D(#79,#80,#81);\n#83=IFCEXTRUDEDAREASOLID(#78,#82,#77,3000.);\n#84=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#83));\n#85=IFCPRODUCTDEFINITIONSHAPE($,$,(#84));\n#86=IFCCARTESIANPOINT((-200.,5800.,0.));\n#87=IFCDIRECTION((0.,0.,1.));\n#88=IFCDIRECTION((1.,0.,0.));\n#89=IFCAXIS2PLACEMENT3D(#86,#87,#88);\n#90=IFCLOCALPLACEMENT($,#89);\n#91=IFCPROPERTYSET('3VLpro8CX1FBIA6SdrYBNH',$,'Pset_Coordinacion',$,(#93));\n#92=IFCRELDEFINESBYPROPERTIES('2fwzpBem1ALhbUzj5FGLlJ',$,$,$,(#69),#91);\n#93=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#94=IFCCOLUMN('3u$mgUMAb8TQ5Zo$0yynu4',$,'C-04',$,$,#115,#110,$,$);\n#100=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,400.),(400.,400.),(400.,0.),(0.,0.)));\n#101=IFCINDEXEDPOLYCURVE(#100,$,.F.);\n#102=IFCDIRECTION((0.,0.,1.));\n#103=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#101);\n#104=IFCCARTESIANPOINT((0.,0.,0.));\n#105=IFCDIRECTION((0.,0.,1.));\n#106=IFCDIRECTION((1.,0.,0.));\n#107=IFCAXIS2PLACEMENT3D(#104,#105,#106);\n#108=IFCEXTRUDEDAREASOLID(#103,#107,#102,3000.);\n#109=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#108));\n#110=IFCPRODUCTDEFINITIONSHAPE($,$,(#109));\n#111=IFCCARTESIANPOINT((7800.,5800.,0.));\n#112=IFCDIRECTION((0.,0.,1.));\n#113=IFCDIRECTION((1.,0.,0.));\n#114=IFCAXIS2PLACEMENT3D(#111,#112,#113);\n#115=IFCLOCALPLACEMENT($,#114);\n#116=IFCPROPERTYSET('279eu0xhv3S8mqOMgd5$ie',$,'Pset_Coordinacion',$,(#118));\n#117=IFCRELDEFINESBYPROPERTIES('0nk7k49hzAifjiXiKoZrG2',$,$,$,(#94),#116);\n#118=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#119=IFCBEAM('0QLOTk7Mr5_8EgIa1880lC',$,'V-01',$,$,#140,#135,$,$);\n#125=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(8000.,300.),(8000.,0.),(0.,0.)));\n#126=IFCINDEXEDPOLYCURVE(#125,$,.F.);\n#127=IFCDIRECTION((0.,0.,1.));\n#128=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#126);\n#129=IFCCARTESIANPOINT((0.,0.,0.));\n#130=IFCDIRECTION((0.,0.,1.));\n#131=IFCDIRECTION((1.,0.,0.));\n#132=IFCAXIS2PLACEMENT3D(#129,#130,#131);\n#133=IFCEXTRUDEDAREASOLID(#128,#132,#127,500.);\n#134=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#133));\n#135=IFCPRODUCTDEFINITIONSHAPE($,$,(#134));\n#136=IFCCARTESIANPOINT((0.,-150.,2500.));\n#137=IFCDIRECTION((0.,0.,1.));\n#138=IFCDIRECTION((1.,0.,0.));\n#139=IFCAXIS2PLACEMENT3D(#136,#137,#138);\n#140=IFCLOCALPLACEMENT($,#139);\n#141=IFCPROPERTYSET('2nw7eDTDz4uAtuISRLFd4h',$,'Pset_Coordinacion',$,(#143));\n#142=IFCRELDEFINESBYPROPERTIES('2KXAT8chT8uuc_CnJsLq3K',$,$,$,(#119),#141);\n#143=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#144=IFCBEAM('1uiXkM6B18YwYOTUdlBirL',$,'V-02',$,$,#165,#160,$,$);\n#150=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(8000.,300.),(8000.,0.),(0.,0.)));\n#151=IFCINDEXEDPOLYCURVE(#150,$,.F.);\n#152=IFCDIRECTION((0.,0.,1.));\n#153=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#151);\n#154=IFCCARTESIANPOINT((0.,0.,0.));\n#155=IFCDIRECTION((0.,0.,1.));\n#156=IFCDIRECTION((1.,0.,0.));\n#157=IFCAXIS2PLACEMENT3D(#154,#155,#156);\n#158=IFCEXTRUDEDAREASOLID(#153,#157,#152,500.);\n#159=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#158));\n#160=IFCPRODUCTDEFINITIONSHAPE($,$,(#159));\n#161=IFCCARTESIANPOINT((0.,5849.999999999999,2500.));\n#162=IFCDIRECTION((0.,0.,1.));\n#163=IFCDIRECTION((1.,0.,0.));\n#164=IFCAXIS2PLACEMENT3D(#161,#162,#163);\n#165=IFCLOCALPLACEMENT($,#164);\n#166=IFCPROPERTYSET('3qyKjayQT0BeI5rEPq5ZkF',$,'Pset_Coordinacion',$,(#168));\n#167=IFCRELDEFINESBYPROPERTIES('0$B0coP$rDJwLSc5aLz11q',$,$,$,(#144),#166);\n#168=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#169=IFCBEAM('1O4hnbXSH00eD4W9T9Ming',$,'V-03',$,$,#190,#185,$,$);\n#175=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,6000.),(300.,6000.),(300.,0.),(0.,0.)));\n#176=IFCINDEXEDPOLYCURVE(#175,$,.F.);\n#177=IFCDIRECTION((0.,0.,1.));\n#178=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#176);\n#179=IFCCARTESIANPOINT((0.,0.,0.));\n#180=IFCDIRECTION((0.,0.,1.));\n#181=IFCDIRECTION((1.,0.,0.));\n#182=IFCAXIS2PLACEMENT3D(#179,#180,#181);\n#183=IFCEXTRUDEDAREASOLID(#178,#182,#177,500.);\n#184=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#183));\n#185=IFCPRODUCTDEFINITIONSHAPE($,$,(#184));\n#186=IFCCARTESIANPOINT((-150.,0.,2500.));\n#187=IFCDIRECTION((0.,0.,1.));\n#188=IFCDIRECTION((1.,0.,0.));\n#189=IFCAXIS2PLACEMENT3D(#186,#187,#188);\n#190=IFCLOCALPLACEMENT($,#189);\n#191=IFCPROPERTYSET('1C5pbH5VP3gOfZ0VAZGJkw',$,'Pset_Coordinacion',$,(#193));\n#192=IFCRELDEFINESBYPROPERTIES('1iauFo$1rD4eldx2rqNvVI',$,$,$,(#169),#191);\n#193=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#194=IFCBEAM('2Bn7DsO011eAaGMPCpGMU8',$,'V-04',$,$,#215,#210,$,$);\n#200=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,6000.),(300.,6000.),(300.,0.),(0.,0.)));\n#201=IFCINDEXEDPOLYCURVE(#200,$,.F.);\n#202=IFCDIRECTION((0.,0.,1.));\n#203=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#201);\n#204=IFCCARTESIANPOINT((0.,0.,0.));\n#205=IFCDIRECTION((0.,0.,1.));\n#206=IFCDIRECTION((1.,0.,0.));\n#207=IFCAXIS2PLACEMENT3D(#204,#205,#206);\n#208=IFCEXTRUDEDAREASOLID(#203,#207,#202,500.);\n#209=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#208));\n#210=IFCPRODUCTDEFINITIONSHAPE($,$,(#209));\n#211=IFCCARTESIANPOINT((7849.999999999999,0.,2500.));\n#212=IFCDIRECTION((0.,0.,1.));\n#213=IFCDIRECTION((1.,0.,0.));\n#214=IFCAXIS2PLACEMENT3D(#211,#212,#213);\n#215=IFCLOCALPLACEMENT($,#214);\n#216=IFCPROPERTYSET('1k1hOdqNPBVPKa2a5lXZI0',$,'Pset_Coordinacion',$,(#218));\n#217=IFCRELDEFINESBYPROPERTIES('2fzD10sV98d8lhOUzyKiyV',$,$,$,(#194),#216);\n#218=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Estructuras'),$);\n#219=IFCWALL('0vl43O6jb21Q5agI05t7LU',$,'M-01',$,$,#240,#235,$,$);\n#225=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,150.),(7599.999999999999,150.),(7599.999999999999,0.),(0.,0.)));\n#226=IFCINDEXEDPOLYCURVE(#225,$,.F.);\n#227=IFCDIRECTION((0.,0.,1.));\n#228=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#226);\n#229=IFCCARTESIANPOINT((0.,0.,0.));\n#230=IFCDIRECTION((0.,0.,1.));\n#231=IFCDIRECTION((1.,0.,0.));\n#232=IFCAXIS2PLACEMENT3D(#229,#230,#231);\n#233=IFCEXTRUDEDAREASOLID(#228,#232,#227,2500.);\n#234=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#233));\n#235=IFCPRODUCTDEFINITIONSHAPE($,$,(#234));\n#236=IFCCARTESIANPOINT((200.,2924.9999999999995,0.));\n#237=IFCDIRECTION((0.,0.,1.));\n#238=IFCDIRECTION((1.,0.,0.));\n#239=IFCAXIS2PLACEMENT3D(#236,#237,#238);\n#240=IFCLOCALPLACEMENT($,#239);\n#241=IFCPROPERTYSET('3W3nj_EoH2UhLVXmAiwgsm',$,'Pset_Coordinacion',$,(#243));\n#242=IFCRELDEFINESBYPROPERTIES('0KR38iZBH7Uw6Zlr7LXJuz',$,$,$,(#219),#241);\n#243=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Arquitectura'),$);\n#244=IFCDUCTSEGMENT('12L6xxuDnE8x2ZbXhHww5O',$,'D-01',$,$,#265,#260,$,$);\n#250=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,7200.),(400.,7200.),(400.,0.),(0.,0.)));\n#251=IFCINDEXEDPOLYCURVE(#250,$,.F.);\n#252=IFCDIRECTION((0.,0.,1.));\n#253=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#251);\n#254=IFCCARTESIANPOINT((0.,0.,0.));\n#255=IFCDIRECTION((0.,0.,1.));\n#256=IFCDIRECTION((1.,0.,0.));\n#257=IFCAXIS2PLACEMENT3D(#254,#255,#256);\n#258=IFCEXTRUDEDAREASOLID(#253,#257,#252,300.);\n#259=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#258));\n#260=IFCPRODUCTDEFINITIONSHAPE($,$,(#259));\n#261=IFCCARTESIANPOINT((3799.9999999999995,-600.,2050.));\n#262=IFCDIRECTION((0.,0.,1.));\n#263=IFCDIRECTION((1.,0.,0.));\n#264=IFCAXIS2PLACEMENT3D(#261,#262,#263);\n#265=IFCLOCALPLACEMENT($,#264);\n#266=IFCPROPERTYSET('2ACgCvYbPCBeJ0idSPgdV7',$,'Pset_Coordinacion',$,(#268));\n#267=IFCRELDEFINESBYPROPERTIES('05dtA_ZRf1TwDvgcNi_$Xe',$,$,$,(#244),#266);\n#268=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('HVAC'),$);\n#269=IFCDUCTSEGMENT('2tKSl63IPEmAyXdHPvgi1l',$,'D-02',$,$,#290,#285,$,$);\n#275=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,300.),(6000.,300.),(6000.,0.),(0.,0.)));\n#276=IFCINDEXEDPOLYCURVE(#275,$,.F.);\n#277=IFCDIRECTION((0.,0.,1.));\n#278=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#276);\n#279=IFCCARTESIANPOINT((0.,0.,0.));\n#280=IFCDIRECTION((0.,0.,1.));\n#281=IFCDIRECTION((1.,0.,0.));\n#282=IFCAXIS2PLACEMENT3D(#279,#280,#281);\n#283=IFCEXTRUDEDAREASOLID(#278,#282,#277,300.);\n#284=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#283));\n#285=IFCPRODUCTDEFINITIONSHAPE($,$,(#284));\n#286=IFCCARTESIANPOINT((1000.,4400.,2000.));\n#287=IFCDIRECTION((0.,0.,1.));\n#288=IFCDIRECTION((1.,0.,0.));\n#289=IFCAXIS2PLACEMENT3D(#286,#287,#288);\n#290=IFCLOCALPLACEMENT($,#289);\n#291=IFCPROPERTYSET('3p8jJpB7TCqeFbbsPyqveX',$,'Pset_Coordinacion',$,(#293));\n#292=IFCRELDEFINESBYPROPERTIES('3QvI3qDB14nfdEUY9mTMtA',$,$,$,(#269),#291);\n#293=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('HVAC'),$);\n#294=IFCPIPESEGMENT('3PoJHWLevBfewyOiuUqMMX',$,'T-01',$,$,#315,#310,$,$);\n#300=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,4000.),(100.,4000.),(100.,0.),(0.,0.)));\n#301=IFCINDEXEDPOLYCURVE(#300,$,.F.);\n#302=IFCDIRECTION((0.,0.,1.));\n#303=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#301);\n#304=IFCCARTESIANPOINT((0.,0.,0.));\n#305=IFCDIRECTION((0.,0.,1.));\n#306=IFCDIRECTION((1.,0.,0.));\n#307=IFCAXIS2PLACEMENT3D(#304,#305,#306);\n#308=IFCEXTRUDEDAREASOLID(#303,#307,#302,100.);\n#309=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#308));\n#310=IFCPRODUCTDEFINITIONSHAPE($,$,(#309));\n#311=IFCCARTESIANPOINT((6000.,1000.,1000.));\n#312=IFCDIRECTION((0.,0.,1.));\n#313=IFCDIRECTION((1.,0.,0.));\n#314=IFCAXIS2PLACEMENT3D(#311,#312,#313);\n#315=IFCLOCALPLACEMENT($,#314);\n#316=IFCPROPERTYSET('09QCLbcLLEMw0x95E13usZ',$,'Pset_Coordinacion',$,(#318));\n#317=IFCRELDEFINESBYPROPERTIES('26w8GuF4z2xgdfTtyFFZ5t',$,$,$,(#294),#316);\n#318=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Sanitarias'),$);\n#319=IFCPIPESEGMENT('3BawzoS1jBgQlx6Uq45kpa',$,'T-02',$,$,#340,#335,$,$);\n#325=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,100.),(6000.,100.),(6000.,0.),(0.,0.)));\n#326=IFCINDEXEDPOLYCURVE(#325,$,.F.);\n#327=IFCDIRECTION((0.,0.,1.));\n#328=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#326);\n#329=IFCCARTESIANPOINT((0.,0.,0.));\n#330=IFCDIRECTION((0.,0.,1.));\n#331=IFCDIRECTION((1.,0.,0.));\n#332=IFCAXIS2PLACEMENT3D(#329,#330,#331);\n#333=IFCEXTRUDEDAREASOLID(#328,#332,#327,100.);\n#334=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#333));\n#335=IFCPRODUCTDEFINITIONSHAPE($,$,(#334));\n#336=IFCCARTESIANPOINT((1000.,4450.,2330.));\n#337=IFCDIRECTION((0.,0.,1.));\n#338=IFCDIRECTION((1.,0.,0.));\n#339=IFCAXIS2PLACEMENT3D(#336,#337,#338);\n#340=IFCLOCALPLACEMENT($,#339);\n#341=IFCPROPERTYSET('2HbseYZgzA6RlJu3CkaYlx',$,'Pset_Coordinacion',$,(#343));\n#342=IFCRELDEFINESBYPROPERTIES('2T_uz_yQ96YPVEA8HlnQum',$,$,$,(#319),#341);\n#343=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Sanitarias'),$);\n#344=IFCPIPESEGMENT('05SuQWtzDCJQEOm0jLFV1k',$,'T-03',$,$,#365,#360,$,$);\n#350=IFCCARTESIANPOINTLIST2D(((0.,0.),(0.,100.),(9200.,100.),(9200.,0.),(0.,0.)));\n#351=IFCINDEXEDPOLYCURVE(#350,$,.F.);\n#352=IFCDIRECTION((0.,0.,1.));\n#353=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#351);\n#354=IFCCARTESIANPOINT((0.,0.,0.));\n#355=IFCDIRECTION((0.,0.,1.));\n#356=IFCDIRECTION((1.,0.,0.));\n#357=IFCAXIS2PLACEMENT3D(#354,#355,#356);\n#358=IFCEXTRUDEDAREASOLID(#353,#357,#352,100.);\n#359=IFCSHAPEREPRESENTATION(#11,'Body','SweptSolid',(#358));\n#360=IFCPRODUCTDEFINITIONSHAPE($,$,(#359));\n#361=IFCCARTESIANPOINT((-600.,1500.,2700.));\n#362=IFCDIRECTION((0.,0.,1.));\n#363=IFCDIRECTION((1.,0.,0.));\n#364=IFCAXIS2PLACEMENT3D(#361,#362,#363);\n#365=IFCLOCALPLACEMENT($,#364);\n#366=IFCPROPERTYSET('2vc3Udd7fFtPLZRFfc_2Fb',$,'Pset_Coordinacion',$,(#368));\n#367=IFCRELDEFINESBYPROPERTIES('08sHMAul9CSPbzJkkUGbf$',$,$,$,(#344),#366);\n#368=IFCPROPERTYSINGLEVALUE('Disciplina',$,IFCLABEL('Sanitarias'),$);\nENDSEC;\nEND-ISO-10303-21;\n"};
+</script>
+<script>
+/* ===================== utilidades ===================== */
+const $=id=>document.getElementById(id);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const C={teal:'#2EC4D6',purple:'#9888F6',red:'#EF5A50',grey:'#8C9AAC',green:'#38C48E',amber:'#EDAA45',orange:'#F2883A',neutral:'#41536D'};
+function toast(m){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* ===================== disciplinas y reglas ===================== */
+const GROUPS={
+  MEP:/^Ifc(Flow|Duct|Pipe|Cable|AirTerminal|SanitaryTerminal|LightFixture|EnergyConversion|DistributionControl|UnitaryEquipment|Pump|Fan|Valve|Boiler|Chiller|Tank|ElectricAppliance|Outlet|SwitchingDevice|Sensor|Damper|Compressor|CoolingTower|Interceptor|FireSuppression|SpaceHeater|Alarm)/,
+  Estructura:/^Ifc(Beam|Column|Slab|Footing|Member|Pile|Plate|Roof|Tendon|Reinforcing)/,
+  Arquitectura:/^Ifc(Wall|Door|Window|Covering|Stair|Ramp|Railing|CurtainWall|Chimney|ShadingDevice|BuildingElementProxy)/};
+const GCOL={MEP:'#2EC4D6',Estructura:'#A9B7CB',Arquitectura:'#6F82A0',Otros:'#4A5B75'};
+const GNAMES=['MEP','Estructura','Arquitectura','Otros'];
+const TLAB={IfcDuct:'Ductos',IfcPipe:'Tuberías',IfcCable:'Bandejas y cables',IfcFlowTerminal:'Terminales',IfcAirTerminal:'Rejillas y difusores',IfcSanitaryTerminal:'Aparatos sanitarios',IfcLightFixture:'Luminarias',IfcBeam:'Vigas',IfcColumn:'Columnas',IfcSlab:'Losas',IfcFooting:'Zapatas',IfcMember:'Elementos estructurales',IfcWall:'Muros',IfcDoor:'Puertas',IfcWindow:'Ventanas',IfcStair:'Escaleras',IfcCovering:'Cielos y revestimientos',IfcRailing:'Barandas'};
+const lab=t=>GNAMES.includes(t)?t:(TLAB[t]||String(t).replace(/^Ifc/,''));
+const hitT=(t,el)=>GNAMES.includes(t)?el.g===t:el.cls.startsWith(t);
+const grp=cls=>{ for(const [g,re] of Object.entries(GROUPS)) if(re.test(cls)) return g; return 'Otros'; };
+const RULES=[
+  {id:'IC-01',a:'MEP',b:'Estructura',tipo:'dura',tol:0,on:true},
+  {id:'IC-02',a:'MEP',b:'Arquitectura',tipo:'dura',tol:0,on:true},
+  {id:'IC-03',a:'MEP',b:'MEP',tipo:'holgura',tol:.05,on:true},
+  {id:'IC-04',a:'Estructura',b:'Arquitectura',tipo:'dura',tol:0,on:false},
+  {id:'IC-05',a:'Estructura',b:'Estructura',tipo:'dura',tol:0,on:false}];
+const KNOWN=["IfcWallStandardCase","IfcWallElementedCase","IfcWall","IfcColumn","IfcBeam","IfcSlab","IfcDoor","IfcWindow","IfcStair","IfcStairFlight","IfcRailing","IfcRoof","IfcCovering","IfcPlate","IfcMember","IfcFooting","IfcPile","IfcFlowTerminal","IfcFlowSegment","IfcFlowFitting","IfcFlowController","IfcFlowMovingDevice","IfcFlowStorageDevice","IfcFlowTreatmentDevice","IfcEnergyConversionDevice","IfcDistributionControlElement","IfcDuctSegment","IfcPipeSegment","IfcDuctFitting","IfcPipeFitting","IfcAirTerminal","IfcSanitaryTerminal","IfcLightFixture","IfcFurnishingElement","IfcFurniture","IfcBuildingElementProxy","IfcCurtainWall","IfcRamp","IfcRampFlight","IfcChimney","IfcShadingDevice","IfcTransportElement","IfcCableSegment","IfcCableCarrierSegment","IfcCableCarrierFitting","IfcUnitaryEquipment","IfcPump","IfcFan","IfcValve","IfcBoiler","IfcChiller","IfcTank","IfcElectricAppliance","IfcOutlet","IfcSwitchingDevice","IfcSensor","IfcAlarm","IfcFireSuppressionTerminal","IfcSpaceHeater","IfcReinforcingBar","IfcGeographicElement","IfcElementAssembly","IfcDiscreteAccessory","IfcMechanicalFastener","IfcDamper","IfcCompressor","IfcCoolingTower","IfcInterceptor"];
+const NAMES=Object.fromEntries(KNOWN.map(k=>[k.toUpperCase(),k]));
+const pretty=T=>NAMES[T]||('Ifc'+T.slice(3).toLowerCase().replace(/^./,c=>c.toUpperCase()));
+
+/* ===================== estado ===================== */
+const EMBED=!!window.AMA_EMBED||/(^|[?#&])embed/.test(location.search+location.hash); if(EMBED) document.documentElement.classList.add('embed');
+// En el paso 6 de la demo, el visor habla con la página por mensajes (funciona también abriendo los archivos localmente)
+const PARENT=EMBED?(()=>{ const pend=new Map(); let seq=0; const info={hasAI:false};
+  addEventListener('message',e=>{ if(e.source!==window.parent) return; const d=e.data||{};
+    if(d.type==='ama-models'){ info.hasAI=!!d.hasAI; onModels(d); }
+    if(d.type==='ama-res'){ const p=pend.get(d.id); if(!p) return; pend.delete(d.id); d.ok?p.res(d.data):p.rej(d.err||{}); } });
+  const ask=(type,payload)=>new Promise((res,rej)=>{ const id=++seq; pend.set(id,{res,rej}); window.parent.postMessage({type,id,...payload},'*'); });
+  return { hasAI:()=>info.hasAI, ai:prompt=>ask('ama-ai',{prompt}), save:(name,blob)=>ask('ama-save',{name,blob}) }; })():null;
+const S={f1:null,f2:null,n1:'',n2:'',M1:null,M2:null,origin:null,rules:RULES.map(r=>({...r})),cl:null,sel:null,meta:{},shots:{},filter:'',mode:'st'};
+
+/* ===================== lectura IFC (web-ifc, carga diferida) ===================== */
+const WIFC='https://unpkg.com/web-ifc@0.0.66/';
+let wifcP=null;
+function loadWebIfc(){ if(wifcP) return wifcP;
+  wifcP=new Promise((res,rej)=>{ if(window.WebIFC) return res(); const s=document.createElement('script'); s.src=WIFC+'web-ifc-api-iife.js'; s.onload=()=>res(); s.onerror=()=>rej(new Error('web-ifc')); document.head.appendChild(s); })
+    .then(async()=>{ const api=new WebIFC.IfcAPI(); api.SetWasmPath(WIFC,true); await api.Init(undefined,true); return api; });
+  wifcP.catch(()=>{wifcP=null}); return wifcP; }
+function readModel(api,buf,origin){
+  const id=api.OpenModel(buf,{COORDINATE_TO_ORIGIN:false});
+  try{
+    const parent=new Map(), level=new Map();
+    for(const T of [WebIFC.IFCRELAGGREGATES,WebIFC.IFCRELNESTS]){ const ids=api.GetLineIDsWithType(id,T);
+      for(let i=0;i<ids.size();i++){ const r=api.GetLine(id,ids.get(i)); const p=r.RelatingObject?.value; for(const o of (r.RelatedObjects||[])) if(o?.value&&p) parent.set(o.value,p); } }
+    const rc=api.GetLineIDsWithType(id,WebIFC.IFCRELCONTAINEDINSPATIALSTRUCTURE);
+    for(let i=0;i<rc.size();i++){ const r=api.GetLine(id,rc.get(i)); let nm=''; try{ nm=api.GetLine(id,r.RelatingStructure.value).Name?.value||'' }catch(e){} for(const o of (r.RelatedElements||[])) if(o?.value) level.set(o.value,nm||'Sin nivel'); }
+    const owner=e=>{ let p=e,k=0; while(k++<25){ if(level.has(p)) return p; const q=parent.get(p); if(!q) return e; p=q; } return e; };
+    const lvl=e=>{ let p=e,k=0; while(p&&k++<25){ if(level.has(p)) return level.get(p); p=parent.get(p); } return 'Sin nivel'; };
+    const skip=new Set([WebIFC.IFCSPACE,WebIFC.IFCOPENINGELEMENT]);
+    const els=new Map(); let tris=0;
+    const meta=o=>{ let L={},cls='IfcElement'; try{ L=api.GetLine(id,o); cls=pretty(String(api.GetNameFromTypeCode(api.GetLineType(id,o))).toUpperCase()); }catch(e){}
+      return {eid:o,id:L.GlobalId?.value||('#'+o),name:L.Name?.value||L.Tag?.value||'',cls,g:grp(cls),level:lvl(o),parts:[]}; };
+    api.StreamAllMeshes(id,mesh=>{ const eid=mesh.expressID; let t=null; try{t=api.GetLineType(id,eid)}catch(e){} if(skip.has(t)) return;
+      const o=owner(eid); let el=els.get(o); if(!el){ el=meta(o); els.set(o,el); }
+      const G=mesh.geometries;
+      for(let i=0;i<G.size();i++){ const pg=G.get(i); const g=api.GetGeometry(id,pg.geometryExpressID);
+        const v=api.GetVertexArray(g.GetVertexData(),g.GetVertexDataSize()), ix=api.GetIndexArray(g.GetIndexData(),g.GetIndexDataSize());
+        const M=pg.flatTransformation; if(!origin.set){origin.x=M[12];origin.y=M[13];origin.z=M[14];origin.set=true}
+        const n=v.length/6, pos=new Float32Array(n*3), nor=new Float32Array(n*3);
+        for(let k=0,j=0;k<v.length;k+=6,j+=3){ const x=v[k],y=v[k+1],z=v[k+2],a=v[k+3],b=v[k+4],c=v[k+5];
+          pos[j]=M[0]*x+M[4]*y+M[8]*z+M[12]-origin.x; pos[j+1]=M[1]*x+M[5]*y+M[9]*z+M[13]-origin.y; pos[j+2]=M[2]*x+M[6]*y+M[10]*z+M[14]-origin.z;
+          nor[j]=M[0]*a+M[4]*b+M[8]*c; nor[j+1]=M[1]*a+M[5]*b+M[9]*c; nor[j+2]=M[2]*a+M[6]*b+M[10]*c; }
+        el.parts.push({pos,nor,idx:Uint32Array.from(ix)}); tris+=ix.length/3; g.delete?.(); } });
+    let proj=''; try{ const p=api.GetLineIDsWithType(id,WebIFC.IFCPROJECT); if(p.size()) proj=api.GetLine(id,p.get(0)).GlobalId?.value||''; }catch(e){}
+    return {els:[...els.values()].filter(e=>e.parts.length),proj,tris};
+  } finally { api.CloseModel(id); }
+}
+
+/* ===================== motor de interferencias =====================
+   Filtro por cajas envolventes y prueba exacta entre triángulos. Un choque duro exige
+   penetración mayor a 1 mm: los elementos que solo se tocan no cuentan. */
+const EPS=1e-3;
+function prep(els){ return els.map(el=>{ let n=0; for(const p of el.parts) n+=p.idx.length; const T=new Float32Array(n*3); let o=0; const b=[Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity];
+  for(const p of el.parts){ const P=p.pos,I=p.idx; for(let i=0;i<I.length;i++){ const k=I[i]*3,x=P[k],y=P[k+1],z=P[k+2]; T[o++]=x;T[o++]=y;T[o++]=z; if(x<b[0])b[0]=x; if(y<b[1])b[1]=y; if(z<b[2])b[2]=z; if(x>b[3])b[3]=x; if(y>b[4])b[4]=y; if(z>b[5])b[5]=z; } }
+  el.box=b; return {el,T,b,g:el.g}; }).filter(o=>o.T.length>=9); }
+const ov=(a,b,p)=>a[0]-p<=b[3]&&b[0]-p<=a[3]&&a[1]-p<=b[4]&&b[1]-p<=a[4]&&a[2]-p<=b[5]&&b[2]-p<=a[5];
+const gap=(a,b)=>Math.hypot(Math.max(0,a[0]-b[3],b[0]-a[3]),Math.max(0,a[1]-b[4],b[1]-a[4]),Math.max(0,a[2]-b[5],b[2]-a[5]));
+const ctr=b=>[(b[0]+b[3])/2,(b[1]+b[4])/2,(b[2]+b[5])/2];
+function plane(T,i){ const ax=T[i],ay=T[i+1],az=T[i+2],ux=T[i+3]-ax,uy=T[i+4]-ay,uz=T[i+5]-az,vx=T[i+6]-ax,vy=T[i+7]-ay,vz=T[i+8]-az;
+  let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx; const L=Math.hypot(nx,ny,nz); if(L<1e-12) return null; nx/=L;ny/=L;nz/=L; return [nx,ny,nz,-(nx*ax+ny*ay+nz*az)]; }
+const sd=(n,T,i)=>{ const d=n[0]*T[i]+n[1]*T[i+1]+n[2]*T[i+2]+n[3]; return Math.abs(d)<EPS?0:d; };
+const crosses=(a,b,c)=>(a>0||b>0||c>0)&&(a<0||b<0||c<0);
+function seg(T,i,D,d){ const p=[D[0]*T[i]+D[1]*T[i+1]+D[2]*T[i+2],D[0]*T[i+3]+D[1]*T[i+4]+D[2]*T[i+5],D[0]*T[i+6]+D[1]*T[i+7]+D[2]*T[i+8]]; let lo=Infinity,hi=-Infinity;
+  for(let a=0;a<3;a++){ const b=(a+1)%3; if(d[a]===0){ lo=Math.min(lo,p[a]); hi=Math.max(hi,p[a]); } if(d[a]*d[b]<0){ const t=p[a]+(p[b]-p[a])*d[a]/(d[a]-d[b]); lo=Math.min(lo,t); hi=Math.max(hi,t); } } return [lo,hi]; }
+function triTri(A,i,nA,B,j,nB){ const a=[sd(nB,A,i),sd(nB,A,i+3),sd(nB,A,i+6)]; if(!crosses(...a)) return false; const b=[sd(nA,B,j),sd(nA,B,j+3),sd(nA,B,j+6)]; if(!crosses(...b)) return false;
+  let D=[nA[1]*nB[2]-nA[2]*nB[1],nA[2]*nB[0]-nA[0]*nB[2],nA[0]*nB[1]-nA[1]*nB[0]]; const L=Math.hypot(...D); if(L<1e-9) return false; D=D.map(v=>v/L);
+  const s1=seg(A,i,D,a), s2=seg(B,j,D,b); return Math.min(s1[1],s2[1])-Math.max(s1[0],s2[0])>EPS; }
+const tbox=(T,i)=>[Math.min(T[i],T[i+3],T[i+6]),Math.min(T[i+1],T[i+4],T[i+7]),Math.min(T[i+2],T[i+5],T[i+8]),Math.max(T[i],T[i+3],T[i+6]),Math.max(T[i+1],T[i+4],T[i+7]),Math.max(T[i+2],T[i+5],T[i+8])];
+function inBox(o,box){ const out=[]; for(let i=0;i<o.T.length;i+=9){ const tb=tbox(o.T,i); if(ov(tb,box,0)) out.push([i,tb]); } return out; }
+function hard(A,B){ const o=[Math.max(A.b[0],B.b[0])-EPS,Math.max(A.b[1],B.b[1])-EPS,Math.max(A.b[2],B.b[2])-EPS,Math.min(A.b[3],B.b[3])+EPS,Math.min(A.b[4],B.b[4])+EPS,Math.min(A.b[5],B.b[5])+EPS];
+  const ia=inBox(A,o), ib=inBox(B,o); if(!ia.length||!ib.length) return null; const pb=ib.map(([j])=>plane(B.T,j)); let n=0;
+  for(const [i,ta] of ia){ const na=plane(A.T,i); if(!na) continue; for(let k=0;k<ib.length;k++){ if(!pb[k]||!ov(ta,ib[k][1],0)) continue; if(++n>4e6) return o; if(triTri(A.T,i,na,B.T,ib[k][0],pb[k])) return o; } }
+  return null; }
+function inside(p,o){ const dx=1,dy=1.3e-4,dz=2.1e-4; let c=0; const T=o.T;
+  for(let i=0;i<T.length;i+=9){ const e1x=T[i+3]-T[i],e1y=T[i+4]-T[i+1],e1z=T[i+5]-T[i+2],e2x=T[i+6]-T[i],e2y=T[i+7]-T[i+1],e2z=T[i+8]-T[i+2];
+    const px=dy*e2z-dz*e2y,py=dz*e2x-dx*e2z,pz=dx*e2y-dy*e2x,det=e1x*px+e1y*py+e1z*pz; if(Math.abs(det)<1e-12) continue; const inv=1/det;
+    const tx=p[0]-T[i],ty=p[1]-T[i+1],tz=p[2]-T[i+2],u=(tx*px+ty*py+tz*pz)*inv; if(u<0||u>1) continue;
+    const qx=ty*e1z-tz*e1y,qy=tz*e1x-tx*e1z,qz=tx*e1y-ty*e1x,v=(dx*qx+dy*qy+dz*qz)*inv; if(v<0||u+v>1) continue; if((e2x*qx+e2y*qy+e2z*qz)*inv>0) c++; }
+  return c%2===1; }
+const within=(a,b)=>a[0]>=b[0]-EPS&&a[1]>=b[1]-EPS&&a[2]>=b[2]-EPS&&a[3]<=b[3]+EPS&&a[4]<=b[4]+EPS&&a[5]<=b[5]+EPS;
+const half=b=>Math.max(.3,Math.hypot(b[3]-b[0],b[4]-b[1],b[5]-b[2])/2);
+function pair(A,B,tol){
+  if(ov(A.b,B.b,0)){ const o=hard(A,B); if(o) return {tipo:'Dura',dist:0,pt:ctr(o),R:half(o)};
+    if(within(A.b,B.b)&&inside(ctr(A.b),B)) return {tipo:'Contenido',dist:0,pt:ctr(A.b),R:half(A.b)};
+    if(within(B.b,A.b)&&inside(ctr(B.b),A)) return {tipo:'Contenido',dist:0,pt:ctr(B.b),R:half(B.b)};
+    return null; }
+  if(tol>0){ const g=gap(A.b,B.b); if(g<=tol){ const ca=ctr(A.b),cb=ctr(B.b); const pt=[0,1,2].map(k=>{ const lo=Math.max(A.b[k],B.b[k]),hi=Math.min(A.b[k+3],B.b[k+3]); return lo<=hi?(lo+hi)/2:(ca[k]+cb[k])/2; }); return {tipo:'Holgura',dist:g,pt,R:.5}; } }
+  return null; }
+async function detect(els,rules,onProg){ const on=rules.filter(r=>r.on); if(!on.length) return [];
+  const L=prep(els), pad=Math.max(0,...on.map(r=>r.tipo==='holgura'?r.tol:0));
+  // la primera regla que aplica gana: las reglas de la matriz (más específicas) van primero
+  const ruleFor=(A,B)=>{ for(const r of on){ if(hitT(r.a,A.el)&&hitT(r.b,B.el)) return [r,A,B]; if(hitT(r.a,B.el)&&hitT(r.b,A.el)) return [r,B,A]; } return null; };
+  L.sort((p,q)=>p.b[0]-q.b[0]); const out=[]; let t0=performance.now();
+  for(let i=0;i<L.length;i++){ const A=L[i];
+    for(let j=i+1;j<L.length;j++){ const B=L[j]; if(B.b[0]>A.b[3]+pad) break; if(A.el.id===B.el.id) continue;
+      const m=ruleFor(A,B); if(!m) continue; const [rule,x,y]=m; const tol=rule.tipo==='holgura'?rule.tol:0; if(!ov(A.b,B.b,tol)) continue;
+      const r=pair(A,B,tol); if(!r) continue;
+      out.push({...r,rule,a:x.el,b:y.el,key:[x.el.id,y.el.id].sort().join('|')+'|'+rule.id}); }
+    if(performance.now()-t0>32){ onProg?.(i/L.length); await sleep(0); t0=performance.now(); } }
+  return out; }
+
+/* ===================== visor 3D ===================== */
+function Viewer(host,opt){
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)); host.prepend(renderer.domElement);
+  const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(30,1,.05,8000);
+  scene.add(new THREE.HemisphereLight(0xe8f0ff,0x0a1420,.95));
+  const d1=new THREE.DirectionalLight(0xffffff,.55); d1.position.set(14,30,20); scene.add(d1);
+  const d2=new THREE.DirectionalLight(0x9fc0ff,.22); d2.position.set(-20,8,-14); scene.add(d2);
+  const grid=new THREE.GridHelper(90,90,0x22375a,0x15253c); grid.material.transparent=true; grid.material.opacity=.55; scene.add(grid);
+  const root=new THREE.Group(); scene.add(root);
+  const clip=new THREE.Plane(new THREE.Vector3(0,-1,0),1e6);
+  const V={meshes:new Map(),list:[],theta:-.72,phi:1.0,dist:30,target:new THREE.Vector3(),home:null,anim:null,dirty:true,xray:true,iso:false,cut:null,sel:[],hls:[],marker:null,off:new THREE.Vector3(),minY:0,maxY:1,minD:.3,maxD:500,fn:null};
+  const place=()=>{ const s=Math.sin(V.phi); cam.position.set(V.target.x+V.dist*s*Math.sin(V.theta),V.target.y+V.dist*Math.cos(V.phi),V.target.z+V.dist*s*Math.cos(V.theta)); cam.lookAt(V.target); };
+  function go(to,dur=650){ const from={t:V.target.clone(),d:V.dist,th:V.theta,ph:V.phi}; to={t:to.t||from.t,d:to.d??from.d,th:to.th??from.th,ph:to.ph??from.ph};
+    let dt=to.th-from.th; dt=Math.atan2(Math.sin(dt),Math.cos(dt)); to.th=from.th+dt;
+    if(RM||!dur){ V.target.copy(to.t); V.dist=to.d; V.theta=to.th; V.phi=to.ph; V.anim=null; } else V.anim={from,to,t0:performance.now(),dur}; V.dirty=true; }
+  const homeD=()=>V.home.R/Math.sin(cam.fov*Math.PI/360)/Math.min(1,Math.pow(cam.aspect||1.4,.85));
+  const VIEWS={iso:{th:-.72,ph:1.0},top:{th:0,ph:.02},front:{th:0,ph:Math.PI/2-.02}};
+  V.view=k=>{ if(V.home) go(Object.assign({t:V.home.c.clone(),d:homeD()},VIEWS[k]||VIEWS.iso)); };
+  V.reset=()=>V.view('iso');
+  function size(){ const w=host.clientWidth,h=host.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); V.dirty=true; }
+  V.load=function(els){
+    for(const m of V.list){ root.remove(m); m.traverse(c=>{c.geometry?.dispose?.(); c.material?.dispose?.()}); } V.meshes.clear(); V.list=[];
+    const box=new THREE.Box3(), geos=[];
+    for(const el of els){ let nv=0,ni=0; for(const p of el.parts){ nv+=p.pos.length; ni+=p.idx.length; }
+      const pos=new Float32Array(nv),nor=new Float32Array(nv),idx=new Uint32Array(ni); let o=0,q=0;
+      for(const p of el.parts){ pos.set(p.pos,o); nor.set(p.nor,o); const b=o/3; for(let i=0;i<p.idx.length;i++) idx[q+i]=p.idx[i]+b; o+=p.pos.length; q+=p.idx.length; }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('normal',new THREE.BufferAttribute(nor,3)); g.setIndex(new THREE.BufferAttribute(idx,1)); g.computeBoundingBox(); box.union(g.boundingBox); geos.push([el,g]); }
+    const c=box.getCenter(new THREE.Vector3()); V.off.set(c.x,box.min.y,c.z);
+    const edges=geos.reduce((a,[,g])=>a+g.index.count,0)<2.4e6;
+    for(const [el,g] of geos){ g.translate(-V.off.x,-V.off.y,-V.off.z); g.computeBoundingBox();
+      const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}));
+      if(edges){ const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,30),new THREE.LineBasicMaterial({color:0x0B1522,transparent:true})); m.add(e); m.userData.edge=e; }
+      m.userData.el=el; root.add(m); V.list.push(m); V.meshes.set(el.id,m); }
+    const sz=box.getSize(new THREE.Vector3()); V.home={c:new THREE.Vector3(0,sz.y*.45,0),R:Math.max(2,sz.length()/2)};
+    V.minY=-.01; V.maxY=sz.y; V.minD=Math.max(.3,V.home.R*.02); V.maxD=V.home.R*12; grid.scale.setScalar(Math.max(.2,V.home.R/30)); grid.position.y=-.02;
+    go({t:V.home.c.clone(),d:homeD(),...VIEWS.iso},0); V.setCut(V.cut); };
+  V.paint=function(fn){ V.fn=fn||V.fn; if(!V.fn) return; const sel=new Set(V.sel.filter(Boolean)), any=sel.size>0;
+    for(const m of V.list){ const el=m.userData.el, st=V.fn(el), on=sel.has(el); let o=st.o??1;
+      if(any&&!on){ if(V.iso) o=0; else if(V.xray) o=Math.min(o,.08); }
+      m.visible=o>0; m.material.color.set(on?(el===V.sel[0]?C.red:C.amber):st.c); m.material.transparent=o<1; m.material.opacity=o; m.material.depthWrite=o>=.99;
+      m.material.emissive.set(on?0x262626:0x000000);
+      const e=m.userData.edge; if(e){ e.material.color.set(on?0xffffff:(st.e||0x0B1522)); e.material.opacity=on?1:(any&&V.xray?.12:(st.eo??.85)); } }
+    for(const h of V.hls){ h.parent?.remove(h); h.traverse(c=>{ c.material?.dispose?.(); if(c.isLineSegments) c.geometry.dispose(); }); } V.hls=[];
+    for(const el of sel){ const m=V.meshes.get(el.id); if(!m) continue;
+      const h=new THREE.Mesh(m.geometry,new THREE.MeshBasicMaterial({color:m.material.color.clone(),transparent:true,opacity:.4,depthTest:false,depthWrite:false})); h.renderOrder=998;
+      const he=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry,30),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.95,depthTest:false})); he.renderOrder=999; h.add(he);
+      h.raycast=()=>{}; he.raycast=()=>{}; m.add(h); V.hls.push(h); }
+    V.dirty=true; };
+  V.select=function(a,b){ V.sel=[a,b]; V.paint(); };
+  V.setMarker=function(p){ if(V.marker){ root.remove(V.marker); V.marker.traverse(c=>{c.geometry?.dispose?.(); c.material?.dispose?.()}); V.marker=null; }
+    if(p){ const R=Math.max(.05,(V.home?.R||10)*.007), g=new THREE.Group();
+      const sp=new THREE.Mesh(new THREE.SphereGeometry(R,16,12),new THREE.MeshBasicMaterial({color:0xF2883A,depthTest:false,transparent:true}));
+      const ring=new THREE.Mesh(new THREE.RingGeometry(R*2.2,R*2.9,40),new THREE.MeshBasicMaterial({color:0xF2883A,depthTest:false,transparent:true,opacity:.85,side:THREE.DoubleSide}));
+      sp.renderOrder=ring.renderOrder=1000; g.add(sp,ring); g.position.copy(p); g.userData.ring=ring; root.add(g); V.marker=g; }
+    V.dirty=true; };
+  V.focusPt=(p,R=.5,dur=700)=>go({t:p.clone(),d:Math.min(Math.max(R*10,10),Math.max(10,(V.home?.R||10)*1.6)),ph:Math.max(V.phi,.55)},dur);
+  V.setCut=function(f){ V.cut=f; if(f==null) renderer.clippingPlanes=[]; else { clip.constant=V.minY+(V.maxY-V.minY)*f+.001; renderer.clippingPlanes=[clip]; } V.dirty=true; };
+  V.camState=()=>({t:V.target.clone(),d:V.dist,th:V.theta,ph:V.phi});
+  V.setCam=s=>{ V.anim=null; V.target.copy(s.t); V.dist=s.d; V.theta=s.th; V.phi=s.ph; V.dirty=true; };
+  V.camInfo=function(){ place(); cam.updateMatrixWorld(); const dir=new THREE.Vector3(); cam.getWorldDirection(dir); return {pos:cam.position.clone(),dir,up:new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,1).normalize()}; };
+  function draw(){ place(); if(V.marker) V.marker.userData.ring.quaternion.copy(cam.quaternion); renderer.render(scene,cam); }
+  V.shot=function(){ renderer.setClearColor(0x0B1520,1); draw(); const u=renderer.domElement.toDataURL('image/png'); renderer.setClearColor(0x000000,0); V.dirty=true; return u; };
+  // interacción
+  const el=renderer.domElement, ray=new THREE.Raycaster(); let drag=null;
+  const hit=ev=>{ const b=el.getBoundingClientRect(); ray.setFromCamera(new THREE.Vector2(((ev.clientX-b.left)/b.width)*2-1,-((ev.clientY-b.top)/b.height)*2+1),cam);
+    return ray.intersectObjects(V.list.filter(m=>m.visible&&m.material.opacity>.1),false).find(i=>V.cut==null||i.point.y<=clip.constant); };
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+  el.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY,m:0,pan:e.button===2||e.button===1||e.shiftKey}; el.setPointerCapture(e.pointerId); V.anim=null; el.style.cursor=drag.pan?'move':'grabbing'; });
+  el.addEventListener('pointermove',e=>{ if(drag){ const dx=e.clientX-drag.x,dy=e.clientY-drag.y; drag.m+=Math.abs(dx)+Math.abs(dy);
+      if(drag.pan){ const k=V.dist*Math.tan(cam.fov*Math.PI/360)*2/(host.clientHeight||1); V.target.addScaledVector(new THREE.Vector3().setFromMatrixColumn(cam.matrix,0),-dx*k).addScaledVector(new THREE.Vector3().setFromMatrixColumn(cam.matrix,1),dy*k); }
+      else { V.theta-=dx*.0075; V.phi=Math.max(.02,Math.min(Math.PI/2-.02,V.phi-dy*.006)); }
+      drag.x=e.clientX; drag.y=e.clientY; V.dirty=true; return; }
+    const h=hit(e); opt.onHover?.(h?h.object.userData.el:null,e); el.style.cursor=h?'pointer':'grab'; });
+  el.addEventListener('pointerup',e=>{ if(drag&&drag.m<6&&!drag.pan){ const h=hit(e); opt.onPick?.(h?h.object.userData.el:null); } drag=null; el.style.cursor='grab'; });
+  el.addEventListener('pointerleave',()=>opt.onHover?.(null));
+  el.addEventListener('wheel',e=>{ e.preventDefault(); V.anim=null; V.dist=Math.max(V.minD,Math.min(V.maxD,V.dist*(e.deltaY<0?1/1.12:1.12))); V.dirty=true; },{passive:false});
+  el.addEventListener('dblclick',()=>V.reset());
+  new ResizeObserver(size).observe(host); size();
+  const ease=t=>1-Math.pow(1-t,3);
+  (function frame(now){ requestAnimationFrame(frame); if(document.hidden) return;
+    if(V.anim){ const A=V.anim,k=Math.min(1,(now-A.t0)/A.dur),e=ease(k); V.target.lerpVectors(A.from.t,A.to.t,e); V.dist=A.from.d+(A.to.d-A.from.d)*e; V.theta=A.from.th+(A.to.th-A.from.th)*e; V.phi=A.from.ph+(A.to.ph-A.from.ph)*e; V.dirty=true; if(k>=1) V.anim=null; }
+    if(V.dirty){ draw(); V.dirty=false; } })(performance.now());
+  return V;
+}
+
+/* ===================== coordenadas ===================== */
+const toV=p=>new THREE.Vector3(p[0]-AV.off.x,p[1]-AV.off.y,p[2]-AV.off.z);
+const toIfc=p=>{ const o=S.origin; const x=p[0]+o.x,y=p[1]+o.y,z=p[2]+o.z; return [x,-z,y]; };   // web-ifc trabaja con Y arriba; IFC con Z arriba
+const dirIfc=v=>[v.x,-v.z,v.y];
+
+/* ===================== estados y colores ===================== */
+const ORD={'Nuevo':0,'Detectado':0,'Activo':1,'Resuelto':2};
+const stCol=s=>({'Nuevo':C.red,'Detectado':C.red,'Activo':C.amber,'Resuelto':C.green}[s]||C.grey);
+const tipoTxt=c=>c.tipo==='Holgura'?`Holgura insuficiente: ${(c.dist*100).toFixed(1)} cm (mín. ${Math.round(c.rule.tol*100)} cm)`:c.tipo==='Contenido'?'Un elemento queda contenido dentro del otro':'Choque duro (penetración)';
+function elState(id){ const s=S.cl?.byEl.get(id); if(!s) return null; return s.has('Nuevo')||s.has('Detectado')?'Nuevo':'Activo'; }
+function paintFn(el){
+  if(S.mode==='di') return {c:GCOL[el.g]||GCOL.Otros};
+  const s=elState(el.id); return s?{c:stCol(s)}:{c:C.neutral,e:'#7E93B3',eo:.35};
+}
+function legend(){ const L=S.mode==='di'?Object.entries(GCOL).map(([k,c])=>[k,c]):(S.cl?.cmp?[['Choque nuevo',C.red],['Choque activo',C.amber],['Sin choque',C.neutral]]:[['En choque',C.red],['Sin choque',C.neutral]]);
+  $('legend').innerHTML=L.map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join('')+(S.sel?`<span><i style="background:${C.red}"></i>A</span><span><i style="background:${C.amber}"></i>B</span>`:''); }
+
+/* ===================== interfaz: reglas, lista y ficha ===================== */
+function renderRules(){
+  const pend=S.rules.filter(r=>r.ia&&!r.on).length;
+  $('rules').innerHTML=(pend?`<button class="btn xs" id="apAll"><i class="ph ph-checks"></i>Aprobar las ${pend} reglas de la IA</button>`:'')+S.rules.map((r,i)=>`<label class="rule${r.ia?' ia':''}"><input type="checkbox" data-i="${i}" ${r.on?'checked':''} ${r.bad?'disabled':''}><span><b>${esc(lab(r.a))} × ${esc(lab(r.b))}</b><small>${esc(r.id)} · ${r.tipo==='holgura'?'holgura mínima':'choque duro'}${r.src?' · '+esc(r.src):''}</small>${r.ia?`<span class="iatag">${r.on?'IA · aprobada':'IA · por aprobar'}</span>`:''}${r.amb?`<span class="amb">${esc(r.amb)}</span>`:''}</span>${r.tipo==='holgura'?`<span class="tol"><input type="number" min="0" max="100" step="1" value="${Math.round(r.tol*100)}" data-t="${i}" aria-label="Holgura mínima en cm">cm</span>`:''}</label>`).join('')
+;
+  $('rulesSum').textContent=`${S.rules.filter(r=>r.on).length} activas`;
+  const dirty=()=>{ if(S.cl) $('prog').textContent='Reglas cambiadas: detecte de nuevo'; };
+  $('rules').querySelectorAll('[data-i]').forEach(x=>x.onchange=()=>{ S.rules[+x.dataset.i].on=x.checked; renderRules(); dirty(); });
+  $('rules').querySelectorAll('[data-t]').forEach(x=>x.onchange=()=>{ S.rules[+x.dataset.t].tol=Math.max(0,+x.value||0)/100; dirty(); });
+  if($('apAll')) $('apAll').onclick=()=>{ S.rules.forEach(r=>{ if(r.ia&&!r.bad) r.on=true; }); renderRules(); dirty(); toast('Reglas aprobadas. Pulse Detectar.'); };
+}
+function renderCounts(){ const L=S.cl?.list||[], n=k=>L.filter(c=>c.status===k).length;
+  const items=S.cl?.cmp?[['Nuevo','Nuevas'],['Activo','Activas'],['Resuelto','Resueltas']]:[['Detectado','Detectadas'],['__d','Duras'],['__h','Holguras']];
+  const val=k=>k==='__d'?L.filter(c=>c.tipo!=='Holgura').length:k==='__h'?L.filter(c=>c.tipo==='Holgura').length:n(k);
+  $('counts').innerHTML=items.map(([k,l])=>`<button class="count" data-k="${k}" aria-pressed="${S.filter===k}" style="--c:${k.startsWith('__')?C.grey:stCol(k)}"><b>${S.cl?val(k):'–'}</b><span>${l}</span></button>`).join('');
+  $('counts').querySelectorAll('.count').forEach(b=>b.onclick=()=>{ if(!S.cl) return; S.filter=S.filter===b.dataset.k?'':b.dataset.k; renderCounts(); renderList(); });
+  ['xBcf','xRep','xCsv'].forEach(i=>$(i).disabled=!L.length); }
+function filtered(){ const q=$('q').value.trim().toLowerCase(), lv=$('fLv').value, f=S.filter;
+  return dashList().filter(c=>(!lv||c.level===lv)&&(!q||c.title.toLowerCase().includes(q)||c.n.toLowerCase().includes(q))&&(!f||(f==='__d'?c.tipo!=='Holgura':f==='__h'?c.tipo==='Holgura':c.status===f))); }
+function renderList(){ const L=filtered();
+  if(!S.cl){ $('clist').innerHTML=`<div class="none"><i class="ph ph-intersect"></i>${S.M2?'Ejecute la detección para ver las interferencias.':'Cargue un IFC para empezar.'}</div>`; return; }
+  $('clist').innerHTML=L.length?L.slice(0,600).map(c=>`<button class="ci" role="option" data-k="${esc(c.key)}" aria-current="${c===S.sel}" style="--c:${stCol(c.status)}"><span class="dot"></span><span class="t">${esc(c.title)}</span><span class="n">${c.n}</span><small>${esc(c.rule.id)} · ${c.tipo}${c.tipo==='Holgura'?' '+(c.dist*100).toFixed(1)+' cm':''} · ${esc(c.level)} · ${c.status}</small></button>`).join('')
+    :`<div class="none"><i class="ph ph-funnel"></i>${S.cl.list.length?'Ninguna interferencia con este filtro.':'Sin interferencias con las reglas activas.'}</div>`;
+  $('clist').querySelectorAll('.ci').forEach(b=>b.onclick=()=>select(S.cl.list.find(c=>c.key===b.dataset.k),true));
+  $('clist').querySelector('[aria-current=true]')?.scrollIntoView({block:'nearest'}); }
+function renderDet(){ const c=S.sel, d=$('det'); if(!c){ d.hidden=true; return; } d.hidden=false;
+  const m=S.meta[c.key], p=toIfc(c.pt), L=filtered(), i=L.indexOf(c);
+  const el=(e,lab,col)=>`<div class="el" style="--c:${col}"><div class="cap">${lab} · ${esc(e.g)}</div><b>${esc(e.name||'(sin nombre)')}</b><div class="mono">${esc(e.cls)} · ${esc(e.level)}<br>${esc(e.id)}</div></div>`;
+  d.innerHTML=`<div class="hd"><span class="cap">${c.n} · ${esc(c.rule.id)} · ${esc(lab(c.rule.a))} × ${esc(lab(c.rule.b))}</span>
+      <button class="iconbtn" id="dPrev" aria-label="Interferencia anterior" ${i<=0?'disabled':''}><i class="ph ph-caret-left"></i></button><span class="mono muted" style="font-size:11.5px">${i+1}/${L.length}</span><button class="iconbtn" id="dNext" aria-label="Interferencia siguiente" ${i<0||i>=L.length-1?'disabled':''}><i class="ph ph-caret-right"></i></button>
+      <button class="iconbtn" id="dMin" aria-label="Minimizar ficha"><i class="ph ${d.classList.contains('min')?'ph-caret-up':'ph-caret-down'}"></i></button></div>
+    <h2>${esc(c.title)} <span class="chip" style="color:${stCol(c.status)}">${c.status}</span></h2>
+    <div class="body"><dl><dt>Tipo</dt><dd>${tipoTxt(c)}</dd><dt>Nivel</dt><dd>${esc(c.level)}</dd><dt>Punto IFC</dt><dd class="mono" style="font-size:12.5px">X ${p[0].toFixed(2)} · Y ${p[1].toFixed(2)} · Z ${p[2].toFixed(2)} m</dd></dl>
+    ${el(c.a,'A',C.red)}${el(c.b,'B',C.amber)}
+    <div class="meta"><label>Estado de gestión<select id="dSt">${['Abierto','En revisión','Resuelto','Aprobado'].map(s=>`<option ${m.st===s?'selected':''}>${s}</option>`).join('')}</select></label>
+      <label>Nota para el BCF<textarea id="dNote" rows="2" placeholder="Ej.: bajar el ducto 15 cm o pasar por la abertura del eje 3">${esc(m.nota)}</textarea></label></div>
+    <div class="acts"><button class="btn xs" id="dFocus"><i class="ph ph-crosshair"></i>Encuadrar</button><button class="btn xs" id="dBcf"><i class="ph ph-package"></i>BCF de esta interferencia</button></div></div>`;
+  $('dPrev').onclick=()=>step(-1); $('dNext').onclick=()=>step(1);
+  $('dMin').onclick=()=>{ d.classList.toggle('min'); renderDet(); };
+  $('dSt').onchange=e=>{ m.st=e.target.value; renderDash(); }; $('dNote').oninput=e=>{ m.nota=e.target.value; };
+  $('dFocus').onclick=()=>AV.focusPt(toV(c.pt),c.R); $('dBcf').onclick=()=>exportBCF([c]); }
+function select(c,fly){ if(c&&!S.sel&&matchMedia('(max-width:900px)').matches) $('det').classList.add('min'); S.sel=c||null;
+  if(AV){ AV.select(c?AV.meshes.get(c.a.id)&&c.a:null,c?AV.meshes.get(c.b.id)&&c.b:null); AV.setMarker(c?toV(c.pt):null); if(fly&&c) AV.focusPt(toV(c.pt),c.R); }
+  legend(); renderList(); renderDet(); }
+function step(d){ const L=filtered(); if(!L.length) return; let i=L.indexOf(S.sel); i=i<0?0:Math.max(0,Math.min(L.length-1,i+d)); select(L[i],true); }
+function repaint(){ if(!AV) return; AV.paint(paintFn); legend(); }
+
+/* ===================== carga y análisis ===================== */
+let AV=null; const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true;
+function setFile(k,f){ S['f'+k]=f; S['n'+k]=f?f.name:''; $('s'+k).classList.toggle('done',!!f); $('n'+k).innerHTML=f?`<span class="fname">${esc(f.name)}</span><span>${(f.size/1048576).toFixed(1)} MB</span>`:'<u>Elija</u> o arrastre el IFC'; $('go').disabled=!S.f2; }
+for(const k of [1,2]){ const inp=$('f'+k), s=$('s'+k);
+  inp.onchange=()=>setFile(k,inp.files[0]||null);
+  s.ondragover=e=>{e.preventDefault(); s.classList.add('over')}; s.ondragleave=()=>s.classList.remove('over');
+  s.ondrop=e=>{ e.preventDefault(); s.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) setFile(k,f); }; }
+$('btnLoad').onclick=()=>{ $('loader').hidden=false; $('lclose').hidden=!S.M2; };
+$('lclose').onclick=()=>{ $('loader').hidden=true; };
+$('sample').onclick=()=>{ setFile(1,new File([SAMPLE.v1],'V01_interferencias.ifc')); setFile(2,new File([SAMPLE.v2],'V02_interferencias.ifc')); analyze(); };
+$('go').onclick=analyze;
+async function analyze(){ if(!S.f2) return; const st=$('lstat'); $('go').disabled=true; $('sample').disabled=true;
+  try{ st.textContent='Cargando el motor de geometría…';
+    // web-ifc si se puede descargar; si no (sin conexión o bloqueado en la vista), el lector integrado
+    let api=null; try{ api=await Promise.race([loadWebIfc(),sleep(15000).then(()=>{ throw new Error('timeout'); })]); }catch(e){ console.warn('[interferencias] web-ifc no disponible, se usa el lector integrado',e); }
+    const b2=new Uint8Array(await S.f2.arrayBuffer()), b1=S.f1?new Uint8Array(await S.f1.arrayBuffer()):null;
+    if(!/ISO-10303-21/.test(new TextDecoder().decode(b2.slice(0,200)))) throw new Error('V02 no parece un archivo IFC.');
+    const readAll=(useApi)=>{ const origin={}; const r=b=>useApi?readModel(api,b,origin):readModelLocal(new TextDecoder().decode(b),origin); const M2=r(b2); const M1=b1?r(b1):null; return {M2,M1,origin,engine:useApi?'web-ifc':'lector integrado'}; };
+    st.textContent='Leyendo la geometría…'; await sleep(30);
+    let R=null; if(api){ try{ R=readAll(true); if(!R.M2.els.length) R=null; }catch(e){ console.warn('[interferencias] web-ifc falló, se usa el lector integrado',e); R=null; } }
+    if(!R) R=readAll(false);
+    const {M2,origin,engine}=R; let M1=R.M1&&R.M1.els.length?R.M1:null; S.engine=engine;
+    if(!M2.els.length) throw new Error('V02 no trae geometría que se pueda leer: exporte el IFC con la vista de coordinación (IFC2x3 o IFC4).');
+    S.M2=M2; S.M1=M1; S.origin=origin; S.cl=null; S.sel=null; S.shots={}; S.filter='';
+    if(!AV){ AV=Viewer($('stage'),{onPick:el=>{ if(!el) return; const c=S.cl?.list.find(c=>c.status!=='Resuelto'&&(c.a.id===el.id||c.b.id===el.id)); if(c) select(c,false); else toast(`${el.name||el.cls}: sin interferencias`); },
+      onHover:(el,e)=>{ if(!el||!e){ tip.hidden=true; return; } const b=$('stage').getBoundingClientRect(); tip.hidden=false; tip.style.left=(e.clientX-b.left)+'px'; tip.style.top=(e.clientY-b.top)+'px'; const s=elState(el.id); tip.innerHTML=`<b>${esc(el.name||el.cls)}</b> <span class="muted">${esc(el.g)}</span>${s?` · <span style="color:${stCol(s)}">${s==='Nuevo'?'choque nuevo':'choque activo'}</span>`:''}`; }});
+      $('stage').appendChild(tip); }
+    AV.load(M2.els); repaint(); select(null);
+    $('files').innerHTML=`<span class="chip" style="color:var(--teal)" title="${esc(S.n2)}">V02 · ${esc(S.n2)}</span>`+(M1?`<span class="chip" style="color:var(--grey)" title="${esc(S.n1)}">V01 · ${esc(S.n1)}</span>`:'');
+    $('badge').hidden=false; $('badge').innerHTML=`<i class="ph ph-cube"></i>${M2.els.length} elementos con geometría · ${S.engine}`;
+    $('run').disabled=false; $('loader').hidden=true; st.textContent='';
+    await run();
+  }catch(e){ console.warn('[interferencias]',e); st.textContent=e.message==='web-ifc'?'No se pudo descargar el motor de geometría: revise la conexión.':(e.message||'No se pudo leer el archivo.'); }
+  $('go').disabled=!S.f2; $('sample').disabled=false; }
+let busy=false;
+async function run(){ if(busy) return; if(!S.M2){ $('loader').hidden=false; $('lclose').hidden=true; toast('Primero cargue los modelos: V02 obligatorio, V01 opcional'); return; } busy=true; $('run').disabled=true; const pr=$('prog'), P=f=>pr.textContent=`Analizando… ${Math.round(f*100)}%`;
+  try{ const t0=performance.now(); P(0);
+    const now=await detect(S.M2.els,S.rules,f=>P(S.M1?f*.6:f));
+    const old=S.M1?await detect(S.M1.els,S.rules,f=>P(.6+f*.4)):null;
+    const by2=new Map(S.M2.els.map(e=>[e.id,e]));
+    const mk=(c,status)=>{ const a=by2.get(c.a.id)||c.a, b=by2.get(c.b.id)||c.b; return {key:c.key,status,rule:c.rule,tipo:c.tipo,dist:c.dist,pt:c.pt,R:c.R,a,b,level:c.a.level,title:`${c.a.name||c.a.cls.replace(/^Ifc/,'')} vs. ${c.b.name||c.b.cls.replace(/^Ifc/,'')}`}; };
+    const ok=new Map((old||[]).map(c=>[c.key,c]));
+    const list=now.map(c=>mk(c,old?(ok.has(c.key)?'Activo':'Nuevo'):'Detectado'));
+    if(old){ const nk=new Set(now.map(c=>c.key)); for(const c of old) if(!nk.has(c.key)) list.push(mk(c,'Resuelto')); }
+    list.sort((p,q)=>ORD[p.status]-ORD[q.status]||p.rule.id.localeCompare(q.rule.id)||p.title.localeCompare(q.title));
+    list.forEach((c,i)=>{ c.n='INT-'+String(i+1).padStart(3,'0'); S.meta[c.key]||={st:c.status==='Resuelto'?'Resuelto':'Abierto',nota:''}; });
+    const byEl=new Map(); for(const c of list) if(c.status!=='Resuelto') for(const e of [c.a,c.b]) (byEl.get(e.id)||byEl.set(e.id,new Set()).get(e.id)).add(c.status);
+    S.cl={list,cmp:!!old,byEl,ms:performance.now()-t0}; S.sel=null; S.shots={}; S.filter='';
+    const lv=[...new Set(list.map(c=>c.level))].sort(); $('fLv').innerHTML='<option value="">Todos los niveles</option>'+lv.map(l=>`<option>${esc(l)}</option>`).join('');
+    pr.textContent=`${list.length} en ${Math.max(1,Math.round(S.cl.ms))} ms${old?' · V02 frente a V01':''}`;
+    S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; $('rulesBox').open=false; repaint(); renderCounts(); select(list.find(c=>c.status!=='Resuelto')||null,true); renderDash();
+  }catch(e){ console.warn(e); pr.textContent='No se pudo completar la detección'; }
+  busy=false; $('run').disabled=false; }
+$('run').onclick=run;
+$('q').oninput=()=>{ renderList(); renderDet(); }; $('fLv').onchange=()=>{ renderList(); renderDet(); };
+
+/* ===================== herramientas del visor ===================== */
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>AV?.view(b.dataset.v));
+$('tFit').onclick=()=>{ if(!AV) return; if(S.sel) AV.focusPt(toV(S.sel.pt),S.sel.R); else AV.reset(); };
+const tg=(id,fn)=>{ const b=$(id); b.onclick=()=>{ const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); fn(on); }; };
+tg('tIso',on=>{ if(AV){ AV.iso=on; AV.paint(); } }); tg('tXray',on=>{ if(AV){ AV.xray=on; AV.paint(); } });
+tg('tCut',on=>{ $('cutBox').hidden=!on; AV?.setCut(on?+$('cutR').value/100:null); });
+$('cutR').oninput=e=>{ $('cutO').textContent=e.target.value+'%'; AV?.setCut(+e.target.value/100); };
+$('tShot').onclick=()=>{ if(!AV) return; dlURL((S.sel?S.sel.n:'interferencias')+'.png',AV.shot()); };
+$('tFull').onclick=()=>{ const h=$('stage'); if(document.fullscreenElement) document.exitFullscreen?.(); else h.requestFullscreen?.(); };
+$('mSt').onclick=()=>{ S.mode='st'; $('mSt').setAttribute('aria-pressed',true); $('mDi').setAttribute('aria-pressed',false); repaint(); };
+$('mDi').onclick=()=>{ S.mode='di'; $('mDi').setAttribute('aria-pressed',true); $('mSt').setAttribute('aria-pressed',false); repaint(); };
+document.addEventListener('keydown',e=>{ if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)) return; if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); step(1); } if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); step(-1); } if(e.key==='Escape') select(null); });
+
+/* ===================== exportación: BCF 2.1, reporte y CSV ===================== */
+function shot(c){ if(S.shots[c.key]) return S.shots[c.key];
+  const prev={cam:AV.camState(),sel:AV.sel,xray:AV.xray,iso:AV.iso,cut:AV.cut};
+  AV.xray=true; AV.iso=false; AV.setCut(null); AV.select(AV.meshes.get(c.a.id)?c.a:null,AV.meshes.get(c.b.id)?c.b:null); AV.setMarker(toV(c.pt));
+  AV.setCam({t:toV(c.pt),d:Math.min(Math.max(c.R*10,10),Math.max(10,AV.home.R*1.6)),th:-.72,ph:.95});
+  const url=AV.shot(), cam=AV.camInfo();
+  AV.xray=prev.xray; AV.iso=prev.iso; AV.setCut(prev.cut); AV.sel=prev.sel; AV.paint(); AV.setCam(prev.cam); AV.setMarker(S.sel?toV(S.sel.pt):null);
+  return S.shots[c.key]={url,cam}; }
+const xq=s=>String(s??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]));
+const uuid=()=>crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16)});
+const csvq=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+// Descargas: dentro de Claude se usa la capacidad «downloads» (el visor pide confirmación); fuera, un enlace normal.
+let DL=null; (async()=>{ try{ if(window.claude?.use) DL=await claude.use('downloads'); }catch(e){} })();
+const fromDataURL=u=>{ const [h,b]=u.split(','), bin=atob(b), arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return new Blob([arr],{type:(h.match(/:(.*?);/)||[])[1]}); };
+function anchor(name,url){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); toast('Descarga lista: '+name); }
+async function dl(name,data,type){ const blob=data instanceof Blob?data:new Blob([data],{type});
+  if(!DL&&PARENT?.save){ try{ await PARENT.save(name,blob); }catch(e){ if(e?.code!=='declined') toast('No se pudo descargar en esta vista.'); } return; }
+  if(DL){ const nm=name.replace(/\.bcfzip$/i,'.bcf.zip');   // el visor de Claude no acepta la extensión .bcfzip: se entrega como .zip
+    try{ await DL.save({filename:nm,data:blob}); toast(nm.endsWith('.bcf.zip')?'Listo. Renómbrelo a .bcfzip si su programa lo pide.':'Archivo listo: '+nm); }
+    catch(e){ if(e?.code!=='declined') toast(e?.code==='rate_limited'?'Ya hay una descarga pendiente de confirmar.':'No se pudo descargar en esta vista.'); }
+    return; }
+  const url=URL.createObjectURL(blob); anchor(name,url); setTimeout(()=>URL.revokeObjectURL(url),2000); }
+function dlURL(name,url){ if(DL) return dl(name,fromDataURL(url)); anchor(name,url); }
+let zipP=null;
+const loadZip=()=>zipP||=new Promise((res,rej)=>{ if(window.JSZip) return res(JSZip); const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload=()=>res(JSZip); s.onerror=()=>{ zipP=null; rej(new Error('jszip')); }; document.head.appendChild(s); });
+const BCF_ST={'Abierto':'Open','En revisión':'In Progress','Resuelto':'Resolved','Aprobado':'Closed'};
+async function exportBCF(list){ list=list||(S.cl?.list||[]).filter(c=>c.status!=='Resuelto'); if(!list.length){ toast('No hay interferencias activas para exportar'); return; }
+  let Z; try{ Z=await loadZip(); }catch(e){ toast('Para exportar BCF se necesita conexión'); return; }
+  toast('Generando BCF…'); await sleep(30);
+  const zip=new Z(), now=new Date().toISOString(), file=S.n2||'modelo.ifc', f3=a=>`<X>${a[0].toFixed(4)}</X><Y>${a[1].toFixed(4)}</Y><Z>${a[2].toFixed(4)}</Z>`;
+  zip.file('bcf.version','<?xml version="1.0" encoding="UTF-8"?>\n<Version VersionId="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="version.xsd">\n  <DetailedVersion>2.1</DetailedVersion>\n</Version>\n');
+  zip.file('project.bcfp',`<?xml version="1.0" encoding="UTF-8"?>\n<ProjectExtension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project.xsd">\n  <Project ProjectId="${uuid()}">\n    <Name>${xq(file.replace(/\.ifc$/i,''))} · interferencias</Name>\n  </Project>\n  <ExtensionSchema></ExtensionSchema>\n</ProjectExtension>\n`);
+  for(const c of list){ const g=uuid(), vg=uuid(), m=S.meta[c.key], s=shot(c), o=AV.off;
+    const pos=toIfc([s.cam.pos.x+o.x,s.cam.pos.y+o.y,s.cam.pos.z+o.z]), p=toIfc(c.pt);
+    const desc=`${tipoTxt(c)}. Regla ${c.rule.id} (${lab(c.rule.a)} × ${lab(c.rule.b)}). A: ${c.a.cls} ${c.a.name||''} [${c.a.id}]. B: ${c.b.cls} ${c.b.name||''} [${c.b.id}]. Nivel: ${c.level}. Punto: X ${p[0].toFixed(3)}, Y ${p[1].toFixed(3)}, Z ${p[2].toFixed(3)} m. Estado frente a V01: ${c.status}.`;
+    const markup=`<?xml version="1.0" encoding="UTF-8"?>
+<Markup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="markup.xsd">
+  <Header>
+    <File${S.M2.proj?` IfcProject="${xq(S.M2.proj)}"`:''} isExternal="true">
+      <Filename>${xq(file)}</Filename>
+      <Date>${now}</Date>
+    </File>
+  </Header>
+  <Topic Guid="${g}" TopicType="Clash" TopicStatus="${BCF_ST[m.st]||'Open'}">
+    <Title>${xq(c.n+' · '+c.title)}</Title>
+    <Priority>${c.tipo==='Holgura'?'Normal':'High'}</Priority>
+    <Labels>${xq(lab(c.rule.a))}</Labels>
+    <Labels>${xq(lab(c.rule.b))}</Labels>
+    <Labels>${xq(c.status)}</Labels>
+    <CreationDate>${now}</CreationDate>
+    <CreationAuthor>AI model audit</CreationAuthor>
+    <Description>${xq(desc)}</Description>
+  </Topic>${m.nota?`
+  <Comment Guid="${uuid()}">
+    <Date>${now}</Date>
+    <Author>Coordinador BIM</Author>
+    <Comment>${xq(m.nota)}</Comment>
+    <Viewpoint Guid="${vg}"/>
+  </Comment>`:''}
+  <Viewpoints Guid="${vg}">
+    <Viewpoint>viewpoint.bcfv</Viewpoint>
+    <Snapshot>snapshot.png</Snapshot>
+  </Viewpoints>
+</Markup>
+`;
+    const view=`<?xml version="1.0" encoding="UTF-8"?>
+<VisualizationInfo Guid="${vg}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="visinfo.xsd">
+  <Components>
+    <Selection>
+      <Component IfcGuid="${xq(c.a.id)}"/>
+      <Component IfcGuid="${xq(c.b.id)}"/>
+    </Selection>
+    <Visibility DefaultVisibility="true"/>
+    <Coloring>
+      <Color Color="FFEF5A50"><Component IfcGuid="${xq(c.a.id)}"/></Color>
+      <Color Color="FFEDAA45"><Component IfcGuid="${xq(c.b.id)}"/></Color>
+    </Coloring>
+  </Components>
+  <PerspectiveCamera>
+    <CameraViewPoint>${f3(pos)}</CameraViewPoint>
+    <CameraDirection>${f3(dirIfc(s.cam.dir))}</CameraDirection>
+    <CameraUpVector>${f3(dirIfc(s.cam.up))}</CameraUpVector>
+    <FieldOfView>60</FieldOfView>
+  </PerspectiveCamera>
+</VisualizationInfo>
+`;
+    const d=zip.folder(g); d.file('markup.bcf',markup); d.file('viewpoint.bcfv',view); d.file('snapshot.png',s.url.split(',')[1],{base64:true}); }
+  dl(list.length===1?`${list[0].n}.bcfzip`:`interferencias_${file.replace(/\.ifc$/i,'')}.bcfzip`,await zip.generateAsync({type:'blob',compression:'DEFLATE'})); }
+function exportCsv(){ const L=S.cl?.list||[]; if(!L.length) return;
+  dl('interferencias.csv','﻿'+['N;Estado frente a V01;Gestión;Regla;Disciplinas;Tipo;Distancia_cm;Nivel;Elemento A;Clase A;GUID A;Elemento B;Clase B;GUID B;X;Y;Z;Nota',
+    ...L.map(c=>{ const p=toIfc(c.pt), m=S.meta[c.key]; return [c.n,c.status,m.st,c.rule.id,`${lab(c.rule.a)} × ${lab(c.rule.b)}`,c.tipo,c.tipo==='Holgura'?(c.dist*100).toFixed(1):'',c.level,c.a.name,c.a.cls,c.a.id,c.b.name,c.b.cls,c.b.id,p[0].toFixed(3),p[1].toFixed(3),p[2].toFixed(3),m.nota].map(csvq).join(';'); })].join('\n'),'text/csv;charset=utf-8'); }
+async function exportReport(){ const L=S.cl?.list||[]; if(!L.length) return; toast('Generando reporte…'); await sleep(30);
+  const act=L.filter(c=>c.status!=='Resuelto'), n=k=>L.filter(c=>c.status===k).length, cs={'Nuevo':'#C0392B','Detectado':'#C0392B','Activo':'#B7791F','Resuelto':'#2F855A'};
+  const kp=[['Activas',act.length,'#F2883A'],...(S.cl.cmp?[['Nuevas',n('Nuevo'),'#C0392B'],['Persisten',n('Activo'),'#B7791F'],['Resueltas',n('Resuelto'),'#2F855A']]:[]),['Choques duros',act.filter(c=>c.tipo!=='Holgura').length,'#C0392B'],['Holguras',act.filter(c=>c.tipo==='Holgura').length,'#5A6B80']];
+  const lv={}; for(const c of act) lv[c.level]=(lv[c.level]||0)+1;
+  const card=c=>{ const s=c.status==='Resuelto'?null:shot(c), p=toIfc(c.pt), m=S.meta[c.key];
+    return `<article class="c">${s?`<img src="${s.url}" alt="Vista de ${esc(c.n)}">`:'<div class="noimg">Resuelta en V02: sin vista</div>'}<div class="b"><div class="m">${esc(c.n)} · ${esc(c.rule.id)} · ${esc(lab(c.rule.a))} × ${esc(lab(c.rule.b))}</div><h3>${esc(c.title)} <span class="s" style="--c:${cs[c.status]}">${c.status}</span></h3><p>${esc(tipoTxt(c))}</p>
+      <table><tr><th>A</th><td>${esc(c.a.name)}<small>${esc(c.a.cls)} · ${esc(c.a.id)}</small></td></tr><tr><th>B</th><td>${esc(c.b.name)}<small>${esc(c.b.cls)} · ${esc(c.b.id)}</small></td></tr><tr><th>Nivel</th><td>${esc(c.level)}</td></tr><tr><th>Punto</th><td>X ${p[0].toFixed(2)} · Y ${p[1].toFixed(2)} · Z ${p[2].toFixed(2)} m</td></tr><tr><th>Gestión</th><td>${esc(m.st)}${m.nota?`<small>${esc(m.nota)}</small>`:''}</td></tr></table></div></article>`; };
+  const html=`<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reporte de interferencias</title>
+<style>body{font-family:Segoe UI,Arial,sans-serif;margin:0;color:#14202E;background:#F4F6F9}main{max-width:1040px;margin:0 auto;padding:40px 24px}header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;border-bottom:3px solid #F2883A;padding-bottom:16px}h1{margin:4px 0 0;font-size:28px}small,.m{color:#5A6B80}.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:24px 0}.k div{background:#fff;border-radius:10px;padding:12px;border-top:3px solid var(--c)}.k b{display:block;font-size:26px}h2{font-size:18px;margin:28px 0 10px}.g{display:grid;grid-template-columns:1fr 1fr;gap:14px}.t{border-collapse:collapse;width:100%;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}.t td,.t th{padding:8px 10px;text-align:left;border-bottom:1px solid #E3E8EF}.t th{background:#EEF2F7;font-weight:600}.c{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:#fff;border-radius:12px;overflow:hidden;margin:0 0 14px;break-inside:avoid;box-shadow:0 1px 3px rgba(0,0,0,.06)}.c img{width:100%;height:100%;object-fit:cover;background:#0B1520;display:block;min-height:220px}.noimg{display:grid;place-items:center;background:#E8EDF3;color:#5A6B80;font-size:13px;min-height:160px}.b{padding:14px 16px}.b h3{margin:4px 0 6px;font-size:16px}.b p{margin:0 0 8px;font-size:13.5px}.b table{font-size:12.5px;border-collapse:collapse;width:100%}.b th{text-align:left;color:#5A6B80;font-weight:500;padding:3px 10px 3px 0;vertical-align:top;width:64px}.b td{padding:3px 0}.b td small{display:block;font-family:Consolas,monospace;font-size:11px}.s{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;color:var(--c);border:1px solid var(--c);vertical-align:2px}footer{margin-top:28px;font-size:12px;color:#5A6B80}@media(max-width:720px){.c,.g{grid-template-columns:1fr}}@media print{body{background:#fff}main{padding:0}.c{box-shadow:none;border:1px solid #E3E8EF}}</style>
+<main><header><div><small>AI model audit · Reporte de interferencias</small><h1>${esc((S.n2||'Modelo').replace(/\.ifc$/i,''))}</h1><small>${S.cl.cmp?`Comparado con ${esc(S.n1)}`:'Sin comparación con versión anterior'}</small></div><small>${new Date().toLocaleString('es-PE')}</small></header>
+<div class="k">${kp.map(([l,v,c])=>`<div style="--c:${c}"><small>${l}</small><b>${v}</b></div>`).join('')}</div>
+<div class="g"><div><h2>Por regla</h2><table class="t"><tr><th>Regla</th><th>Disciplinas</th><th>Tipo</th><th>Activas</th></tr>${S.rules.filter(r=>r.on).map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(lab(r.a))} × ${esc(lab(r.b))}</td><td>${r.tipo==='holgura'?`holgura ${Math.round(r.tol*100)} cm`:'choque duro'}</td><td><b>${act.filter(c=>c.rule.id===r.id).length}</b></td></tr>`).join('')}</table></div>
+<div><h2>Por nivel</h2><table class="t"><tr><th>Nivel</th><th>Activas</th></tr>${Object.entries(lv).sort().map(([k,v])=>`<tr><td>${esc(k)}</td><td><b>${v}</b></td></tr>`).join('')||'<tr><td colspan="2">Sin interferencias activas</td></tr>'}</table></div></div>
+<h2>Detalle (${L.length})</h2>${L.map(card).join('')}
+<footer>Detección determinista por geometría: choque duro = penetración mayor a 1 mm; holgura medida entre cajas envolventes (aproximada). Las vistas se exportan también en BCF 2.1 con la misma numeración. Generado por AI model audit.</footer></main></html>`;
+  dl('reporte_interferencias.html',html,'text/html;charset=utf-8'); }
+$('xBcf').onclick=()=>exportBCF(); $('xRep').onclick=exportReport; $('xCsv').onclick=exportCsv;
+
+/* ===================== lector de geometría integrado (respaldo sin descargas) =====================
+   Se usa cuando web-ifc no se puede cargar (sin conexión o bloqueado por la vista). Cubre los casos
+   habituales: extrusiones (perfil rectangular, circular o poligonal), sólidos facetados, mallas
+   trianguladas o poligonales, elementos mapeados y recortes booleanos (toma el sólido base). */
+function stepParse(text){
+  const ents=new Map(); const data=text.slice(Math.max(0,text.search(/\bDATA\s*;/i)));
+  const re=/#(\d+)\s*=\s*([A-Za-z0-9_]+)\s*\(/g; let m;
+  while((m=re.exec(data))){ let i=re.lastIndex,d=1,q=false;
+    for(;i<data.length;i++){ const c=data[i]; if(q){ if(c==="'"){ if(data[i+1]==="'") i++; else q=false; } continue; }
+      if(c==="'") q=true; else if(c==='(') d++; else if(c===')'){ if(--d===0) break; } }
+    ents.set(+m[1],{t:m[2].toUpperCase(),raw:data.slice(re.lastIndex,i)}); re.lastIndex=i+1; }
+  return ents; }
+function stepArgs(s){ let i=0; s=s.replace(/\r?\n/g,'');
+  const val=()=>{ while(s[i]===' ') i++; const c=s[i];
+    if(c==="'"){ let o=''; i++; for(;;){ if(s[i]==="'"){ if(s[i+1]==="'"){ o+="'"; i+=2; continue; } i++; break; } if(i>=s.length) break; o+=s[i++]; } return o.replace(/\\X2\\([0-9A-F]+)\\X0\\/gi,(_,h)=>h.match(/.{4}/g).map(x=>String.fromCharCode(parseInt(x,16))).join('')).replace(/\\X\\([0-9A-F]{2})/gi,(_,h)=>String.fromCharCode(parseInt(h,16))); }
+    if(c==='('){ i++; const a=[]; while(i<s.length&&s[i]!==')'){ a.push(val()); while(s[i]===' ') i++; if(s[i]===',') i++; } i++; return a; }
+    if(c==='#'){ i++; let n=''; while(/[0-9]/.test(s[i])) n+=s[i++]; return {r:+n}; }
+    if(c==='$'||c==='*'){ i++; return null; }
+    if(c==='.'){ i++; let n=''; while(i<s.length&&s[i]!=='.') n+=s[i++]; i++; return {e:n}; }
+    if(/[A-Za-z]/.test(c)){ while(/[A-Za-z0-9_]/.test(s[i])) i++; const v=val(); return Array.isArray(v)?v[0]:v; }
+    let n=''; while(i<s.length&&/[-+0-9.Ee]/.test(s[i])) n+=s[i++]; return parseFloat(n); };
+  const out=[]; while(i<s.length){ out.push(val()); while(s[i]===' ') i++; if(s[i]===',') i++; else break; } return out; }
+function readModelLocal(text,origin){
+  const E=stepParse(text), A=new Map(); const args=id=>{ if(!A.has(id)){ const e=E.get(id); A.set(id,e?stepArgs(e.raw):[]); } return A.get(id); };
+  const T=id=>E.get(id)?.t, R=v=>v&&v.r;
+  // unidad de longitud
+  let sc=1; for(const [id,e] of E) if(e.t==='IFCSIUNIT'){ const a=args(id); if(a[1]?.e==='LENGTHUNIT'){ sc={MILLI:.001,CENTI:.01,DECI:.1,KILO:1000}[a[2]?.e]||1; } }
+  for(const [id,e] of E) if(e.t==='IFCCONVERSIONBASEDUNIT'){ const a=args(id); if(a[1]?.e==='LENGTHUNIT'){ const n=String(a[2]||'').toUpperCase(); if(n.includes('FOOT')) sc=.3048; else if(n.includes('INCH')) sc=.0254; } }
+  // álgebra 4x4 (fila mayor)
+  const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+  const mul=(a,b)=>{ const c=new Array(16).fill(0); for(let r=0;r<4;r++) for(let k=0;k<4;k++){ const v=a[r*4+k]; if(v) for(let j=0;j<4;j++) c[r*4+j]+=v*b[k*4+j]; } return c; };
+  const nrm=v=>{ const l=Math.hypot(...v)||1; return v.map(x=>x/l); }, cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const pt=id=>{ const a=args(id)[0]||[]; return [a[0]||0,a[1]||0,a[2]||0]; };
+  const dir=id=>{ const a=args(id)[0]||[]; return [a[0]||0,a[1]||0,a[2]||0]; };
+  const frame=(o,z,x)=>{ x=nrm([x[0]-(x[0]*z[0]+x[1]*z[1]+x[2]*z[2])*z[0],x[1]-(x[0]*z[0]+x[1]*z[1]+x[2]*z[2])*z[1],x[2]-(x[0]*z[0]+x[1]*z[1]+x[2]*z[2])*z[2]]); const y=cross(z,x); return [x[0],y[0],z[0],o[0],x[1],y[1],z[1],o[1],x[2],y[2],z[2],o[2],0,0,0,1]; };
+  const ax3=id=>{ if(!id) return I(); const a=args(id); if(T(id)==='IFCAXIS2PLACEMENT2D'){ const o=R(a[0])?pt(R(a[0])):[0,0,0]; const x=R(a[1])?nrm([...dir(R(a[1])).slice(0,2),0]):[1,0,0]; return frame(o,[0,0,1],x); }
+    const o=R(a[0])?pt(R(a[0])):[0,0,0], z=R(a[1])?nrm(dir(R(a[1]))):[0,0,1]; let x=R(a[2])?nrm(dir(R(a[2]))):(Math.abs(z[0])<.9?[1,0,0]:[0,1,0]); return frame(o,z,x); };
+  const pc=new Map(); const place=id=>{ if(!id) return I(); if(pc.has(id)) return pc.get(id); let M=I(); if(T(id)==='IFCLOCALPLACEMENT'){ const a=args(id); M=mul(place(R(a[0])),ax3(R(a[1]))); } pc.set(id,M); return M; };
+  // perfiles -> polígono 2D cerrado
+  const poly2=id=>{ const t=T(id), a=args(id);
+    if(t==='IFCPOLYLINE') return (a[0]||[]).map(p=>pt(R(p)));
+    if(t==='IFCINDEXEDPOLYCURVE'){ const L=args(R(a[0]))[0]||[]; return L.map(p=>[p[0],p[1],p[2]||0]); }
+    if(t==='IFCCOMPOSITECURVE'){ const out=[]; for(const s of a[0]||[]){ const c=R(args(R(s))[2]); if(c) out.push(...poly2(c)); } return out; }
+    if(t==='IFCTRIMMEDCURVE') return poly2(R(a[0]));
+    if(t==='IFCCIRCLE'){ const r=a[1]; const P=ax3(R(a[0])); return circ(r).map(p=>xf(P,p)); }
+    return []; };
+  const circ=r=>{ const n=24, o=[]; for(let k=0;k<n;k++){ const t=2*Math.PI*k/n; o.push([r*Math.cos(t),r*Math.sin(t),0]); } return o; };
+  const xf=(M,p)=>[M[0]*p[0]+M[1]*p[1]+M[2]*p[2]+M[3],M[4]*p[0]+M[5]*p[1]+M[6]*p[2]+M[7],M[8]*p[0]+M[9]*p[1]+M[10]*p[2]+M[11]];
+  const profile=id=>{ const t=T(id), a=args(id); let P=I(), pts=[];
+    if(t==='IFCRECTANGLEPROFILEDEF'||t==='IFCRECTANGLEHOLLOWPROFILEDEF'||t==='IFCROUNDEDRECTANGLEPROFILEDEF'){ const x=a[3]/2,y=a[4]/2; pts=[[-x,-y,0],[x,-y,0],[x,y,0],[-x,y,0]]; P=ax3(R(a[2])); }
+    else if(t==='IFCCIRCLEPROFILEDEF'||t==='IFCCIRCLEHOLLOWPROFILEDEF'){ pts=circ(a[3]); P=ax3(R(a[2])); }
+    else if(t==='IFCELLIPSEPROFILEDEF'){ pts=circ(1).map(p=>[p[0]*a[3],p[1]*a[4],0]); P=ax3(R(a[2])); }
+    else if(t==='IFCARBITRARYCLOSEDPROFILEDEF'||t==='IFCARBITRARYPROFILEDEFWITHVOIDS') pts=poly2(R(a[2]));
+    else if(/^IFC(I|L|T|U|C|Z)SHAPEPROFILEDEF$/.test(t||'')){ const w=(a[3]||.2)/2,h=(a[4]||.2)/2; pts=[[-w,-h,0],[w,-h,0],[w,h,0],[-w,h,0]]; P=ax3(R(a[2])); }   // aproximación por su caja
+    else if(t==='IFCDERIVEDPROFILEDEF'){ const b=profile(R(a[2])); return b; }
+    pts=pts.map(p=>xf(P,p)); if(pts.length>2){ const f=pts[0],l=pts[pts.length-1]; if(Math.hypot(f[0]-l[0],f[1]-l[1])<1e-9) pts.pop(); } return pts; };
+  // triangulación de un polígono plano (orejas; si falla, abanico)
+  const ear=P=>{ const n=P.length; if(n<3) return []; let area=0; for(let i=0;i<n;i++){ const p=P[i],q=P[(i+1)%n]; area+=p[0]*q[1]-q[0]*p[1]; }
+    const idx=[...Array(n).keys()]; if(area<0) idx.reverse(); const tri=[]; let g=0;
+    const inT=(p,a,b,c)=>{ const s=(u,v,w)=>(v[0]-u[0])*(w[1]-u[1])-(v[1]-u[1])*(w[0]-u[0]); return s(a,b,p)>=0&&s(b,c,p)>=0&&s(c,a,p)>=0; };
+    while(idx.length>3&&g++<5000){ let cut=false;
+      for(let i=0;i<idx.length;i++){ const a=P[idx[(i+idx.length-1)%idx.length]],b=P[idx[i]],c=P[idx[(i+1)%idx.length]];
+        if((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])<=0) continue;
+        if(idx.some(j=>{ const p=P[j]; return p!==a&&p!==b&&p!==c&&inT(p,a,b,c); })) continue;
+        tri.push([idx[(i+idx.length-1)%idx.length],idx[i],idx[(i+1)%idx.length]]); idx.splice(i,1); cut=true; break; }
+      if(!cut) break; }
+    if(idx.length===3) tri.push([...idx]); else for(let i=1;i<idx.length-1;i++) tri.push([idx[0],idx[i],idx[i+1]]);
+    return tri; };
+  // resultado: lista de triángulos en coordenadas locales del producto
+  const solid=(id,M,out,k=0)=>{ if(!id||k>12) return; const t=T(id), a=args(id);
+    if(t==='IFCEXTRUDEDAREASOLID'){ const pr=profile(R(a[0])); if(pr.length<3) return; const P=mul(M,ax3(R(a[1]))); const d=nrm(dir(R(a[2]))), h=a[3]||0;
+      const top=pr.map(p=>[p[0]+d[0]*h,p[1]+d[1]*h,p[2]+d[2]*h]); const tr=ear(pr), w=p=>xf(P,p);
+      for(const [i,j,l] of tr){ out.push([w(pr[i]),w(pr[l]),w(pr[j])],[w(top[i]),w(top[j]),w(top[l])]); }
+      for(let i=0;i<pr.length;i++){ const j=(i+1)%pr.length; out.push([w(pr[i]),w(pr[j]),w(top[j])],[w(pr[i]),w(top[j]),w(top[i])]); } return; }
+    if(t==='IFCFACETEDBREP'||t==='IFCFACETEDBREPWITHVOIDS'||t==='IFCCLOSEDSHELL'||t==='IFCOPENSHELL'||t==='IFCSHELLBASEDSURFACEMODEL'||t==='IFCFACEBASEDSURFACEMODEL'){
+      const shells=t==='IFCFACETEDBREP'||t==='IFCFACETEDBREPWITHVOIDS'?[R(a[0])]:t==='IFCCLOSEDSHELL'||t==='IFCOPENSHELL'?[id]:(a[0]||[]).map(R);
+      for(const sh of shells){ for(const f of (args(sh)[0]||[])){ for(const b of (args(R(f))[0]||[])){ const ba=args(R(b)); if(T(R(b))!=='IFCFACEOUTERBOUND'&&(args(R(f))[0]||[]).length>1) continue;
+        const loop=args(R(ba[0]))[0]||[]; const P=loop.map(p=>xf(M,pt(R(p)))); if(P.length<3) continue;
+        // proyección al plano dominante para triangular
+        const n=nrm(cross([P[1][0]-P[0][0],P[1][1]-P[0][1],P[1][2]-P[0][2]],[P[2][0]-P[0][0],P[2][1]-P[0][1],P[2][2]-P[0][2]])); const ax=[0,1,2].sort((u,v)=>Math.abs(n[v])-Math.abs(n[u]))[0];
+        const P2=P.map(p=>ax===2?[p[0],p[1]]:ax===1?[p[0],p[2]]:[p[1],p[2]]); for(const [i,j,l] of ear(P2)) out.push([P[i],P[j],P[l]]); } } } return; }
+    if(t==='IFCTRIANGULATEDFACESET'||t==='IFCPOLYGONALFACESET'){ const C=(args(R(a[0]))[0]||[]).map(p=>xf(M,[p[0],p[1],p[2]||0]));
+      if(t==='IFCTRIANGULATEDFACESET'){ const ci=a[3]||[]; const pi=a[5]; for(const tr of ci){ const g=i=>C[(pi&&pi.length?pi[i-1]:i)-1]; const p=[g(tr[0]),g(tr[1]),g(tr[2])]; if(p.every(Boolean)) out.push(p); } }
+      else { const pi=a[3]; for(const f of a[2]||[]){ const ix=(args(R(f))[0]||[]).map(i=>C[(pi&&pi.length?pi[i-1]:i)-1]).filter(Boolean); for(let i=1;i<ix.length-1;i++) out.push([ix[0],ix[i],ix[i+1]]); } } return; }
+    if(t==='IFCBOOLEANCLIPPINGRESULT'||t==='IFCBOOLEANRESULT'){ solid(R(a[1]),M,out,k+1); return; }
+    if(t==='IFCMAPPEDITEM'){ const src=args(R(a[0])); const O=ax3(R(src[0])); const ta=args(R(a[1]));
+      let Tm=I(); if(ta.length){ const x=R(ta[0])?nrm(dir(R(ta[0]))):[1,0,0], o=R(ta[2])?pt(R(ta[2])):[0,0,0], s=ta[3]||1; const z=R(ta[4])?nrm(dir(R(ta[4]))):[0,0,1]; Tm=frame(o,z,x); if(s!==1) for(const q of [0,1,2,4,5,6,8,9,10]) Tm[q]*=s; }
+      for(const it of (args(R(src[1]))[3]||[])) solid(R(it),mul(mul(M,Tm),O),out,k+1); return; }
+    if(t==='IFCSWEPTDISKSOLID'){ const c=poly2(R(a[0])), r=a[1]||.05; for(let i=0;i<c.length-1;i++){ const p=xf(M,c[i]),q=xf(M,c[i+1]); boxSeg(p,q,r,out); } return; } };
+  const boxSeg=(p,q,r,out)=>{ const d=nrm([q[0]-p[0],q[1]-p[1],q[2]-p[2]]); const u=nrm(cross(d,Math.abs(d[2])<.9?[0,0,1]:[1,0,0])), v=cross(d,u);
+    const c=[[1,1],[-1,1],[-1,-1],[1,-1]].map(([s,t])=>[u[0]*s*r+v[0]*t*r,u[1]*s*r+v[1]*t*r,u[2]*s*r+v[2]*t*r]);
+    const A=c.map(o=>[p[0]+o[0],p[1]+o[1],p[2]+o[2]]), B=c.map(o=>[q[0]+o[0],q[1]+o[1],q[2]+o[2]]);
+    for(let i=0;i<4;i++){ const j=(i+1)%4; out.push([A[i],A[j],B[j]],[A[i],B[j],B[i]]); } out.push([A[0],A[1],A[2]],[A[0],A[2],A[3]],[B[0],B[2],B[1]],[B[0],B[3],B[2]]); };
+  // estructura espacial y padres
+  const level=new Map(), parent=new Map();
+  for(const [id,e] of E){ if(e.t==='IFCRELCONTAINEDINSPATIALSTRUCTURE'){ const a=args(id); const nm=args(R(a[5]))[2]||'Sin nivel'; for(const o of a[4]||[]) level.set(R(o),nm); }
+    else if(e.t==='IFCRELAGGREGATES'||e.t==='IFCRELNESTS'){ const a=args(id); for(const o of a[5]||[]) parent.set(R(o),R(a[4])); } }
+  const owner=e=>{ let p=e,k=0; while(k++<25){ if(level.has(p)) return p; const q=parent.get(p); if(!q) return e; p=q; } return e; };
+  const lvl=e=>{ let p=e,k=0; while(p&&k++<25){ if(level.has(p)) return level.get(p); p=parent.get(p); } return 'Sin nivel'; };
+  const SKIP=/^IFC(PROJECT|SITE|BUILDING|BUILDINGSTOREY|SPACE|OPENINGELEMENT|VIRTUALELEMENT|ANNOTATION|GRID|FACILITY|FACILITYPART|BRIDGE|ROAD|RAILWAY|ZONE)$/;
+  const els=new Map(); let proj='';
+  for(const [id,e] of E){
+    if(e.t==='IFCPROJECT'){ proj=args(id)[0]||''; continue; }
+    if(SKIP.test(e.t)) continue; const a=args(id); if(typeof a[0]!=='string'||a[0].length!==22) continue;
+    const pds=R(a[6]); if(!pds||T(pds)!=='IFCPRODUCTDEFINITIONSHAPE') continue;
+    const reps=(args(pds)[2]||[]).map(R); const body=reps.filter(r=>/^body$/i.test(args(r)[1]||'')); const use=(body.length?body:reps.filter(r=>!/axis|footprint|box|annotation|plan/i.test(args(r)[1]||'')));
+    const M=place(R(a[5])); const tris=[]; for(const r of use) for(const it of (args(r)[3]||[])) solid(R(it),M,tris);
+    if(!tris.length) continue;
+    const o=owner(id); let el=els.get(o);
+    if(!el){ const oa=args(o); const cls=pretty(T(o)); el={eid:o,id:oa[0]||('#'+o),name:oa[2]||oa[7]||'',cls,g:grp(cls),level:lvl(o),parts:[]}; els.set(o,el); }
+    // a metros, eje Y arriba (mismo marco que web-ifc) y relativo al origen común
+    const n=tris.length*3, pos=new Float32Array(n*3), nor=new Float32Array(n*3), idx=new Uint32Array(n); let k=0;
+    for(const tr of tris){ const w=tr.map(p=>[p[0]*sc,p[2]*sc,-p[1]*sc]); if(!origin.set){ origin.x=w[0][0]; origin.y=w[0][1]; origin.z=w[0][2]; origin.set=true; }
+      const nn=nrm(cross([w[1][0]-w[0][0],w[1][1]-w[0][1],w[1][2]-w[0][2]],[w[2][0]-w[0][0],w[2][1]-w[0][1],w[2][2]-w[0][2]]));
+      for(const p of w){ pos[k*3]=p[0]-origin.x; pos[k*3+1]=p[1]-origin.y; pos[k*3+2]=p[2]-origin.z; nor.set(nn,k*3); idx[k]=k; k++; } }
+    el.parts.push({pos,nor,idx}); }
+  return {els:[...els.values()],proj,tris:0,local:true}; }
+
+/* ===================== reglas con IA desde una matriz (CSV o Excel) =====================
+   La IA solo propone: cada regla llega desactivada («por aprobar») y el coordinador la aprueba.
+   Sin IA disponible, un asistente local interpreta la matriz por palabras clave (aproximado). */
+const MATRIX_SAMPLE=[['Código','Disciplina A','Disciplina B','Criterio de coordinación','Tolerancia','Prioridad','Fuente'],
+  ['MI-01','Ductos de climatización','Vigas','Ningún ducto puede atravesar vigas, mantener 5 cm libres bajo la viga.','5 cm','Alta','BEP 6.2'],
+  ['MI-02','Tuberías sanitarias','Muros','Todo cruce de tubería con muro debe reportarse para prever la manga.','0','Media','Acta de coordinación 14'],
+  ['MI-03','Tuberías','Ductos','Separación mínima entre redes de tuberías y ductos.','5 cm','Media','BEP 6.4'],
+  ['MI-04','Instalaciones MEP','Columnas','No se permite ningún cruce de instalaciones con columnas.','0','Alta','BEP 6.1'],
+  ['MI-05','Tuberías','Vigas','Las tuberías no pueden cruzar vigas sin pase aprobado por estructuras.','0','Alta','Acta de coordinación 15']];
+const TEXT_SAMPLE=`PLAN DE EJECUCIÓN BIM (extracto de ejemplo, no corresponde a un proyecto real)
+Sección 6.1 - Coordinación de instalaciones
+CI-01. Los ductos de climatización no deberán atravesar vigas y deberán mantener 5 cm libres bajo ellas.
+CI-02. Las tuberías sanitarias que crucen muros deberán reportarse para prever la manga correspondiente.
+CI-03. Entre tuberías y ductos deberá respetarse una separación mínima de 5 cm.
+Acta de coordinación N.° 15, punto 2
+A-15.2. Se acordó que ninguna tubería deberá cruzar vigas sin pase aprobado por estructuras.`;
+let BEP_TEXT='';
+const KW=[[/duct|climatiz|hvac|aire acond|extracci/i,'IfcDuct'],[/tuber|sanitari|desag|agua|pluvial|contra ?incendio|rociad/i,'IfcPipe'],[/bandeja|cable|el[eé]ctric/i,'IfcCable'],
+  [/rejilla|difusor/i,'IfcAirTerminal'],[/luminari/i,'IfcLightFixture'],[/viga/i,'IfcBeam'],[/columna|pilar/i,'IfcColumn'],[/losa|forjado/i,'IfcSlab'],[/zapata|cimenta/i,'IfcFooting'],
+  [/muro|tabique|pared|placa/i,'IfcWall'],[/puerta/i,'IfcDoor'],[/ventana/i,'IfcWindow'],[/escalera/i,'IfcStair'],[/cielo|falso techo|revestim/i,'IfcCovering'],
+  [/\bmep\b|instalacion/i,'MEP'],[/estructur/i,'Estructura'],[/arquitect/i,'Arquitectura']];
+const mapT=s=>{ for(const [re,t] of KW) if(re.test(s||'')) return t; return null; };
+const tolOf=s=>{ const m=String(s||'').replace(',','.').match(/(\d+(?:\.\d+)?)\s*(mm|cm|m)\b/i); if(!m) return /^\s*0+(\.0+)?\s*$/.test(s||'')?0:null; const v=+m[1]; return m[2].toLowerCase()==='mm'?v/1000:m[2].toLowerCase()==='cm'?v/100:v; };
+function parseCSV(text){ const first=text.split(/\r?\n/)[0]||''; const d=[';','\t',','].map(c=>[c,first.split(c).length]).sort((x,y)=>y[1]-x[1])[0][0];
+  const rows=[]; let row=[],cell='',q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ cell+='"'; i++; } else q=false; } else cell+=c; continue; }
+    if(c==='"') q=true; else if(c===d){ row.push(cell); cell=''; } else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(cell); rows.push(row); row=[]; cell=''; } else cell+=c; }
+  if(cell||row.length){ row.push(cell); rows.push(row); }
+  return rows.map(r=>r.map(x=>x.replace(/^﻿/,'').trim())).filter(r=>r.some(Boolean)); }
+let xlsxP=null;
+const loadXLSX=()=>xlsxP||=new Promise((res,rej)=>{ if(window.XLSX) return res(XLSX); const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload=()=>res(XLSX); s.onerror=()=>{ xlsxP=null; rej(new Error('xlsx')); }; document.head.appendChild(s); });
+async function readMatrix(file){
+  if(/\.xlsx?$/i.test(file.name)){ const X=await loadXLSX(); const wb=X.read(new Uint8Array(await file.arrayBuffer()),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+    return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:''}).map(r=>r.map(x=>String(x).trim())).filter(r=>r.some(Boolean)); }
+  return parseCSV(await file.text()); }
+function localRules(rows){ const head=rows[0].join(' ').toLowerCase(); const body=/c[oó]digo|disciplina|criterio|toleranc/.test(head)?rows.slice(1):rows; const out=[];
+  body.forEach((r,i)=>{ const txt=r.join(' · '); const code=(r.find(x=>/^[A-Z]{1,4}-?\d+(\.\d+)?$/.test(x))||'MI-'+String(i+1).padStart(2,'0'));
+    const ts=[]; for(const c of r){ if(c===code) continue; const t=mapT(c); if(t&&ts.length<2&&!(ts.length===1&&ts[0]===t&&r.length>3)) ts.push(t); if(ts.length===2) break; }
+    let tol=null; for(const c of r){ const v=tolOf(c); if(v!=null&&/\d/.test(c)&&c.length<14){ tol=v; break; } } if(tol==null) tol=tolOf(txt)??0;
+    const amb=ts.length<2?'No se identificaron las dos disciplinas o clases a cruzar.':'';
+    const src=r.find(x=>/bep|acta|plan|norma|especif/i.test(x)&&x!==code)||'';
+    out.push({codigo:code,a:ts[0]||'',b:ts[1]||'',tipo:tol>0?'holgura':'dura',tolerancia_m:tol,prioridad:(txt.match(/\b(alta|media|baja)\b/i)||[])[1]||'',fuente:src,cita:r.find(x=>x.length>30)||txt.slice(0,160),ambiguedad:amb}); });
+  return out; }
+// texto libre (BEP o actas): una regla por cada requisito que nombre dos grupos de elementos
+function localText(text){ const out=[]; let sec='';
+  for(const raw of text.split(/\n+/)){ const l=raw.trim(); if(!l) continue;
+    if(/^(secci[oó]n|acta|cap[ií]tulo)/i.test(l)&&!/deber|debe|acord|permit/i.test(l)){ sec=l.replace(/\s+-\s+.*/,'').slice(0,40); continue; }
+    if(!/deber[áa]n?|\bdeben?\b|se acord|no se permite|prohib|separaci[oó]n|holgura|cruce|cruzar|atraves/i.test(l)) continue;
+    const im=l.match(/^([A-Z]{1,4}-\d+(?:\.\d+)?)[.:)]?\s*/); const body=im?l.slice(im[0].length):l;
+    const hits=[]; for(const [re,t] of KW){ const g=new RegExp(re.source,'ig'); let m; while((m=g.exec(body))){ hits.push([m.index,t]); } }
+    hits.sort((p,q)=>p[0]-q[0]); const ts=[]; for(const [,t] of hits) if(!ts.includes(t)) ts.push(t);
+    if(!ts.length) continue; const tol=tolOf(body)??0;
+    out.push({codigo:im?im[1]:'R-'+(out.length+1),a:ts[0]||'',b:ts[1]||'',tipo:tol>0?'holgura':'dura',tolerancia_m:tol,prioridad:'',fuente:sec,cita:body.slice(0,160),ambiguedad:ts.length<2?'El requisito no nombra dos grupos de elementos.':''}); }
+  return out; }
+function aiFlow(steps,cur,note){ $('aiFlow').hidden=false; $('aiFlow').innerHTML=steps.map((s,i)=>`<div class="st ${i<cur?'done':i===cur?'run':''}"><i class="ph ${i<cur?'ph-check-circle':i===cur?'ph-circle-notch':'ph-circle'}"></i>${esc(s)}</div>`).join('')+(note?`<div class="note">${note}</div>`:''); }
+let SAI=null; (async()=>{ try{ if(!EMBED&&window.claude?.use) SAI=await claude.use('sample'); }catch(e){} })();
+function aiCaller(){ if(PARENT?.hasAI?.()) return p=>PARENT.ai(p); if(SAI) return p=>SAI.json(p); return null; }
+async function rulesFromMatrix(rows,name,text){
+  if(text!=null){ if(!text.trim()){ toast('Pegue el texto del BEP o las actas'); return; } } else if(!rows.length){ toast('La matriz está vacía'); return; }
+  const targets=[...GNAMES.filter(g=>g!=='Otros'),...Object.keys(TLAB)];
+  if(S.M2) for(const e of S.M2.els) if(!targets.includes(e.cls)) targets.push(e.cls);
+  const n=text!=null?text.split(/\n+/).filter(l=>l.trim()).length:rows.length-1, call=aiCaller();
+  const steps=[`Leyendo «${name}» (${n} ${text!=null?'líneas':'filas'})`,'Interpretando cada criterio','Validando disciplinas y clases contra el modelo','Preparando reglas para su aprobación'];
+  $('aiBtn').disabled=true; let arr, origin='ia', note='';
+  try{
+    if(call){ note='IA en vivo. Revise cada regla antes de aprobarla.'; aiFlow(steps,1,note);
+      const table=text!=null?text.slice(0,30000):rows.slice(0,200).map(r=>r.join(' | ')).join('\n');
+      const prompt=`Eres coordinador BIM. Convierte cada ${text!=null?'requisito de coordinación de este texto (BEP o actas) que hable de cruces, choques o separaciones entre elementos':'fila de esta matriz de interferencias'} en una regla de detección de choques entre dos grupos de elementos de un modelo IFC.
+Responde SOLO un arreglo JSON. Cada objeto: {"codigo": string (el código del requisito o de la fila si existe), "a": string, "b": string, "tipo": "dura" | "holgura", "tolerancia_m": number (separación mínima en metros; 0 si es choque duro), "prioridad": string, "fuente": string (documento citado en la fila, si existe), "cita": string (texto literal del criterio, máximo 160 caracteres), "ambiguedad": string o null}.
+"a" y "b" deben ser EXACTAMENTE uno de estos valores (disciplinas o prefijos de clase IFC): ${targets.join(', ')}.
+Usa la clase más específica que corresponda (p. ej. ductos → IfcDuct, tuberías → IfcPipe, vigas → IfcBeam, muros → IfcWall). Si el criterio pide una separación (p. ej. "5 cm libres"), tipo "holgura" con esa tolerancia; si prohíbe cruces sin separación, tipo "dura" y 0.
+Ignora los requisitos que no tratan de interferencias. Si un requisito no permite identificar los dos grupos, deja "a" o "b" vacío y explica en "ambiguedad". No inventes filas.
+
+${text!=null?'TEXTO':'MATRIZ'}:
+${table}`;
+      const raw=await call(prompt); if(!Array.isArray(raw)) throw {code:'invalid_json'}; arr=raw; aiFlow(steps,2,note); await sleep(250);
+    } else { origin='local'; note='Sin IA conectada en esta vista: asistente local por palabras clave. Es aproximado; revise cada regla.';
+      for(let i=0;i<3;i++){ aiFlow(steps,i,note); await sleep(350); } arr=text!=null?localText(text):localRules(rows); }
+    // validar contra la lista permitida y armar las reglas propuestas (desactivadas hasta aprobarlas)
+    const ok=new Set(targets); const prop=[];
+    for(const x of arr){ const a=String(x.a||''), b=String(x.b||''); let amb=x.ambiguedad||''; let bad=false;
+      if(!ok.has(a)||!ok.has(b)){ bad=true; amb=(amb?amb+' ':'')+`Grupo no reconocido: ${[a,b].filter(t=>!ok.has(t)).map(t=>t||'(vacío)').join(', ')}.`; }
+      const tol=Math.max(0,+x.tolerancia_m||0); const tipo=x.tipo==='holgura'||tol>0?'holgura':'dura';
+      prop.push({id:String(x.codigo||'MI-'+(prop.length+1)),a,b,tipo,tol:tipo==='holgura'?(tol||.05):0,on:false,ia:origin,bad,amb,src:[x.fuente,x.prioridad&&('prioridad '+String(x.prioridad).toLowerCase())].filter(Boolean).join(' · '),cita:x.cita||''}); }
+    if(!prop.length){ aiFlow([...steps.slice(0,2),'No se encontraron criterios de interferencia en el texto.'],3,note); $('aiBtn').disabled=false; return; }
+    S.rules=[...prop,...S.rules.filter(r=>!r.ia)];
+    $('rulesBox').open=true; renderRules();
+    aiFlow([...steps.slice(0,3),`${prop.filter(r=>!r.bad).length} reglas propuestas${prop.some(r=>r.bad)?` · ${prop.filter(r=>r.bad).length} con ambigüedad`:''}. Apruébelas y pulse Detectar.`],4,note);
+  }catch(e){ console.warn('[reglas IA]',e); const m={not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Demasiadas solicitudes; intente en un momento.',invalid_json:'La IA no devolvió reglas legibles; intente de nuevo.',prompt_too_large:'La matriz es demasiado grande; cargue solo las filas de criterios.'};
+    $('aiFlow').hidden=false; $('aiFlow').innerHTML=`<div class="st" style="color:#FF8A80"><i class="ph ph-x-circle"></i>${esc(m[e?.code]||(e?.message==='xlsx'?'No se pudo cargar el lector de Excel: revise la conexión o use CSV.':'No se pudo generar las reglas. Intente de nuevo.'))}</div>`; }
+  $('aiBtn').disabled=false; }
+$('aiBtn').onclick=()=>{ const m=$('aiMenu'); m.hidden=!m.hidden; $('aiBtn').setAttribute('aria-expanded',!m.hidden); };
+$('aiFromText').onclick=()=>{ const t=$('aiText').value; if(!t.trim()){ toast('Pegue el texto o use el de ejemplo'); return; } $('aiMenu').hidden=true; rulesFromMatrix([],BEP_TEXT&&t===BEP_TEXT?'BEP y actas de la revisión':'texto pegado',t); };
+$('aiSampleTxt').onclick=()=>{ $('aiText').value=TEXT_SAMPLE; $('aiMenu').hidden=true; rulesFromMatrix([],'BEP de ejemplo',TEXT_SAMPLE); };
+function proposeAI(){ const t=$('aiText').value||BEP_TEXT; if(t.trim()){ $('aiText').value=t; $('aiMenu').hidden=true; rulesFromMatrix([],t===BEP_TEXT?'BEP y actas de la revisión':'texto pegado',t); } else { $('aiMenu').hidden=false; $('aiBtn').setAttribute('aria-expanded',true); toast('Pegue el texto del BEP o cargue su matriz en CSV o Excel'); } }
+$('aiSample').onclick=()=>{ $('aiMenu').hidden=true; rulesFromMatrix(MATRIX_SAMPLE,'matriz_interferencias_ejemplo'); };
+$('aiDl').onclick=()=>dl('matriz_interferencias_ejemplo.csv','﻿'+MATRIX_SAMPLE.map(r=>r.map(csvq).join(';')).join('\n'),'text/csv;charset=utf-8');
+$('fM').onchange=async()=>{ const f=$('fM').files[0]; $('fM').value=''; if(!f) return; $('aiMenu').hidden=true;
+  try{ rulesFromMatrix(await readMatrix(f),f.name); }catch(e){ toast(e?.message==='xlsx'?'No se pudo cargar el lector de Excel: revise la conexión o use CSV.':'No se pudo leer la matriz.'); } };
+
+/* ===================== paso 6 de la demo: recibe los modelos de la revisión ===================== */
+let lastSig='';
+function onModels(d){ const v2=d.v2, v1=d.v1;
+  if(typeof d.bep==='string'&&d.bep.trim()&&d.bep!==BEP_TEXT){ const ta=$('aiText'); if(!ta.value.trim()||ta.value===BEP_TEXT) ta.value=d.bep; BEP_TEXT=d.bep; }
+  if(!v2) return;
+  if(!v2.geo){ if(!S.M2) $('lstat').textContent='Los modelos de esta revisión no traen geometría: use el caso de ejemplo de interferencias o cargue otros IFC.'; return; }
+  const sig=v2.name+':'+v2.buf.byteLength+'|'+(v1?.geo?v1.name+':'+v1.buf.byteLength:''); if(sig===lastSig) return; lastSig=sig;
+  setFile(2,new File([v2.buf],v2.name||'V02.ifc')); setFile(1,v1&&v1.geo?new File([v1.buf],v1.name||'V01.ifc'):null); analyze(); }
+if(EMBED){ addEventListener('message',e=>{ if(e.source!==window.parent) return; if(e.data?.type==='ama-propose') proposeAI(); if(e.data?.type==='ama-sample'&&!S.M2) $('sample').click(); }); window.parent.postMessage({type:'ama-hello'},'*'); }
+
+/* ===================== tablero del reporte de interferencias =====================
+   Colores: disciplinas con la paleta categórica validada (azul, naranja, aqua) sobre la superficie oscura;
+   estados con los colores de estado del producto, siempre con etiqueta directa (y textura en «Activas»). */
+const DC={grp:{MEP:'#3987e5',Estructura:'#d95926',Arquitectura:'#199e70',Otros:'#5B6B80'},st:{Nuevo:'#EF5A50',Detectado:'#EF5A50',Activo:'#EDAA45',Resuelto:'#38C48E'},bar:'#3987e5',gap:'#0F1B2A'};
+const STL={Nuevo:'Nuevas',Detectado:'Detectadas',Activo:'Persisten',Resuelto:'Resueltas'};
+S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; S.view='3d';
+function dashList(){ const f=S.df; return (S.cl?.list||[]).filter(c=>(!f.lv||c.level===f.lv)&&(!f.rule||c.rule.id===f.rule)&&(!f.tipo||c.tipo===f.tipo)&&(!f.st||c.status===f.st)&&(!f.gest||S.meta[c.key]?.st===f.gest)); }
+const pct=(a,b)=>b?Math.round(100*a/b):0;
+const nf=n=>new Intl.NumberFormat('es-PE').format(n);
+function donut(parts,total,center,filterKey){ const R=62,W=20,L=2*Math.PI*R; let off=0; const sum=parts.reduce((s,p)=>s+p.v,0)||1;
+  const segs=parts.filter(p=>p.v>0).map(p=>{ const len=L*p.v/sum, g=parts.filter(q=>q.v>0).length>1?2:0;
+    const s=`<circle class="seg" cx="80" cy="80" r="${R}" stroke="${p.tex?'url(#hatch)':p.c}" stroke-width="${W}" stroke-dasharray="${Math.max(0,len-g)} ${L-Math.max(0,len-g)}" stroke-dashoffset="${-off}" data-f="${filterKey}:${esc(p.k)}" data-tip="${esc(p.label)}: ${p.v} (${pct(p.v,sum)}%)"/>`; off+=len; return s; }).join('');
+  return `<div class="donut"><svg viewBox="0 0 160 160" role="img" aria-label="${esc(parts.map(p=>p.label+' '+p.v).join(', '))}"><defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="${DC.st.Activo}"/><rect width="2" height="6" fill="rgba(15,27,42,.55)"/></pattern></defs><circle cx="80" cy="80" r="${R}" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="${W}"/><g transform="rotate(-90 80 80)">${segs}</g>
+    <text x="80" y="78" text-anchor="middle" class="dv">${nf(total)}</text><text x="80" y="97" text-anchor="middle" class="dl">${esc(center)}</text></svg>
+    <ul class="dleg">${parts.map(p=>`<li data-f="${filterKey}:${esc(p.k)}"><i style="background:${p.c}"${p.tex?' class="tex"':''}></i><span>${esc(p.label)}</span><b>${p.v}</b><em>${pct(p.v,sum)}%</em></li>`).join('')}</ul></div>`; }
+function hbars(rows,keys,colors,filterKey,opts={}){ const max=Math.max(1,...rows.map(r=>keys.reduce((s,k)=>s+(r.v[k]||0),0)));
+  if(!rows.length) return '<p class="dempty">Sin datos para este filtro.</p>';
+  return `<div class="hb">${rows.map(r=>{ const tot=keys.reduce((s,k)=>s+(r.v[k]||0),0);
+    return `<div class="hr" data-f="${filterKey}:${esc(r.k)}" ${opts.pick?`data-pick="${esc(r.k)}"`:''}><span class="hl" title="${esc(r.label)}">${esc(r.label)}</span><span class="ht">${keys.filter(k=>r.v[k]).map(k=>`<i class="${opts.tex?.includes(k)?'tex':''}" style="width:${100*r.v[k]/max}%;background:${colors[k]}" data-tip="${esc(r.label)} · ${esc(opts.names?.[k]||k)}: ${r.v[k]}"></i>`).join('')}</span><b>${tot}</b></div>`; }).join('')}</div>`; }
+function renderDash(){ const d=$('dash'); if(S.view!=='dash') return;
+  if(!S.cl){ d.innerHTML=`<div class="none" style="padding-top:120px"><i class="ph ph-chart-donut"></i>${S.M2?'Ejecute la detección para ver el tablero.':'Cargue un IFC para ver el tablero.'}</div>`; return; }
+  const all=S.cl.list, L=dashList(), act=L.filter(c=>c.status!=='Resuelto'), n=k=>L.filter(c=>c.status===k).length, f=S.df, cmp=S.cl.cmp;
+  const opt=(arr,cur,all)=>`<option value="">${all}</option>`+arr.map(([v,l])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`).join('');
+  const levels=[...new Set(all.map(c=>c.level))].sort().map(l=>[l,l]);
+  const rules=[...new Map(all.map(c=>[c.rule.id,c.rule])).values()].map(r=>[r.id,`${r.id} · ${lab(r.a)} × ${lab(r.b)}`]);
+  const sts=(cmp?['Nuevo','Activo','Resuelto']:['Detectado']).map(s=>[s,STL[s]]);
+  const kpi=[['Activas',act.length,'abiertas en V02','k-acc']];
+  if(cmp) kpi.push(['Nuevas',n('Nuevo'),'aparecen en V02','k-red'],['Persisten',n('Activo'),'ya estaban en V01','k-amb'],['Resueltas',n('Resuelto'),'corregidas desde V01','k-grn']);
+  kpi.push(['Choques duros',act.filter(c=>c.tipo!=='Holgura').length,'con penetración','k-blu'],['Holguras',act.filter(c=>c.tipo==='Holgura').length,'bajo la separación mínima','k-blu2'],
+    ['Elementos',new Set(act.flatMap(c=>[c.a.id,c.b.id])).size,'involucrados en choques','k-pur']);
+  if(cmp){ const r=n('Resuelto'),p=n('Activo'); kpi.push(['Corrección',pct(r,r+p)+'%',`${r} de ${r+p} choques de V01`,'k-teal']); }
+  // disciplinas involucradas (cada choque aporta sus dos elementos)
+  const gc={}; for(const c of act) for(const e of [c.a,c.b]) gc[e.g]=(gc[e.g]||0)+1;
+  const gparts=['MEP','Estructura','Arquitectura','Otros'].filter(g=>gc[g]).map(g=>({k:g,label:g,v:gc[g],c:DC.grp[g]}));
+  const sparts=(cmp?['Nuevo','Activo','Resuelto']:['Detectado']).map(s=>({k:s,label:STL[s],v:n(s),c:DC.st[s],tex:s==='Activo'}));
+  const stKeys=cmp?['Nuevo','Activo','Resuelto']:['Detectado'];
+  const by=(fn,lbl)=>{ const m=new Map(); for(const c of L){ const k=fn(c); const r=m.get(k)||m.set(k,{k,label:lbl(c),v:{}}).get(k); r.v[c.status]=(r.v[c.status]||0)+1; } return [...m.values()].sort((a,b)=>Object.values(b.v).reduce((x,y)=>x+y,0)-Object.values(a.v).reduce((x,y)=>x+y,0)); };
+  const byRule=by(c=>c.rule.id,c=>`${c.rule.id} · ${lab(c.rule.a)} × ${lab(c.rule.b)}`), byLv=by(c=>c.level,c=>c.level);
+  const ec=new Map(); for(const c of act) for(const e of [c.a,c.b]){ const r=ec.get(e.id)||ec.set(e.id,{k:e.id,label:`${e.name||e.cls.replace(/^Ifc/,'')} · ${lab(e.g)}`,v:{n:0}}).get(e.id); r.v.n++; }
+  const top=[...ec.values()].sort((a,b)=>b.v.n-a.v.n).slice(0,8);
+  const gest=['Abierto','En revisión','Resuelto','Aprobado'].map(g=>({k:g,label:g,v:{n:L.filter(c=>S.meta[c.key]?.st===g).length}})).filter(r=>r.v.n);
+  const v1=n('Activo')+n('Resuelto'), v2=act.length;
+  const active=Object.values(f).some(Boolean);
+  d.innerHTML=`
+  <div class="dfil" role="group" aria-label="Filtros del tablero">
+    <label><span>Nivel</span><select data-df="lv">${opt(levels,f.lv,'Todos')}</select></label>
+    <label><span>Regla</span><select data-df="rule">${opt(rules,f.rule,'Todas')}</select></label>
+    <label><span>Tipo</span><select data-df="tipo">${opt([['Dura','Choque duro'],['Holgura','Holgura'],['Contenido','Contenido']].filter(([v])=>all.some(c=>c.tipo===v)),f.tipo,'Todos')}</select></label>
+    <label><span>Estado</span><select data-df="st">${opt(sts,f.st,'Todos')}</select></label>
+    <label><span>Gestión</span><select data-df="gest">${opt(['Abierto','En revisión','Resuelto','Aprobado'].map(g=>[g,g]),f.gest,'Todas')}</select></label>
+    <button class="btn xs ghost" id="dClear" ${active?'':'disabled'}><i class="ph ph-x"></i>Limpiar</button>
+    <span class="dsum">${L.length} de ${all.length} interferencias</span>
+  </div>
+  <div class="kpis">${kpi.map(([l,v,s,c])=>`<div class="kp ${c}"><span>${l}</span><b>${typeof v==='number'?nf(v):v}</b><small>${s}</small></div>`).join('')}</div>
+  <div class="dgrid">
+    <section class="dc"><h3>Estado frente a V01</h3>${L.length?donut(sparts,L.length,'interferencias','st'):'<p class="dempty">Sin datos.</p>'}</section>
+    <section class="dc"><h3>Disciplinas involucradas</h3>${gparts.length?donut(gparts,act.length,'activas','grp'):'<p class="dempty">Sin interferencias activas.</p>'}</section>
+    <section class="dc"><h3>Entre entregas</h3>${cmp?`<div class="evo"><div><span>V01</span><b>${v1}</b><small>choques</small></div><i class="ph ph-arrow-right"></i><div><span>V02</span><b>${v2}</b><small>activos</small></div></div>
+      <p class="evtxt">${v2>v1?`<b style="color:var(--red)">+${v2-v1}</b> respecto de la entrega anterior`:v2<v1?`<b style="color:var(--green)">−${v1-v2}</b> respecto de la entrega anterior`:'Igual que en la entrega anterior'}. ${n('Nuevo')} nuevas, ${n('Resuelto')} resueltas.</p>`
+      :'<p class="dempty">Cargue también V01 para comparar entregas.</p>'}</section>
+    <section class="dc w2"><h3>Por regla</h3>${hbars(byRule,stKeys,DC.st,'rule',{tex:['Activo'],names:STL})}</section>
+    <section class="dc"><h3>Por nivel</h3>${hbars(byLv,stKeys,DC.st,'lv',{tex:['Activo'],names:STL})}</section>
+    <section class="dc w2"><h3>Elementos con más interferencias activas</h3>${hbars(top,['n'],{n:DC.bar},'el',{pick:true,names:{n:'interferencias'}})}<p class="dnote">Clic en un elemento para verlo en el visor 3D.</p></section>
+    <section class="dc"><h3>Gestión</h3>${hbars(gest,['n'],{n:DC.bar},'gest',{names:{n:'interferencias'}})}</section>
+  </div>
+  <div class="dlegend"><span><i style="background:${DC.st.Nuevo}"></i>${cmp?'Nuevas':'Detectadas'}</span>${cmp?`<span><i class="tex" style="background:${DC.st.Activo}"></i>Persisten</span><span><i style="background:${DC.st.Resuelto}"></i>Resueltas</span>`:''}<span class="muted">Clic en un segmento o una barra para filtrar.</span></div>`;
+  d.querySelectorAll('[data-df]').forEach(s=>s.onchange=()=>{ S.df[s.dataset.df]=s.value; dashChanged(); });
+  $('dClear').onclick=()=>{ S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; dashChanged(); };
+  d.querySelectorAll('[data-f]').forEach(el=>el.onclick=e=>{ const [k,v]=el.dataset.f.split(/:(.*)/s);
+    if(k==='el'){ const c=act.find(c=>c.a.id===v||c.b.id===v); if(c){ setView('3d'); select(c,true); } return; }
+    if(k==='grp') return; const map={st:'st',rule:'rule',lv:'lv',gest:'gest'}; if(!map[k]) return; S.df[map[k]]=S.df[map[k]]===v?'':v; dashChanged(); });
+}
+function dashChanged(){ renderDash(); renderList(); if(S.sel&&!dashList().includes(S.sel)) select(null); }
+// información al pasar el cursor
+const dtip=document.createElement('div'); dtip.className='dtip'; dtip.hidden=true; document.body.appendChild(dtip);
+$('dash').addEventListener('pointermove',e=>{ const t=e.target.closest('[data-tip]'); if(!t){ dtip.hidden=true; return; } dtip.hidden=false; dtip.textContent=t.dataset.tip; dtip.style.left=(e.clientX+14)+'px'; dtip.style.top=(e.clientY+14)+'px'; });
+$('dash').addEventListener('pointerleave',()=>dtip.hidden=true);
+function setView(v){ S.view=v; const on=v==='dash'; $('dash').hidden=!on; $('stage').classList.toggle('dashon',on); $('vV').setAttribute('aria-pressed',!on); $('vT').setAttribute('aria-pressed',on); if(on) renderDash(); else AV&&(AV.dirty=true); }
+$('vV').onclick=()=>setView('3d'); $('vT').onclick=()=>setView('dash');
+
+/* ===================== inicio ===================== */
+renderRules(); renderCounts(); renderList(); legend();
+if(!window.THREE){ $('lstat').textContent='El visor necesita WebGL y conexión para cargar sus librerías.'; $('go').disabled=true; $('sample').disabled=true; }
+if(location.hash==='#ejemplo') $('sample').click();
+</script>
+</body>
+</html>
