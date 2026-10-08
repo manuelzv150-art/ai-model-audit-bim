@@ -260,6 +260,69 @@ html.embed .top{height:50px}
 .dtip{position:fixed;z-index:70;pointer-events:none;background:rgba(9,17,28,.96);border:1px solid var(--line2);border-radius:8px;padding:5px 9px;font-size:12.5px;color:var(--fg);white-space:nowrap}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dgrid{grid-template-columns:1fr 1fr}.dc.w2{grid-column:1/-1}}
 @media (max-width:900px){.stage.dashon{height:auto;min-height:62vh}.stage.dashon .dash{position:relative;inset:auto}.dgrid{grid-template-columns:1fr}.dsum{margin-left:0;width:100%}}
+
+/* rail de pasos (igual que Avance del modelo) */
+.layout{grid-template-columns:240px minmax(0,1fr)}
+.rail{border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto;background:var(--bg)}
+.rail .ttl{font:500 11.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 10px 10px}
+.rstep{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:center;text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:10px;cursor:pointer;color:var(--muted);font:inherit;transition:background .2s,color .2s}
+.rstep:hover{background:var(--s1);color:var(--fg)}
+.rstep .n{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--s2);font-size:16px;border:1px solid var(--line)}
+.rstep b{display:block;font-weight:600;font-size:14.5px;color:inherit}
+.rstep small{font-size:12px;color:var(--dim)}
+.rstep[aria-current=step]{background:var(--s1);border-color:var(--line2);color:var(--fg)}
+.rstep[aria-current=step] .n{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
+.rail .foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line)}
+.rsum{font-size:12.5px;color:var(--muted);line-height:1.5;display:flex;flex-direction:column;gap:6px}
+.rsum b{color:var(--fg);font-size:22px;font-weight:700;letter-spacing:-.02em;display:block}
+.rsum .row{display:flex;gap:10px;flex-wrap:wrap;font:500 11.5px var(--mono)}
+.rsum .row i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+/* panel de categorías */
+.cats{left:12px;top:56px;bottom:52px;width:300px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden}
+.cats .chd{display:flex;align-items:center;gap:8px;padding:11px 12px 9px;border-bottom:1px solid var(--line)}
+.cats .chd b{font-size:14px;font-weight:600}
+.cats .chd .mono{font:500 11px var(--mono);color:var(--dim);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cats .cq{margin:9px 12px 4px;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:7px 10px;font:400 12.5px var(--sans);color:var(--fg);width:calc(100% - 24px)}
+.cats .cq::placeholder{color:#7C8DA2}
+.ctree{overflow:auto;padding:4px 6px 10px;flex:1;min-height:0}
+.cg{margin-top:6px}
+.crow{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:8px;font-size:13px;color:var(--fg2);min-width:0}
+.crow:hover{background:var(--s1)}
+.crow .tw{border:0;background:transparent;color:var(--dim);cursor:pointer;width:18px;height:18px;display:grid;place-items:center;font-size:12px;flex:none;padding:0}
+.crow .eye{border:0;background:transparent;color:var(--muted);cursor:pointer;width:22px;height:22px;display:grid;place-items:center;font-size:15px;border-radius:6px;flex:none;padding:0}
+.crow .eye:hover{background:var(--s2);color:var(--fg)}
+.crow.off{opacity:.45}
+.crow .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.crow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
+.crow .nm small{color:var(--dim);font:400 11px var(--mono);margin-left:6px}
+.crow .ct{font:500 11.5px var(--mono);color:var(--dim);flex:none}
+.crow .cb{font:600 10.5px var(--mono);padding:1px 6px;border-radius:999px;flex:none;color:#0B1522}
+.crow.g{font-weight:600;color:var(--fg);font-size:13.5px}
+.crow.c{padding-left:14px}
+.crow.e{padding-left:40px;font-size:12.5px}
+.crow.e.on{background:rgba(242,136,58,.14);color:var(--fg)}
+.cats .cempty{padding:14px;color:var(--dim);font-size:12.5px}
+.cats.min{bottom:auto}
+.cats.min .cq,.cats.min .ctree{display:none}
+.cats.min .chd{border-bottom:0}
+.stage.dashon .cats,.stage.ruleson .cats{display:none}
+.hint{left:326px;max-width:calc(100% - 760px)}
+/* panel de reglas */
+.rpanel{position:absolute;inset:0;z-index:5;overflow:auto;padding:64px 18px 22px;background:radial-gradient(90% 60% at 50% 0%,#101D2E 0%,var(--bg) 70%)}
+.rgrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+.rcard{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:16px}
+.rcard .rhd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.stage.ruleson .tbl #colorSeg,.stage.ruleson .tools,.stage.ruleson .legend,.stage.ruleson .badge,.stage.ruleson .det,.stage.ruleson .hint,.stage.ruleson .cut{display:none}
+@media (max-width:1100px){.rgrid{grid-template-columns:1fr}.hint{display:none}}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .rail{flex-direction:row;overflow-x:auto;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line);order:-2}
+  .rail .ttl,.rail .foot,.rstep small{display:none}
+  .rstep{grid-template-columns:26px auto;padding:7px 10px;flex:none}.rstep .n{width:26px;height:26px;font-size:14px}.rstep b{font-size:13.5px}
+  .cats,.cats.min{top:100px;bottom:auto;left:8px;width:auto;right:8px;max-height:calc(100% - 180px)}
+  .stage .cut{top:150px}
+  .stage.ruleson{height:auto;min-height:62vh}.stage.ruleson .rpanel{position:relative;inset:auto}
+}
 </style>
 </head>
 <body>
@@ -273,36 +336,16 @@ html.embed .top{height:50px}
 </header>
 
 <div class="layout">
-  <aside class="side" aria-label="Panel de interferencias">
-    <details class="blk" id="rulesBox" open>
-      <summary><span class="cap">Reglas de interferencia</span><span class="mono muted" style="font-size:12px" id="rulesSum"></span></summary>
-      <div class="rules" id="rules"></div>
-      <div class="runrow"><button class="btn pri sm" id="run"><i class="ph ph-scan"></i>Detectar</button><span class="prog" id="prog"></span></div>
-    </details>
-      <div class="blk aibox">
-      <button class="btn sm ia" id="aiBtn" aria-expanded="false" aria-controls="aiMenu"><i class="ph ph-sparkle"></i>Proponer reglas con IA</button>
-      <div class="aimenu" id="aiMenu" hidden>
-        <p>La IA convierte sus acuerdos en reglas de interferencia. Usted las aprueba antes de detectar.</p>
-        <label class="sr" for="aiText">Texto del BEP o las actas</label>
-        <textarea id="aiText" rows="4" placeholder="Pegue el texto del BEP o las actas. Ej.: CI-01. Los ductos no deberán atravesar vigas y mantendrán 5 cm libres."></textarea>
-        <div class="acts"><button class="btn xs ia" id="aiFromText"><i class="ph ph-sparkle"></i>Proponer desde el texto</button><label class="btn xs" for="fM"><i class="ph ph-file-arrow-up"></i>Cargar CSV o Excel</label></div>
-        <div class="acts"><button class="btn xs ghost" id="aiSampleTxt">Texto de ejemplo</button><button class="btn xs ghost" id="aiSample">Matriz de ejemplo</button><button class="btn xs ghost" id="aiDl"><i class="ph ph-download-simple"></i>Descargar matriz</button></div>
-      </div>
-      <input class="sr" type="file" id="fM" accept=".csv,.txt,.xlsx,.xls">
-      <div class="aiflow" id="aiFlow" hidden aria-live="polite"></div>
-    </div>
-    <div class="blk" id="sumBox">
-      <div class="counts" id="counts"></div>
-      <div class="exports"><button class="btn xs" id="xBcf" disabled><i class="ph ph-package"></i>BCF</button><button class="btn xs" id="xRep" disabled><i class="ph ph-file-text"></i>Reporte</button><button class="btn xs" id="xCsv" disabled><i class="ph ph-file-csv"></i>CSV</button></div>
-    </div>
-    <div class="blk listblk">
-      <div class="filters"><label class="sr" for="q">Buscar</label><input id="q" type="text" placeholder="Buscar elemento o N.°"><label class="sr" for="fLv">Nivel</label><select id="fLv"><option value="">Todos los niveles</option></select></div>
-      <div class="clist" id="clist" role="listbox" aria-label="Interferencias"></div>
-    </div>
-  </aside>
+  <nav class="rail" aria-label="Pasos de interferencias">
+    <div class="ttl">Interferencias</div>
+    <button class="rstep" data-view="3d" aria-current="step"><span class="n"><i class="ph ph-cube"></i></span><span><b>Visor</b><small>Categorías y choques</small></span></button>
+    <button class="rstep" data-view="dash"><span class="n"><i class="ph ph-file-text"></i></span><span><b>Reporte</b><small>Dashboard, BCF y CSV</small></span></button>
+    <button class="rstep" data-view="rules"><span class="n"><i class="ph ph-sliders-horizontal"></i></span><span><b>Reglas</b><small>Criterios e IA</small></span></button>
+    <div class="foot"><div class="rsum" id="railSum"></div></div>
+  </nav>
 
   <main class="stage" id="stage">
-    <div class="ov tbl"><div class="seg glass" role="group" aria-label="Vista"><button id="vV" aria-pressed="true"><i class="ph ph-cube"></i> 1 · VISOR</button><button id="vT" aria-pressed="false"><i class="ph ph-file-text"></i> 2 · REPORTE</button></div><div class="seg glass" id="colorSeg" role="group" aria-label="Color del modelo"><button id="mSt" aria-pressed="true">ESTADO</button><button id="mDi" aria-pressed="false">DISCIPLINA</button></div></div>
+    <div class="ov tbl"><div class="seg glass" id="colorSeg" role="group" aria-label="Color del modelo"><button id="mSt" aria-pressed="true">ESTADO</button><button id="mDi" aria-pressed="false">DISCIPLINA</button></div></div>
     <div class="ov badge glass" id="badge" hidden></div>
     <div class="ov tools glass" role="toolbar" aria-label="Herramientas del visor">
       <button data-v="iso" title="Vista 3D" aria-label="Vista 3D"><i class="ph ph-cube"></i></button>
@@ -321,6 +364,36 @@ html.embed .top{height:50px}
     <div class="ov legend glass" id="legend"></div>
     <div class="ov hint" id="hint">Arrastre: girar · clic der.: desplazar · rueda: zoom · ← →: anterior / siguiente</div>
     <section class="ov det glass" id="det" hidden aria-live="polite"></section>
+    <section class="ov cats glass" id="cats" aria-label="Categorías del modelo" hidden></section>
+    <section class="rpanel" id="rpanel" hidden aria-label="Reglas de interferencia">
+      <div class="dhead"><div><h2>Reglas de interferencia</h2><p>Elija qué disciplinas o clases IFC se cruzan y con qué holgura. La IA puede proponer las reglas desde el BEP, las actas o una matriz en CSV o Excel.</p></div></div>
+      <div class="rgrid">
+<div class="rcard" id="rulesBox">
+      <div class="rhd"><span class="cap">Matriz de reglas</span><span class="mono muted" style="font-size:12px" id="rulesSum"></span></div>
+      <div class="rules" id="rules"></div>
+      <div class="runrow"><button class="btn pri sm" id="run"><i class="ph ph-scan"></i>Detectar</button><span class="prog" id="prog"></span></div>
+    </div>
+<div class="rcard aibox">
+      <button class="btn sm ia" id="aiBtn" aria-expanded="true" aria-controls="aiMenu"><i class="ph ph-sparkle"></i>Proponer reglas con IA</button>
+      <div class="aimenu" id="aiMenu">
+        <p>La IA convierte sus acuerdos en reglas de interferencia. Usted las aprueba antes de detectar.</p>
+        <label class="sr" for="aiText">Texto del BEP o las actas</label>
+        <textarea id="aiText" rows="4" placeholder="Pegue el texto del BEP o las actas. Ej.: CI-01. Los ductos no deberán atravesar vigas y mantendrán 5 cm libres."></textarea>
+        <div class="acts"><button class="btn xs ia" id="aiFromText"><i class="ph ph-sparkle"></i>Proponer desde el texto</button><label class="btn xs" for="fM"><i class="ph ph-file-arrow-up"></i>Cargar CSV o Excel</label></div>
+        <div class="acts"><button class="btn xs ghost" id="aiSampleTxt">Texto de ejemplo</button><button class="btn xs ghost" id="aiSample">Matriz de ejemplo</button><button class="btn xs ghost" id="aiDl"><i class="ph ph-download-simple"></i>Descargar matriz</button></div>
+      </div>
+      <input class="sr" type="file" id="fM" accept=".csv,.txt,.xlsx,.xls">
+      <div class="aiflow" id="aiFlow" hidden aria-live="polite"></div>
+    </div>
+      </div>
+    </section>
+    <div hidden><div class="blk" id="sumBox">
+      <div class="counts" id="counts"></div>
+      <div class="exports"><button class="btn xs" id="xBcf" disabled><i class="ph ph-package"></i>BCF</button><button class="btn xs" id="xRep" disabled><i class="ph ph-file-text"></i>Reporte</button><button class="btn xs" id="xCsv" disabled><i class="ph ph-file-csv"></i>CSV</button></div>
+    </div><div class="blk listblk">
+      <div class="filters"><label class="sr" for="q">Buscar</label><input id="q" type="text" placeholder="Buscar elemento o N.°"><label class="sr" for="fLv">Nivel</label><select id="fLv"><option value="">Todos los niveles</option></select></div>
+      <div class="clist" id="clist" role="listbox" aria-label="Interferencias"></div>
+    </div></div>
     <section class="dash" id="dash" hidden aria-label="Reporte de interferencias"></section>
 
     <div class="loader" id="loader">
@@ -384,7 +457,7 @@ const PARENT=EMBED?(()=>{ const pend=new Map(); let seq=0; const info={hasAI:fal
     if(d.type==='ama-res'){ const p=pend.get(d.id); if(!p) return; pend.delete(d.id); d.ok?p.res(d.data):p.rej(d.err||{}); } });
   const ask=(type,payload)=>new Promise((res,rej)=>{ const id=++seq; pend.set(id,{res,rej}); window.parent.postMessage({type,id,...payload},'*'); });
   return { hasAI:()=>info.hasAI, ai:prompt=>ask('ama-ai',{prompt}), save:(name,blob)=>ask('ama-save',{name,blob}) }; })():null;
-const S={f1:null,f2:null,n1:'',n2:'',M1:null,M2:null,origin:null,rules:RULES.map(r=>({...r})),cl:null,sel:null,meta:{},shots:{},filter:'',mode:'st'};
+const S={f1:null,f2:null,n1:'',n2:'',M1:null,M2:null,origin:null,rules:RULES.map(r=>({...r})),cl:null,sel:null,meta:{},shots:{},filter:'',mode:'st',hide:new Set(),open:new Set(),pk:null,cq:''};
 
 /* ===================== lectura IFC (web-ifc, carga diferida) ===================== */
 const WIFC='https://unpkg.com/web-ifc@0.0.66/';
@@ -573,6 +646,7 @@ const stCol=s=>({'Nuevo':C.red,'Detectado':C.red,'Activo':C.amber,'Resuelto':C.g
 const tipoTxt=c=>c.tipo==='Holgura'?`Holgura insuficiente: ${(c.dist*100).toFixed(1)} cm (mín. ${Math.round(c.rule.tol*100)} cm)`:c.tipo==='Contenido'?'Un elemento queda contenido dentro del otro':'Choque duro (penetración)';
 function elState(id){ const s=S.cl?.byEl.get(id); if(!s) return null; return s.has('Nuevo')||s.has('Detectado')?'Nuevo':'Activo'; }
 function paintFn(el){
+  if(S.hide.has(el.id)) return {c:C.neutral,o:0};
   if(S.mode==='di') return {c:GCOL[el.g]||GCOL.Otros};
   const s=elState(el.id); return s?{c:stCol(s)}:{c:C.neutral,e:'#7E93B3',eo:.35};
 }
@@ -620,12 +694,58 @@ function renderDet(){ const c=S.sel, d=$('det'); if(!c){ d.hidden=true; return; 
   $('dMin').onclick=()=>{ d.classList.toggle('min'); renderDet(); };
   $('dSt').onchange=e=>{ m.st=e.target.value; renderDash(); }; $('dNote').oninput=e=>{ m.nota=e.target.value; };
   $('dFocus').onclick=()=>AV.focusPt(toV(c.pt),c.R); $('dBcf').onclick=()=>exportBCF([c]); }
-function select(c,fly){ if(c&&!S.sel&&matchMedia('(max-width:900px)').matches) $('det').classList.add('min'); S.sel=c||null;
+function select(c,fly){ S.pk=null; if(c&&!S.sel&&matchMedia('(max-width:900px)').matches) $('det').classList.add('min'); S.sel=c||null;
   if(AV){ AV.select(c?AV.meshes.get(c.a.id)&&c.a:null,c?AV.meshes.get(c.b.id)&&c.b:null); AV.setMarker(c?toV(c.pt):null); if(fly&&c) AV.focusPt(toV(c.pt),c.R); }
-  legend(); renderList(); renderDet(); }
+  legend(); renderList(); renderDet(); renderCats(); }
 function step(d){ const L=filtered(); if(!L.length) return; let i=L.indexOf(S.sel); i=i<0?0:Math.max(0,Math.min(L.length-1,i+d)); select(L[i],true); }
 function repaint(){ if(!AV) return; AV.paint(paintFn); legend(); }
 
+
+/* ===================== panel de categorías ===================== */
+const CLSN={IfcBeam:'Vigas',IfcColumn:'Columnas',IfcWall:'Muros',IfcWallStandardCase:'Muros',IfcSlab:'Losas',IfcRoof:'Techos',IfcFooting:'Zapatas',IfcPile:'Pilotes',IfcMember:'Miembros',IfcPlate:'Placas',IfcStair:'Escaleras',IfcStairFlight:'Tramos de escalera',IfcRamp:'Rampas',IfcRailing:'Barandas',IfcCovering:'Revestimientos',IfcCurtainWall:'Muros cortina',IfcDoor:'Puertas',IfcWindow:'Ventanas',IfcFurnishingElement:'Mobiliario',IfcDuctSegment:'Ductos',IfcDuctFitting:'Accesorios de ducto',IfcPipeSegment:'Tuberías',IfcPipeFitting:'Accesorios de tubería',IfcCableCarrierSegment:'Bandejas',IfcCableCarrierFitting:'Accesorios de bandeja',IfcCableSegment:'Cables',IfcFlowTerminal:'Terminales',IfcAirTerminal:'Difusores',IfcFlowSegment:'Segmentos de flujo',IfcFlowFitting:'Accesorios de flujo',IfcFlowController:'Válvulas y controles',IfcEnergyConversionDevice:'Equipos',IfcSanitaryTerminal:'Aparatos sanitarios',IfcLightFixture:'Luminarias',IfcBuildingElementProxy:'Elementos genéricos'};
+const clsName=c=>CLSN[c]||c.replace(/^Ifc/,'');
+const GORD=['MEP','Estructura','Arquitectura','Otros'];
+function elClash(id){ return (S.cl?.list||[]).filter(c=>c.status!=='Resuelto'&&(c.a.id===id||c.b.id===id)).length; }
+function pickEl(el){ const c=S.cl?.list.find(c=>c.status!=='Resuelto'&&(c.a.id===el.id||c.b.id===el.id));
+  if(S.hide.has(el.id)){ S.hide.delete(el.id); repaint(); }
+  if(c){ select(c,true); return; }
+  select(null); S.pk=el.id; if(AV){ const m=AV.meshes.get(el.id); AV.select(el,null); if(m){ const b=m.geometry.boundingBox; AV.focusPt(b.getCenter(new THREE.Vector3()),Math.max(.3,b.getSize(new THREE.Vector3()).length()/2)); } }
+  renderCats(); toast(`${el.name||clsName(el.cls)}: sin interferencias`); }
+function renderCats(){ const box=$('cats'); if(!box||!S.M2){ return; }
+  const els=S.M2.els, q=S.cq.trim().toLowerCase(), big=els.length>40;
+  const G=new Map(); for(const e of els){ const g=GORD.includes(e.g)?e.g:'Otros'; if(!G.has(g)) G.set(g,new Map()); const m=G.get(g); const k=clsName(e.cls); if(!m.has(k)) m.set(k,[]); m.get(k).push(e); }
+  const match=e=>!q||(e.name||'').toLowerCase().includes(q)||e.cls.toLowerCase().includes(q)||clsName(e.cls).toLowerCase().includes(q)||(e.level||'').toLowerCase().includes(q);
+  const eye=(key,off,lab)=>`<button class="eye" data-tg="${esc(key)}" aria-label="${off?'Mostrar':'Ocultar'} ${esc(lab)}" title="${off?'Mostrar':'Ocultar'}"><i class="ph ${off?'ph-eye-slash':'ph-eye'}"></i></button>`;
+  const badge=(n,col)=>n?`<span class="cb" style="background:${col}" title="${n} en choque">${n}</span>`:'';
+  let html='', shown=0;
+  for(const g of GORD){ const m=G.get(g); if(!m) continue; const all=[...m.values()].flat(), vis=all.filter(match); if(!vis.length) continue;
+    const gOff=all.every(e=>S.hide.has(e.id)), gK='g:'+g, gOpen=!S.open.has('x'+gK)||q;
+    const gCl=all.filter(e=>elClash(e.id)).length;
+    html+=`<div class="cg"><div class="crow g${gOff?' off':''}"><button class="tw" data-op="${esc('x'+gK)}" aria-expanded="${!!gOpen}" aria-label="Expandir ${esc(g)}"><i class="ph ${gOpen?'ph-caret-down':'ph-caret-right'}"></i></button>${eye(gK,gOff,g)}<i class="dot" style="background:${GCOL[g]||GCOL.Otros}"></i><span class="nm">${esc(g)}</span>${badge(gCl,C.red)}<span class="ct">${all.length}</span></div>`;
+    if(gOpen) for(const [k,list] of [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]))){ const lv=list.filter(match); if(!lv.length) continue;
+      const cK='c:'+g+'|'+k, cOff=list.every(e=>S.hide.has(e.id)), cOpen=q||(big?S.open.has(cK):!S.open.has('x'+cK)), cCl=list.filter(e=>elClash(e.id)).length;
+      html+=`<div class="crow c${cOff?' off':''}"><button class="tw" data-op="${esc(big?cK:'x'+cK)}" aria-expanded="${!!cOpen}" aria-label="Expandir ${esc(k)}"><i class="ph ${cOpen?'ph-caret-down':'ph-caret-right'}"></i></button>${eye(cK,cOff,k)}<button class="nm" data-op="${esc(big?cK:'x'+cK)}">${esc(k)}<small>${esc(list[0].cls)}</small></button>${badge(cCl,C.red)}<span class="ct">${list.length}</span></div>`;
+      if(cOpen) for(const e of lv){ const n=elClash(e.id), s=elState(e.id), off=S.hide.has(e.id), on=S.pk===e.id||(S.sel&&(S.sel.a.id===e.id||S.sel.b.id===e.id)); shown++;
+        html+=`<div class="crow e${off?' off':''}${on?' on':''}">${eye('e:'+e.id,off,e.name||k)}<button class="nm" data-el="${esc(e.id)}" title="${esc((e.name||'(sin nombre)')+' · '+e.level)}">${esc(e.name||'(sin nombre)')}<small>${esc(e.level)}</small></button>${badge(n,s?stCol(s):C.red)}</div>`; } } html+='</div>'; }
+  const prev=box.querySelector('.ctree')?.scrollTop||0, hadQ=document.activeElement?.id==='cq';
+  const nCl=new Set((S.cl?.list||[]).filter(c=>c.status!=='Resuelto').flatMap(c=>[c.a.id,c.b.id])).size;
+  box.innerHTML=`<div class="chd"><i class="ph ph-tree-structure" style="color:var(--acc)"></i><b>Categorías</b><span class="mono">${els.length} elem.${nCl?` · ${nCl} en choque`:''}</span><button class="iconbtn" id="cAll" title="Mostrar todo" aria-label="Mostrar todo"><i class="ph ph-eye"></i></button><button class="iconbtn" id="cMin" aria-label="${box.classList.contains('min')?'Expandir':'Minimizar'} panel"><i class="ph ${box.classList.contains('min')?'ph-caret-up':'ph-caret-down'}"></i></button></div>
+    <label class="sr" for="cq">Buscar en categorías</label><input class="cq" id="cq" type="text" placeholder="Buscar categoría, elemento o nivel" value="${esc(S.cq)}">
+    <div class="ctree" role="tree">${html||'<div class="cempty">Sin resultados.</div>'}</div>`;
+  box.querySelector('.ctree').scrollTop=prev;
+  const cq=$('cq'); cq.oninput=()=>{ S.cq=cq.value; renderCats(); }; if(hadQ){ cq.focus(); cq.setSelectionRange(cq.value.length,cq.value.length); }
+  $('cMin').onclick=()=>{ box.classList.toggle('min'); renderCats(); };
+  $('cAll').onclick=()=>{ S.hide.clear(); repaint(); renderCats(); };
+  box.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{ const k=b.dataset.op; S.open.has(k)?S.open.delete(k):S.open.add(k); renderCats(); });
+  box.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{ const k=b.dataset.tg, t=k.slice(0,1), v=k.slice(2);
+    const ids=t==='e'?[v]:t==='g'?els.filter(e=>(GORD.includes(e.g)?e.g:'Otros')===v).map(e=>e.id):(()=>{ const [g,c]=v.split('|'); return els.filter(e=>(GORD.includes(e.g)?e.g:'Otros')===g&&clsName(e.cls)===c).map(e=>e.id); })();
+    const hideIt=!ids.every(id=>S.hide.has(id)); ids.forEach(id=>hideIt?S.hide.add(id):S.hide.delete(id)); repaint(); renderCats(); });
+  box.querySelectorAll('[data-el]').forEach(b=>b.onclick=()=>{ const e=els.find(x=>x.id===b.dataset.el); if(e) pickEl(e); }); }
+function renderSum(){ const L=S.cl?.list||[], n=k=>L.filter(c=>c.status===k).length, r=$('railSum'); if(!r) return;
+  if(!S.cl){ r.innerHTML=S.M2?'Modelos cargados. Revise las reglas y pulse Detectar.':'Cargue los modelos para empezar.'; return; }
+  const act=L.filter(c=>c.status!=='Resuelto').length;
+  const it=S.cl.cmp?[['Nuevo','nuevas'],['Activo','activas'],['Resuelto','resueltas']]:[['Detectado','detectadas']];
+  r.innerHTML=`<span><b>${act}</b>interferencias abiertas</span><span class="row">${it.map(([k,l])=>`<span><i style="background:${stCol(k)}"></i>${n(k)} ${l}</span>`).join('')}</span>`; }
 /* ===================== carga y análisis ===================== */
 let AV=null; const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true;
 function setFile(k,f){ S['f'+k]=f; S['n'+k]=f?f.name:''; $('s'+k).classList.toggle('done',!!f); $('n'+k).innerHTML=f?`<span class="fname">${esc(f.name)}</span><span>${(f.size/1048576).toFixed(1)} MB</span>`:'<u>Elija</u> o arrastre el IFC'; $('go').disabled=!S.f2; }
@@ -653,10 +773,10 @@ async function analyze(){ if(!S.f2) return; const st=$('lstat'); $('go').disable
     if(!AV){ AV=Viewer($('stage'),{onPick:el=>{ if(!el) return; const c=S.cl?.list.find(c=>c.status!=='Resuelto'&&(c.a.id===el.id||c.b.id===el.id)); if(c) select(c,false); else toast(`${el.name||el.cls}: sin interferencias`); },
       onHover:(el,e)=>{ if(!el||!e){ tip.hidden=true; return; } const b=$('stage').getBoundingClientRect(); tip.hidden=false; tip.style.left=(e.clientX-b.left)+'px'; tip.style.top=(e.clientY-b.top)+'px'; const s=elState(el.id); tip.innerHTML=`<b>${esc(el.name||el.cls)}</b> <span class="muted">${esc(el.g)}</span>${s?` · <span style="color:${stCol(s)}">${s==='Nuevo'?'choque nuevo':'choque activo'}</span>`:''}`; }});
       $('stage').appendChild(tip); }
-    AV.load(M2.els); repaint(); select(null);
+    AV.load(M2.els); S.hide.clear(); S.open.clear(); S.cq=''; $('cats').hidden=false; if(matchMedia('(max-width:900px)').matches) $('cats').classList.add('min'); repaint(); select(null);
     $('files').innerHTML=`<span class="chip" style="color:var(--teal)" title="${esc(S.n2)}">V02 · ${esc(S.n2)}</span>`+(M1?`<span class="chip" style="color:var(--grey)" title="${esc(S.n1)}">V01 · ${esc(S.n1)}</span>`:'');
     $('badge').hidden=false; $('badge').innerHTML=`<i class="ph ph-cube"></i>${M2.els.length} elementos con geometría · ${S.engine}`;
-    $('run').disabled=false; $('loader').hidden=true; st.textContent='';
+    $('run').disabled=false; $('loader').hidden=true; st.textContent=''; renderSum();
     await run();
   }catch(e){ console.warn('[interferencias]',e); st.textContent=e.message==='web-ifc'?'No se pudo descargar el motor de geometría: revise la conexión.':(e.message||'No se pudo leer el archivo.'); }
   $('go').disabled=!S.f2; $('sample').disabled=false; }
@@ -676,7 +796,7 @@ async function run(){ if(busy) return; if(!S.M2){ $('loader').hidden=false; $('l
     S.cl={list,cmp:!!old,byEl,ms:performance.now()-t0}; S.sel=null; S.shots={}; S.filter='';
     const lv=[...new Set(list.map(c=>c.level))].sort(); $('fLv').innerHTML='<option value="">Todos los niveles</option>'+lv.map(l=>`<option>${esc(l)}</option>`).join('');
     pr.textContent=`${list.length} en ${Math.max(1,Math.round(S.cl.ms))} ms${old?' · V02 frente a V01':''}`;
-    S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; $('rulesBox').open=false; repaint(); renderCounts(); select(list.find(c=>c.status!=='Resuelto')||null,true); renderDash();
+    S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; $('rulesBox').open=false; repaint(); renderCounts(); select(list.find(c=>c.status!=='Resuelto')||null,true); renderDash(); renderSum(); if(S.view==='rules') setView('3d');
   }catch(e){ console.warn(e); pr.textContent='No se pudo completar la detección'; }
   busy=false; $('run').disabled=false; }
 $('run').onclick=run;
@@ -1009,7 +1129,7 @@ ${table}`;
       prop.push({id:String(x.codigo||'MI-'+(prop.length+1)),a,b,tipo,tol:tipo==='holgura'?(tol||.05):0,on:false,ia:origin,bad,amb,src:[x.fuente,x.prioridad&&('prioridad '+String(x.prioridad).toLowerCase())].filter(Boolean).join(' · '),cita:x.cita||''}); }
     if(!prop.length){ aiFlow([...steps.slice(0,2),'No se encontraron criterios de interferencia en el texto.'],3,note); $('aiBtn').disabled=false; return; }
     S.rules=[...prop,...S.rules.filter(r=>!r.ia)];
-    $('rulesBox').open=true; renderRules();
+    setView('rules'); renderRules();
     aiFlow([...steps.slice(0,3),`${prop.filter(r=>!r.bad).length} reglas propuestas${prop.some(r=>r.bad)?` · ${prop.filter(r=>r.bad).length} con ambigüedad`:''}. Apruébelas y pulse Detectar.`],4,note);
   }catch(e){ console.warn('[reglas IA]',e); const m={not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Demasiadas solicitudes; intente en un momento.',invalid_json:'La IA no devolvió reglas legibles; intente de nuevo.',prompt_too_large:'La matriz es demasiado grande; cargue solo las filas de criterios.'};
     $('aiFlow').hidden=false; $('aiFlow').innerHTML=`<div class="st" style="color:#FF8A80"><i class="ph ph-x-circle"></i>${esc(m[e?.code]||(e?.message==='xlsx'?'No se pudo cargar el lector de Excel: revise la conexión o use CSV.':'No se pudo generar las reglas. Intente de nuevo.'))}</div>`; }
@@ -1113,8 +1233,10 @@ function dashChanged(){ renderDash(); renderList(); if(S.sel&&!dashList().includ
 const dtip=document.createElement('div'); dtip.className='dtip'; dtip.hidden=true; document.body.appendChild(dtip);
 $('dash').addEventListener('pointermove',e=>{ const t=e.target.closest('[data-tip]'); if(!t){ dtip.hidden=true; return; } dtip.hidden=false; dtip.textContent=t.dataset.tip; dtip.style.left=(e.clientX+14)+'px'; dtip.style.top=(e.clientY+14)+'px'; });
 $('dash').addEventListener('pointerleave',()=>dtip.hidden=true);
-function setView(v){ S.view=v; const on=v==='dash'; $('dash').hidden=!on; $('stage').classList.toggle('dashon',on); $('vV').setAttribute('aria-pressed',!on); $('vT').setAttribute('aria-pressed',on); if(on) renderDash(); else AV&&(AV.dirty=true); }
-$('vV').onclick=()=>setView('3d'); $('vT').onclick=()=>setView('dash');
+function setView(v){ S.view=v; const on=v==='dash', ru=v==='rules'; $('dash').hidden=!on; $('rpanel').hidden=!ru; $('stage').classList.toggle('dashon',on); $('stage').classList.toggle('ruleson',ru);
+  document.querySelectorAll('.rail [data-view]').forEach(b=>b.dataset.view===v?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current'));
+  if(on) renderDash(); else if(!ru) AV&&(AV.dirty=true); }
+document.querySelectorAll('.rail [data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 
 /* ===================== inicio ===================== */
 renderRules(); renderCounts(); renderList(); legend();
