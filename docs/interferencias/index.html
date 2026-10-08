@@ -639,6 +639,26 @@ tr:last-child td{border-bottom:0}
 .clwrap{flex:1;min-height:0;display:flex}
 .clwrap iframe{flex:1;width:100%;height:calc(100dvh - 60px);border:0;display:block;background:var(--bg)}
 @media (max-width:760px){.modsw{margin-left:0}.modsw button{padding:7px 10px;font-size:12.5px}.modsw button span{display:none}.modsw button em{display:inline}}
+
+/* inicio de la demo: dos caminos */
+.chooser{flex:1;display:grid;place-items:center;padding:40px 20px;background:radial-gradient(70% 60% at 50% 0%,rgba(242,136,58,.08),transparent 60%)}
+.chin{width:min(980px,100%);text-align:center}
+.chin h2{font-size:clamp(30px,3.6vw,44px);font-weight:600;letter-spacing:-.04em;margin:8px 0 8px}
+.chcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;text-align:left}
+.chcard{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:22px;border:1px solid var(--line2);background:radial-gradient(90% 80% at 0% 0%,rgba(242,136,58,.12),transparent 60%),var(--s1);color:var(--fg);cursor:pointer;font:inherit;text-align:left;transition:transform .2s var(--ease),border-color .2s}
+.chcard:hover{transform:translateY(-2px);border-color:rgba(242,136,58,.6)}
+.chcard.plus{background:radial-gradient(90% 80% at 0% 0%,rgba(152,136,246,.16),transparent 60%),var(--s1)}
+.chcard.plus:hover{border-color:rgba(152,136,246,.7)}
+.chic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:rgba(242,136,58,.14);color:var(--acc)}
+.chcard.plus .chic{background:rgba(152,136,246,.16);color:var(--purple)}
+.chcard b{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.chd{color:var(--fg2);font-size:15px}
+.chflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px}
+.chflow em{font:500 12px var(--mono);font-style:normal;color:var(--fg);background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 10px}
+.chflow .ph{color:var(--dim);font-size:12px}
+.chplan{font:500 12px var(--mono);color:var(--acc);margin-top:auto}
+.chcard.plus .chplan{color:var(--purple)}
+@media (max-width:760px){.chcards{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1030,13 +1050,37 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     <a class="btn ghost sm" href="#top" aria-label="Salir de la demo"><i class="ph ph-x"></i></a>
   </header>
 
+  <section class="chooser" id="chooser" hidden aria-labelledby="chT">
+    <div class="chin">
+      <div class="cap2" style="color:var(--acc)">Probar la demo</div>
+      <h2 id="chT">¿Qué quiere revisar?</h2>
+      <p class="muted">Elija un camino. Puede cambiar en cualquier momento con los botones de arriba.</p>
+      <div class="chcards">
+        <button class="chcard" data-go="av">
+          <span class="chic"><i class="ph ph-chart-line-up"></i></span>
+          <b>Avance del modelo</b>
+          <span class="chd">Compare dos entregas IFC y verifique el avance contra el alcance y los requisitos del BEP y las actas.</span>
+          <span class="chflow"><em>Entrega</em><i class="ph ph-caret-right"></i><em>Alcance</em><i class="ph ph-caret-right"></i><em>Requisitos</em><i class="ph ph-caret-right"></i><em>Visor</em><i class="ph ph-caret-right"></i><em>Reporte</em></span>
+          <span class="chplan">Planes Comparador y Auditoría IA</span>
+        </button>
+        <button class="chcard plus" data-go="in">
+          <span class="chic"><i class="ph ph-intersect"></i></span>
+          <b>Interferencias</b>
+          <span class="chd">Detecte choques entre disciplinas sobre la geometría real del IFC y expórtelos en BCF.</span>
+          <span class="chflow"><em>Visor</em><i class="ph ph-caret-right"></i><em>Reporte</em></span>
+          <span class="chplan">Plan Plus</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <div class="appbody">
     <nav class="rail" aria-label="Pasos de la revisión">
       <div class="ttl">Revisión</div>
       <button class="rstep" data-step="1"><span class="n"><i class="ph ph-upload-simple"></i></span><span><b>Entrega</b><small>Modelos y acuerdos</small></span></button>
+      <button class="rstep" data-step="4"><span class="n"><i class="ph ph-chart-donut"></i></span><span><b>Alcance</b><small>Avance contra lo aprobado</small></span></button>
       <button class="rstep" data-step="2"><span class="n"><i class="ph ph-sparkle"></i></span><span><b>Requisitos</b><small>Reglas de la IA</small></span></button>
       <button class="rstep" data-step="3"><span class="n"><i class="ph ph-cube"></i></span><span><b>Visor</b><small>Cambios y cumplimiento</small></span></button>
-      <button class="rstep" data-step="4"><span class="n"><i class="ph ph-chart-donut"></i></span><span><b>Avance</b><small>Contra el alcance</small></span></button>
       <button class="rstep" data-step="5"><span class="n"><i class="ph ph-file-text"></i></span><span><b>Reporte</b><small>Observaciones</small></span></button>
       <div class="foot"><div class="aimode" id="aiMode"></div></div>
     </nav>
@@ -1075,7 +1119,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
             <div class="tolf"><label for="tol">Tolerancia de desplazamiento</label><input type="number" id="tol" min="0" step="0.005" value="0.01"><span>m</span></div>
             <div class="checks" id="checks"></div>
           </div>
-          <button class="btn pri" id="go2" disabled>Continuar a requisitos<i class="ph ph-arrow-right"></i></button>
+          <button class="btn pri" id="go2" disabled>Continuar a alcance<i class="ph ph-arrow-right"></i></button>
         </div>
       </section>
 
@@ -1144,6 +1188,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
           <div class="card" id="bars"></div>
           <div class="card tbl" id="perRule"></div>
         </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn pri" id="go4b">Continuar a requisitos<i class="ph ph-arrow-right"></i></button></div>
       </section>
 
       <!-- 5 REPORTE -->
@@ -1897,17 +1942,19 @@ function go(n){ if(n>1&&!(S.m1&&S.m2)) n=1; step=n; timers(n);
   markSteps(); window.scrollTo({top:0,behavior:RM?'auto':'smooth'}); }
 function markSteps(){ const ok={1:S.m1&&S.m2,2:S.rules.some(r=>r.st==='ap'),3:!!S.sel,4:false,5:!!S.tour.done.T4}; document.querySelectorAll('.rstep').forEach(b=>b.classList.toggle('ok',!!ok[b.dataset.step]&&+b.dataset.step!==step)); }
 document.querySelectorAll('.rstep').forEach(b=>b.onclick=()=>go(+b.dataset.step));
-$('go2').onclick=()=>go(2); $('go3').onclick=()=>go(3);
+$('go2').onclick=()=>go(4); $('go4b').onclick=()=>go(2); $('go3').onclick=()=>go(3);
 
 /* ruta: sitio o app */
 /* módulos de la demo: avance del modelo (pasos 1 a 5) e interferencias (plan Plus, embebido) */
-let mod='av', wantClash=false, clSample=false;
+let mod=null, wantClash=false, clSample=false;
 function clWin(){ return document.getElementById('clFrame')?.contentWindow; }
-function setModule(m){ mod=m; const on=m==='in'; $('mAv').setAttribute('aria-selected',!on); $('mIn').setAttribute('aria-selected',on);
+function setModule(m){ mod=m; const on=m==='in'; $('chooser').hidden=true; document.querySelector('.modsw').hidden=false; $('mAv').setAttribute('aria-selected',!on); $('mIn').setAttribute('aria-selected',on);
   document.querySelector('.appbody').hidden=on; $('clWrap').hidden=!on; document.querySelector('.apptop .timers').style.visibility=on?'hidden':'';
   if(on){ const f=$('clFrame'); if(!f.getAttribute('src')){ f.src='interferencias.html?embed=1'; } else { sendModels(); if(clSample){ clWin()?.postMessage({type:'ama-sample'},'*'); clSample=false; } } }
   else go(S.m1&&S.m2?step:1); }
-$('mAv').onclick=()=>setModule('av'); $('mIn').onclick=()=>setModule('in');
+$('mAv').onclick=()=>setModule('av'); $('mIn').onclick=()=>{ if(!(S.m2&&S.m2.hasGeo)) clSample=true; setModule('in'); };
+function showChooser(){ mod=null; $('chooser').hidden=false; document.querySelector('.appbody').hidden=true; $('clWrap').hidden=true; document.querySelector('.modsw').hidden=true; document.querySelector('.apptop .timers').style.visibility='hidden'; }
+document.querySelectorAll('.chcard').forEach(b=>b.onclick=()=>{ if(b.dataset.go==='in'&&!(S.m2&&S.m2.hasGeo)) clSample=true; setModule(b.dataset.go); });
 function sendModels(){ const w=clWin(); if(!w||!$('clFrame').getAttribute('src')) return;
   const pack=(m,n)=>m?.buf?{name:n,buf:m.buf.slice(),geo:!!m.hasGeo}:null;
   w.postMessage({type:'ama-models',hasAI:!!capS,bep:S.bep||'',v1:pack(S.m1,S.name1),v2:pack(S.m2,S.name2)},'*'); }
@@ -1920,7 +1967,7 @@ window.addEventListener('message',async e=>{ const w=clWin(); if(!w||e.source!==
   else if(d.type==='ama-save'){ try{ await clSave(d.name,d.blob); reply(true); }catch(err){ reply(false,null,{code:err?.code||'error'}); } } });
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-cl]'); if(!a) return; e.preventDefault(); e.stopPropagation(); wantClash=true; clSample=a.dataset.cl==='ejemplo'; if(location.hash!=='#app') location.hash='#app'; else route(); },true);
 function route(){ const app=location.hash==='#app'; $('app').hidden=!app; $('site').hidden=app; document.title=app?'AI model audit · Demo':'AI model audit';
-  if(app){ if(wantClash){ wantClash=false; setModule('in'); } else if(mod==='in') setModule('in'); else go(S.m1&&S.m2?step:1); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
+  if(app){ if(wantClash){ wantClash=false; setModule('in'); } else if(!mod) showChooser(); else setModule(mod); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
 window.addEventListener('hashchange',route);
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-demo]'); if(!a) return; e.preventDefault(); if(location.hash!=='#app') location.hash='#app'; else route(); if(!S.m1) loadDemo(); });
 
@@ -1959,7 +2006,7 @@ try{const t=localStorage.getItem('ama_tol'); if(t) $('tol').value=t}catch(e){}
 async function loadDemo(){ S.demo=true; $('demoChip').hidden=false; $('starter').hidden=true;
   $('bepText').value=DEMO.bep; S.bep=DEMO.bep; S.rules=[]; S.red={};
   await Promise.all([loadIfc(new File([DEMO.v1],'V01_edificio_demo.ifc'),1),loadIfc(new File([DEMO.v2],'V02_edificio_demo.ifc'),2)]);
-  toast('Caso de ejemplo cargado. Continúe a requisitos.'); if(!$('tour').hidden) renderTour(); }
+  toast('Caso de ejemplo cargado. Continúe a alcance.'); if(!$('tour').hidden) renderTour(); }
 $('btnDemo').onclick=loadDemo;
 
 /* ---------- 2 requisitos ---------- */

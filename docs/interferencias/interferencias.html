@@ -205,6 +205,10 @@ html.embed .top{height:50px}
 .stage.dashon .tbl{z-index:7}
 .stage.dashon .tools,.stage.dashon .legend,.stage.dashon .hint,.stage.dashon .det,.stage.dashon .badge,.stage.dashon .cut,.stage.dashon #colorSeg{display:none!important}
 .seg button .ph{font-size:13px;vertical-align:-1px}
+.dhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.dhead h2{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.dhead p{color:var(--muted);font-size:13.5px;margin-top:4px;max-width:62ch}
+.dhead .acts{display:flex;gap:6px;flex-wrap:wrap}
 .dfil{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;margin-bottom:14px}
 .dfil label{display:flex;flex-direction:column;gap:3px;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .dfil select{min-width:120px;max-width:220px;background:var(--s1);border:1px solid var(--line2);border-radius:9px;padding:6px 8px;font:400 13px var(--sans);letter-spacing:0;text-transform:none;color:var(--fg)}
@@ -298,7 +302,7 @@ html.embed .top{height:50px}
   </aside>
 
   <main class="stage" id="stage">
-    <div class="ov tbl"><div class="seg glass" role="group" aria-label="Vista"><button id="vV" aria-pressed="true"><i class="ph ph-cube"></i> VISOR 3D</button><button id="vT" aria-pressed="false"><i class="ph ph-chart-donut"></i> TABLERO</button></div><div class="seg glass" id="colorSeg" role="group" aria-label="Color del modelo"><button id="mSt" aria-pressed="true">ESTADO</button><button id="mDi" aria-pressed="false">DISCIPLINA</button></div></div>
+    <div class="ov tbl"><div class="seg glass" role="group" aria-label="Vista"><button id="vV" aria-pressed="true"><i class="ph ph-cube"></i> 1 · VISOR</button><button id="vT" aria-pressed="false"><i class="ph ph-file-text"></i> 2 · REPORTE</button></div><div class="seg glass" id="colorSeg" role="group" aria-label="Color del modelo"><button id="mSt" aria-pressed="true">ESTADO</button><button id="mDi" aria-pressed="false">DISCIPLINA</button></div></div>
     <div class="ov badge glass" id="badge" hidden></div>
     <div class="ov tools glass" role="toolbar" aria-label="Herramientas del visor">
       <button data-v="iso" title="Vista 3D" aria-label="Vista 3D"><i class="ph ph-cube"></i></button>
@@ -317,7 +321,7 @@ html.embed .top{height:50px}
     <div class="ov legend glass" id="legend"></div>
     <div class="ov hint" id="hint">Arrastre: girar · clic der.: desplazar · rueda: zoom · ← →: anterior / siguiente</div>
     <section class="ov det glass" id="det" hidden aria-live="polite"></section>
-    <section class="dash" id="dash" hidden aria-label="Tablero del reporte de interferencias"></section>
+    <section class="dash" id="dash" hidden aria-label="Reporte de interferencias"></section>
 
     <div class="loader" id="loader">
       <div class="lcard">
@@ -1073,6 +1077,8 @@ function renderDash(){ const d=$('dash'); if(S.view!=='dash') return;
   const v1=n('Activo')+n('Resuelto'), v2=act.length;
   const active=Object.values(f).some(Boolean);
   d.innerHTML=`
+  <div class="dhead"><div><h2>Reporte de interferencias</h2><p>Resumen de ${all.length} interferencias${cmp?' de V02 frente a V01':''}. Filtre, revise y descargue el reporte con capturas, el BCF para su software de coordinación o la tabla en CSV.</p></div>
+    <div class="acts"><button class="btn sm pri" id="dRep"><i class="ph ph-file-text"></i>Reporte HTML</button><button class="btn sm" id="dBcf"><i class="ph ph-package"></i>BCF 2.1</button><button class="btn sm" id="dCsv"><i class="ph ph-file-csv"></i>CSV</button></div></div>
   <div class="dfil" role="group" aria-label="Filtros del tablero">
     <label><span>Nivel</span><select data-df="lv">${opt(levels,f.lv,'Todos')}</select></label>
     <label><span>Regla</span><select data-df="rule">${opt(rules,f.rule,'Todas')}</select></label>
@@ -1096,6 +1102,7 @@ function renderDash(){ const d=$('dash'); if(S.view!=='dash') return;
   </div>
   <div class="dlegend"><span><i style="background:${DC.st.Nuevo}"></i>${cmp?'Nuevas':'Detectadas'}</span>${cmp?`<span><i class="tex" style="background:${DC.st.Activo}"></i>Persisten</span><span><i style="background:${DC.st.Resuelto}"></i>Resueltas</span>`:''}<span class="muted">Clic en un segmento o una barra para filtrar.</span></div>`;
   d.querySelectorAll('[data-df]').forEach(s=>s.onchange=()=>{ S.df[s.dataset.df]=s.value; dashChanged(); });
+  $('dRep').onclick=()=>exportReport(); $('dBcf').onclick=()=>exportBCF(); $('dCsv').onclick=()=>exportCsv();
   $('dClear').onclick=()=>{ S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; dashChanged(); };
   d.querySelectorAll('[data-f]').forEach(el=>el.onclick=e=>{ const [k,v]=el.dataset.f.split(/:(.*)/s);
     if(k==='el'){ const c=act.find(c=>c.a.id===v||c.b.id===v); if(c){ setView('3d'); select(c,true); } return; }
