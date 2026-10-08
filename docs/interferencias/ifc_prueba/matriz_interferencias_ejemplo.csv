@@ -1,0 +1,6 @@
+﻿Código;Disciplina A;Disciplina B;Criterio de coordinación;Tolerancia;Prioridad;Fuente
+MI-01;Ductos de climatización;Vigas;Ningún ducto puede atravesar vigas, mantener 5 cm libres bajo la viga.;5 cm;Alta;BEP 6.2
+MI-02;Tuberías sanitarias;Muros;Todo cruce de tubería con muro debe reportarse para prever la manga.;0;Media;Acta de coordinación 14
+MI-03;Tuberías;Ductos;Separación mínima entre redes de tuberías y ductos.;5 cm;Media;BEP 6.4
+MI-04;Instalaciones MEP;Columnas;No se permite ningún cruce de instalaciones con columnas.;0;Alta;BEP 6.1
+MI-05;Tuberías;Vigas;Las tuberías no pueden cruzar vigas sin pase aprobado por estructuras.;0;Alta;Acta de coordinación 15
