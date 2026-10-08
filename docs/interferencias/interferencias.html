@@ -338,9 +338,9 @@ html.embed .top{height:50px}
 <div class="layout">
   <nav class="rail" aria-label="Pasos de interferencias">
     <div class="ttl">Interferencias</div>
-    <button class="rstep" data-view="3d" aria-current="step"><span class="n"><i class="ph ph-cube"></i></span><span><b>Visor</b><small>Categorías y choques</small></span></button>
-    <button class="rstep" data-view="dash"><span class="n"><i class="ph ph-file-text"></i></span><span><b>Reporte</b><small>Dashboard, BCF y CSV</small></span></button>
-    <button class="rstep" data-view="rules"><span class="n"><i class="ph ph-sliders-horizontal"></i></span><span><b>Reglas</b><small>Criterios e IA</small></span></button>
+    <button class="rstep" data-view="rules" aria-current="step"><span class="n"><i class="ph ph-sliders-horizontal"></i></span><span><b>Reglas</b><small>1 · Criterios e IA</small></span></button>
+    <button class="rstep" data-view="3d"><span class="n"><i class="ph ph-cube"></i></span><span><b>Visor</b><small>2 · Categorías y choques</small></span></button>
+    <button class="rstep" data-view="dash"><span class="n"><i class="ph ph-file-text"></i></span><span><b>Reporte</b><small>3 · Dashboard y BCF</small></span></button>
     <div class="foot"><div class="rsum" id="railSum"></div></div>
   </nav>
 
@@ -366,7 +366,7 @@ html.embed .top{height:50px}
     <section class="ov det glass" id="det" hidden aria-live="polite"></section>
     <section class="ov cats glass" id="cats" aria-label="Categorías del modelo" hidden></section>
     <section class="rpanel" id="rpanel" hidden aria-label="Reglas de interferencia">
-      <div class="dhead"><div><h2>Reglas de interferencia</h2><p>Elija qué disciplinas o clases IFC se cruzan y con qué holgura. La IA puede proponer las reglas desde el BEP, las actas o una matriz en CSV o Excel.</p></div></div>
+      <div class="dhead"><div><h2>Reglas de interferencia</h2><p>Paso 1. Elija qué disciplinas o clases IFC se cruzan y con qué holgura. La IA puede proponer las reglas desde el BEP, las actas o una matriz en CSV o Excel. Luego pulse Detectar para pasar al visor.</p></div></div>
       <div class="rgrid">
 <div class="rcard" id="rulesBox">
       <div class="rhd"><span class="cap">Matriz de reglas</span><span class="mono muted" style="font-size:12px" id="rulesSum"></span></div>
@@ -777,7 +777,7 @@ async function analyze(){ if(!S.f2) return; const st=$('lstat'); $('go').disable
     $('files').innerHTML=`<span class="chip" style="color:var(--teal)" title="${esc(S.n2)}">V02 · ${esc(S.n2)}</span>`+(M1?`<span class="chip" style="color:var(--grey)" title="${esc(S.n1)}">V01 · ${esc(S.n1)}</span>`:'');
     $('badge').hidden=false; $('badge').innerHTML=`<i class="ph ph-cube"></i>${M2.els.length} elementos con geometría · ${S.engine}`;
     $('run').disabled=false; $('loader').hidden=true; st.textContent=''; renderSum();
-    await run();
+    $('prog').textContent='Modelos listos: revise las reglas y pulse Detectar'; setView('rules');
   }catch(e){ console.warn('[interferencias]',e); st.textContent=e.message==='web-ifc'?'No se pudo descargar el motor de geometría: revise la conexión.':(e.message||'No se pudo leer el archivo.'); }
   $('go').disabled=!S.f2; $('sample').disabled=false; }
 let busy=false;
@@ -1158,7 +1158,7 @@ if(EMBED){ addEventListener('message',e=>{ if(e.source!==window.parent) return; 
    estados con los colores de estado del producto, siempre con etiqueta directa (y textura en «Activas»). */
 const DC={grp:{MEP:'#3987e5',Estructura:'#d95926',Arquitectura:'#199e70',Otros:'#5B6B80'},st:{Nuevo:'#EF5A50',Detectado:'#EF5A50',Activo:'#EDAA45',Resuelto:'#38C48E'},bar:'#3987e5',gap:'#0F1B2A'};
 const STL={Nuevo:'Nuevas',Detectado:'Detectadas',Activo:'Persisten',Resuelto:'Resueltas'};
-S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; S.view='3d';
+S.df={lv:'',rule:'',tipo:'',st:'',gest:''}; S.view='rules';
 function dashList(){ const f=S.df; return (S.cl?.list||[]).filter(c=>(!f.lv||c.level===f.lv)&&(!f.rule||c.rule.id===f.rule)&&(!f.tipo||c.tipo===f.tipo)&&(!f.st||c.status===f.st)&&(!f.gest||S.meta[c.key]?.st===f.gest)); }
 const pct=(a,b)=>b?Math.round(100*a/b):0;
 const nf=n=>new Intl.NumberFormat('es-PE').format(n);
