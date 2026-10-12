@@ -328,8 +328,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 @media (max-width:560px){.ev-stats{grid-template-columns:1fr}.ev-stats>div{border-left:0!important;border-top:1px solid var(--line)!important}.ev-stats>div:first-child{border-top:0!important}.ev-q p{font-size:19px}}
 
 /* ---------- VALIDACIÓN (timeline) ---------- */
-.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;position:relative}
-.tl::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,var(--acc) 0 45%,var(--line2) 45%)}
+.tl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;position:relative}
+.tl::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,var(--acc) 0 44%,var(--line2) 44%)}
 .tl .st{padding:0 22px 0 0;position:relative}
 .tl .dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:2px solid var(--line2);color:var(--muted);font-size:15px;position:relative;margin-bottom:20px}
 .tl .st.done .dot{border-color:var(--acc);background:var(--acc);color:var(--accInk)}
@@ -1095,19 +1095,20 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
 
 <section class="block" id="validacion" style="padding-top:0">
   <div class="container">
-    <div class="head rv"><h2 class="h2">Así validamos antes de construir más.</h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir.</p></div>
+    <div class="head rv"><h2 class="h2">Así validamos antes de construir más.</h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir. Las entrevistas ya validaron el dolor; ahora medimos el ahorro en casos reales.</p></div>
     <div class="tl rv">
       <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set 2026</div><h3>Oportunidad</h3><p>Problema, segmento priorizado frente a otros 3 y mercado con fuentes.</p><div class="crit">Hito 1 entregado</div></div>
-      <div class="st now"><div class="dot"><i class="ph ph-microphone"></i></div><div class="when">Oct 2026</div><h3>Entrevistas y revisión medida</h3><p>6 entrevistas hechas: 6 de 6 con retrabajo reciente y 36 de 36 tareas resueltas en la demo. 3 entregan un caso real para la revisión medida.</p><div class="crit">H1: validada (6 de 6)<br>H2: 30% menos tiempo<br>H3: 90% de precisión</div></div>
+      <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Oct 2026</div><h3>Entrevistas y demo</h3><p>6 entrevistas válidas: 6 de 6 con retrabajo reciente, 36 de 36 tareas resueltas y utilidad de 4,7 sobre 5.</p><div class="crit">H1: validada (6 de 6)<br>H6: 5 de 6 reglas sin cambio<br>H4: US$ 180 en rango (3 de 3)</div></div>
+      <div class="st now"><div class="dot"><i class="ph ph-timer"></i></div><div class="when">Oct a nov 2026</div><h3>Revisión medida</h3><p>3 casos reales (2 IFC + BEP) revisados a mano y con el prototipo, con cronómetro por fase. Línea base: 22,5 h por auditoría.</p><div class="crit">H2: 30% menos tiempo<br>H3: 90% de precisión</div></div>
       <div class="st"><div class="dot"><i class="ph ph-handshake"></i></div><div class="when">Nov a dic 2026</div><h3>Pilotos pagados</h3><p>3 entrevistados aceptaron el piloto y 2 lo condicionan a probarlo en un proyecto real.</p><div class="crit">2 pilotos a US$ 180: seguir<br>0: bajar precio o cambiar segmento</div></div>
       <div class="st"><div class="dot"><i class="ph ph-rocket-launch"></i></div><div class="when">Ene 2027</div><h3>MVP</h3><p>Geometría completa, alcance aprobado y costo de operación medido.</p><div class="crit">90% en 3 casos y costo de US$ 60 o menos por proyecto-mes</div></div>
     </div>
     <div class="hyp rv">
       <span class="chip" style="color:var(--green)">H1 dolor recurrente · validada, 6 de 6</span>
       <span class="chip" style="color:var(--amber)">H2 ahorro de tiempo · línea base 22,5 h</span>
-      <span class="chip" style="color:var(--amber)">H3 calidad · en medición</span>
+      <span class="chip" style="color:var(--amber)">H3 calidad · se mide en 3 casos reales</span>
       <span class="chip" style="color:var(--amber)">H4 disposición a pagar · señal positiva, 3 de 3</span>
-      <span class="chip" style="color:var(--grey)">H5 costo de operación · pendiente</span>
+      <span class="chip" style="color:var(--grey)">H5 costo de operación · pendiente, MVP</span>
       <span class="chip" style="color:var(--green)">H6 reglas útiles de la IA · 5 de 6 sin cambio</span>
     </div>
   </div>
