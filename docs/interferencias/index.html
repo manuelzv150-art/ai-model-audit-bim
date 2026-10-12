@@ -295,9 +295,41 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .verdict .ph{font-size:20px;margin-top:1px}
 @media (max-width:900px){.price-grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.calc-out{grid-template-columns:1fr}}
 
+/* ---------- ENTREVISTAS (Hito 2) ---------- */
+.ev-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--bg2)}
+.ev-stats>div{padding:26px 24px;border-left:1px solid var(--line);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.ev-stats>div:nth-child(3n+1){border-left:0}
+.ev-stats>div:nth-child(-n+3){border-top:0}
+.ev-stats .big{font-size:42px;font-weight:500;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.ev-stats .big small{font-size:.5em;color:var(--muted);letter-spacing:-.01em;margin-left:4px}
+.ev-stats p{color:var(--fg2);font-size:14.5px;max-width:34ch}
+.ev-stats .chip{align-self:flex-start;margin-top:auto}
+.ev-cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:20px;margin-top:20px}
+.ev-card{border-radius:22px;border:1px solid var(--line);background:var(--s1);padding:26px;display:flex;flex-direction:column;gap:14px}
+.ev-card h3{font-size:20px;font-weight:500;letter-spacing:-.03em}
+.ev-q{margin:0;padding:2px 0 2px 16px;border-left:2px solid var(--acc)}
+.ev-q p{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.3;color:var(--fg)}
+.ev-q cite{display:block;margin-top:6px;font:400 12px var(--mono);color:var(--dim);font-style:normal}
+.ev-kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;font-size:14.5px;color:var(--fg2)}
+.ev-kv b{font:600 14.5px var(--mono);color:var(--fg);text-align:right;font-variant-numeric:tabular-nums}
+.ev-range{position:relative;height:38px;margin:6px 4px 2px}
+.ev-range .tr{position:absolute;left:0;right:0;top:16px;height:6px;border-radius:6px;background:var(--line)}
+.ev-range .ok{position:absolute;top:16px;height:6px;border-radius:6px;background:rgba(56,196,142,.55)}
+.ev-range .mk{position:absolute;top:0;transform:translateX(-50%);font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap}
+.ev-range .mk.b{top:26px}
+.ev-range .pin{position:absolute;top:10px;width:3px;height:18px;border-radius:2px;background:var(--acc);transform:translateX(-50%)}
+.ev-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ev-list li{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--fg2)}
+.ev-list li:first-child{border-top:0}
+.ev-list .ph{font-size:18px;margin-top:2px}
+.ev-list small{display:block;font:400 12px var(--mono);color:var(--dim);margin-top:2px}
+.phase b .pct{font:500 12px var(--mono);color:var(--red);margin-left:8px;font-weight:500}
+@media (max-width:900px){.ev-stats{grid-template-columns:1fr 1fr}.ev-stats>div{border-left:1px solid var(--line)!important;border-top:1px solid var(--line)!important}.ev-stats>div:nth-child(odd){border-left:0!important}.ev-stats>div:nth-child(-n+2){border-top:0!important}.ev-cols{grid-template-columns:1fr}}
+@media (max-width:560px){.ev-stats{grid-template-columns:1fr}.ev-stats>div{border-left:0!important;border-top:1px solid var(--line)!important}.ev-stats>div:first-child{border-top:0!important}.ev-q p{font-size:19px}}
+
 /* ---------- VALIDACIÓN (timeline) ---------- */
 .tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;position:relative}
-.tl::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,var(--acc) 0 37%,var(--line2) 37%)}
+.tl::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,var(--acc) 0 45%,var(--line2) 45%)}
 .tl .st{padding:0 22px 0 0;position:relative}
 .tl .dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:2px solid var(--line2);color:var(--muted);font-size:15px;position:relative;margin-bottom:20px}
 .tl .st.done .dot{border-color:var(--acc);background:var(--acc);color:var(--accInk)}
@@ -689,6 +721,7 @@ tr:last-child td{border-bottom:0}
       <li><a href="#interferencias">Interferencias</a></li>
       <li><a href="#ids">IDS</a></li>
       <li><a href="#ia">IA</a></li>
+      <li><a href="#entrevistas">Entrevistas</a></li>
       <li><a href="#mercado">Mercado</a></li>
       <li><a href="#precio">Planes</a></li>
     </ul>
@@ -737,12 +770,12 @@ tr:last-child td{border-bottom:0}
     <div class="versus">
       <div class="vcol today rv">
         <h3><i class="ph ph-hourglass-medium" style="color:var(--red)"></i>Hoy, a mano</h3>
-        <p class="sub">Las cinco fases que el coordinador repite en cada entrega.</p>
-        <div class="phase"><i class="ph ph-arrows-left-right"></i><div><b>Comparar</b><span>Abrir V01 y V02 lado a lado y buscar diferencias a ojo.</span></div></div>
-        <div class="phase"><i class="ph ph-magnifying-glass"></i><div><b>Localizar</b><span>Encontrar cada elemento en el modelo y en las tablas.</span></div></div>
-        <div class="phase"><i class="ph ph-list-checks"></i><div><b>Verificar requisitos</b><span>Releer el BEP y las actas para saber qué se exigía.</span></div></div>
-        <div class="phase"><i class="ph ph-note-pencil"></i><div><b>Documentar</b><span>Armar el reporte de observaciones con capturas.</span></div></div>
-        <div class="phase"><i class="ph ph-arrow-counter-clockwise"></i><div><b>Volver a verificar</b><span>En la siguiente entrega, empezar casi de cero.</span></div></div>
+        <p class="sub">Las cinco fases que el coordinador repite en cada entrega, con la parte del tiempo que les dedicaron los 6 entrevistados (promedio).</p>
+        <div class="phase"><i class="ph ph-arrows-left-right"></i><div><b>Comparar<span class="pct">43%</span></b><span>Abrir V01 y V02 lado a lado y buscar diferencias a ojo.</span></div></div>
+        <div class="phase"><i class="ph ph-magnifying-glass"></i><div><b>Localizar<span class="pct">9%</span></b><span>Encontrar cada elemento en el modelo y en las tablas.</span></div></div>
+        <div class="phase"><i class="ph ph-list-checks"></i><div><b>Verificar requisitos<span class="pct">18%</span></b><span>Releer el BEP y las actas para saber qué se exigía.</span></div></div>
+        <div class="phase"><i class="ph ph-note-pencil"></i><div><b>Documentar<span class="pct">13%</span></b><span>Armar el reporte de observaciones con capturas.</span></div></div>
+        <div class="phase"><i class="ph ph-arrow-counter-clockwise"></i><div><b>Volver a verificar<span class="pct">17%</span></b><span>En la siguiente entrega, empezar casi de cero.</span></div></div>
       </div>
       <div class="vmid" aria-hidden="true"><i class="ph ph-arrow-right"></i></div>
       <div class="vcol with rv" style="--i:1">
@@ -911,6 +944,70 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
   </div>
 </section>
 
+<section class="block" id="entrevistas">
+  <div class="container">
+    <div class="head rv">
+      <div class="eyebrow">Hito 2 · Entrevistas · octubre 2026</div>
+      <h2 class="h2">Lo que nos dijeron <span class="serif">seis equipos BIM.</span></h2>
+      <p class="lead">2 coordinadores BIM, 2 BIM managers y 2 directores de consultoras y contratistas de Lima contaron su última revisión de un modelo de terceros. Luego hicieron 6 tareas con el prototipo.</p>
+    </div>
+    <div class="ev-stats rv">
+      <div><div class="big" data-count="6" data-suf=" de 6">6 de 6</div><p>tuvieron una omisión o un retrabajo en los últimos 3 meses.</p><span class="chip" style="color:var(--green)">H1 · meta 4 de 6</span></div>
+      <div><div class="big">22,5<small>h</small></div><p>por auditoría manual (mediana), con 4 revisiones al mes por proyecto.</p><span class="chip" style="color:var(--amber)">H2 · línea base</span></div>
+      <div><div class="big" data-count="43" data-suf="%">43%</div><p>del tiempo de revisión se va solo en comparar versiones.</p><span class="chip" style="color:var(--grey)">P3 · promedio</span></div>
+      <div><div class="big" data-count="36" data-suf=" de 36">36 de 36</div><p>tareas resueltas con el prototipo. Facilidad promedio de 6,3 sobre 7.</p><span class="chip" style="color:var(--green)">Demo · meta 80%</span></div>
+      <div><div class="big">4,7<small>/ 5</small></div><p>de utilidad para su próxima revisión. 5 de 6 lo usarían en su siguiente entrega.</p><span class="chip" style="color:var(--green)">Valor · meta 4</span></div>
+      <div><div class="big" data-count="5" data-suf=" de 6">5 de 6</div><p>aprobaron sin cambios la regla que propuso la IA; uno la corrigió.</p><span class="chip" style="color:var(--green)">H6 · meta 80%</span></div>
+    </div>
+    <div class="ev-cols">
+      <div class="ev-card rv">
+        <h3>En sus palabras</h3>
+        <blockquote class="ev-q"><p>«Lo que más tiempo me quita es saber si lo que acordamos en las actas ya está en el modelo.»</p><cite>E-03 · Director, consultora BIM</cite></blockquote>
+        <blockquote class="ev-q"><p>«Actualizar los cambios de modelado geométrico y de información en corto plazo es demasiado tedioso y toma mucho tiempo.»</p><cite>E-04 · BIM manager, consultora de ingeniería</cite></blockquote>
+        <blockquote class="ev-q"><p>«Cuando ya hay información correcta, actualizar todo el modelo BIM, los documentos, los metrados y la data se nos complica.»</p><cite>E-06 · Director, consultora de arquitectura</cite></blockquote>
+        <p class="src">Códigos anónimos. Dolor principal: saber qué cambió (2), reprocesos, verificar acuerdos, localizar en el modelo y documentar observaciones (1 cada uno). 5 de 6 usan Navisworks.</p>
+      </div>
+      <div class="ev-card rv" style="--i:1">
+        <h3>Precio y piloto</h3>
+        <p class="muted" style="font-size:14.5px">Respuestas de precio válidas (a quienes no se les mencionó US$ 180 antes): 3.</p>
+        <div class="ev-range" aria-label="Rango de precio: barato US$ 120, caro US$ 250, plan Auditoría IA US$ 180">
+          <div class="tr"></div><div class="ok" style="left:20%;right:30%"></div>
+          <span class="mk" style="left:20%">US$ 120 · barato</span><span class="mk" style="left:70%">US$ 250 · caro</span>
+          <span class="pin" style="left:43%"></span><span class="mk b" style="left:43%;color:var(--acc)">US$ 180</span>
+        </div>
+        <div class="ev-kv" style="margin-top:12px">
+          <span>Ubican US$ 180 entre «barato» y «caro»</span><b>3 de 3</b>
+          <span>Aceptan el piloto</span><b>3 de 6</b>
+          <span>Lo condicionan a probarlo en un proyecto real</span><b>2 de 6</b>
+          <span>Entregan un caso real (2 IFC + BEP)</span><b>3 de 6</b>
+          <span>Plazo de decisión de compra (mediana)</span><b>18 días</b>
+        </div>
+        <p class="src">Medianas de las respuestas válidas. Muestra pequeña: el precio se confirma con los pilotos.</p>
+      </div>
+    </div>
+    <div class="ev-cols">
+      <div class="ev-card rv">
+        <h3>Qué cambiamos por lo que escuchamos</h3>
+        <ul class="ev-list">
+          <li><i class="ph ph-intersect" style="color:var(--teal)"></i><div>Separar con más claridad el choque duro de la falta de holgura, con la evidencia de cada regla.<small>E-01, E-02 · E-03 dudó en esa tarea</small></div></li>
+          <li><i class="ph ph-cube" style="color:var(--teal)"></i><div>Probar con sus propios IFC y no con el caso de ejemplo: la revisión medida se hace con los 3 casos reales.<small>E-03</small></div></li>
+          <li><i class="ph ph-package" style="color:var(--teal)"></i><div>Exportar observaciones en BCF para BIMcollab: ya incluido en el plan Plus.<small>E-03</small></div></li>
+          <li><i class="ph ph-users-three" style="color:var(--teal)"></i><div>Varios revisores en un mismo proyecto y tablero exportable a Power BI.<small>E-06</small></div></li>
+          <li><i class="ph ph-sparkle" style="color:var(--purple)"></i><div>Interfaz más simple y reglas de IA más prácticas de corregir.<small>E-04, E-05</small></div></li>
+        </ul>
+      </div>
+      <div class="ev-card rv" style="--i:1">
+        <h3>Lo que todavía no está probado</h3>
+        <ul class="ev-list">
+          <li><i class="ph ph-warning" style="color:var(--amber)"></i><div>Solo 2 de 6 tenían IFC en su última entrega; los 6 tenían BEP. El mercado supone entregas con IFC y lo revisamos en los pilotos.</div></li>
+          <li><i class="ph ph-user-check" style="color:var(--amber)"></i><div>4 de 6 confiarían en el resultado sin revisarlo y 2 solo en parte. Por eso cada regla sigue pasando por el coordinador.</div></li>
+          <li><i class="ph ph-timer" style="color:var(--amber)"></i><div>El ahorro de tiempo (H2) y la precisión (H3) se miden en una revisión real con cronómetro por fase, no en la demo.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="block" id="mercado">
   <div class="container">
     <div class="head rv"><h2 class="h2">Empezamos por las consultoras BIM de Lima.</h2><p class="lead">Usa el coordinador BIM. Paga el director. Revisan entregas de terceros todas las semanas.</p></div>
@@ -973,14 +1070,14 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto"><a class="btn ia" href="#app" data-cl="ejemplo"><i class="ph ph-intersect"></i>Ver interferencias</a><a class="btn ia" href="#app" data-ids="ejemplo"><i class="ph ph-list-checks"></i>Ver validación IDS</a></div>
       </div>
     </div>
-    <p class="src plansrc">Precios en validación con clientes (hipótesis H4).</p>
+    <p class="src plansrc">Precios en validación (H4). En las entrevistas, las 3 respuestas válidas ubicaron US$ 180 entre «barato» (mediana US$ 120) y «caro» (mediana US$ 250).</p>
     <div class="price-grid one">
       <div class="calc rv" style="--i:1" aria-labelledby="calcT">
-        <div class="calchd"><div><h3 id="calcT">¿Se paga solo en su proyecto?</h3><p class="muted" style="font-size:14.5px;margin-top:6px">Elija un plan y mueva los supuestos. Todos son editables y ninguno está medido todavía.</p></div>
+        <div class="calchd"><div><h3 id="calcT">¿Se paga solo en su proyecto?</h3><p class="muted" style="font-size:14.5px;margin-top:6px">Elija un plan y mueva los supuestos. Las revisiones y las horas parten de la mediana de las 6 entrevistas; la reducción y el costo por hora todavía son supuestos.</p></div>
           <div class="pseg" role="radiogroup" aria-label="Plan"><label><input type="radio" name="cPlan" value="90">Comparador</label><label><input type="radio" name="cPlan" value="180" checked>Auditoría IA</label><label><input type="radio" name="cPlan" value="260">Plus</label></div></div>
         <div class="fields">
-          <div class="fld"><label for="cRev">Revisiones al mes por proyecto <output id="oRev"></output></label><input type="range" id="cRev" min="2" max="24" step="1" value="8"></div>
-          <div class="fld"><label for="cH">Horas por revisión manual <output id="oH"></output></label><input type="range" id="cH" min="1" max="12" step="0.5" value="4"></div>
+          <div class="fld"><label for="cRev">Revisiones al mes por proyecto <output id="oRev"></output></label><input type="range" id="cRev" min="1" max="24" step="1" value="4"></div>
+          <div class="fld"><label for="cH">Horas por revisión manual <output id="oH"></output></label><input type="range" id="cH" min="1" max="40" step="0.5" value="22.5"></div>
           <div class="fld"><label for="cRed">Reducción de tiempo <output id="oRed"></output></label><input type="range" id="cRed" min="10" max="60" step="5" value="30"></div>
           <div class="fld"><label for="cCost">Costo por hora del coordinador <output id="oCost"></output></label><input type="range" id="cCost" min="6" max="40" step="1" value="14"></div>
         </div>
@@ -1001,17 +1098,17 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     <div class="head rv"><h2 class="h2">Así validamos antes de construir más.</h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir.</p></div>
     <div class="tl rv">
       <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set 2026</div><h3>Oportunidad</h3><p>Problema, segmento priorizado frente a otros 3 y mercado con fuentes.</p><div class="crit">Hito 1 entregado</div></div>
-      <div class="st now"><div class="dot"><i class="ph ph-microphone"></i></div><div class="when">Oct 2026</div><h3>Entrevistas y revisión medida</h3><p>8 coordinadores, 1 caso real revisado a mano y con el prototipo.</p><div class="crit">H2: 30% menos tiempo<br>H3: 90% de precisión</div></div>
-      <div class="st"><div class="dot"><i class="ph ph-handshake"></i></div><div class="when">Nov a dic 2026</div><h3>Pilotos pagados</h3><p>Ofrecer 1 proyecto piloto a quienes dijeron que lo probarían.</p><div class="crit">2 pilotos a US$ 180: seguir<br>0: bajar precio o cambiar segmento</div></div>
+      <div class="st now"><div class="dot"><i class="ph ph-microphone"></i></div><div class="when">Oct 2026</div><h3>Entrevistas y revisión medida</h3><p>6 entrevistas hechas: 6 de 6 con retrabajo reciente y 36 de 36 tareas resueltas en la demo. 3 entregan un caso real para la revisión medida.</p><div class="crit">H1: validada (6 de 6)<br>H2: 30% menos tiempo<br>H3: 90% de precisión</div></div>
+      <div class="st"><div class="dot"><i class="ph ph-handshake"></i></div><div class="when">Nov a dic 2026</div><h3>Pilotos pagados</h3><p>3 entrevistados aceptaron el piloto y 2 lo condicionan a probarlo en un proyecto real.</p><div class="crit">2 pilotos a US$ 180: seguir<br>0: bajar precio o cambiar segmento</div></div>
       <div class="st"><div class="dot"><i class="ph ph-rocket-launch"></i></div><div class="when">Ene 2027</div><h3>MVP</h3><p>Geometría completa, alcance aprobado y costo de operación medido.</p><div class="crit">90% en 3 casos y costo de US$ 60 o menos por proyecto-mes</div></div>
     </div>
     <div class="hyp rv">
-      <span class="chip" style="color:var(--amber)">H1 dolor recurrente · en medición</span>
-      <span class="chip" style="color:var(--amber)">H2 ahorro de tiempo · en medición</span>
+      <span class="chip" style="color:var(--green)">H1 dolor recurrente · validada, 6 de 6</span>
+      <span class="chip" style="color:var(--amber)">H2 ahorro de tiempo · línea base 22,5 h</span>
       <span class="chip" style="color:var(--amber)">H3 calidad · en medición</span>
-      <span class="chip" style="color:var(--grey)">H4 disposición a pagar · pendiente</span>
+      <span class="chip" style="color:var(--amber)">H4 disposición a pagar · señal positiva, 3 de 3</span>
       <span class="chip" style="color:var(--grey)">H5 costo de operación · pendiente</span>
-      <span class="chip" style="color:var(--amber)">H6 reglas útiles de la IA · en medición</span>
+      <span class="chip" style="color:var(--green)">H6 reglas útiles de la IA · 5 de 6 sin cambio</span>
     </div>
   </div>
 </section>
@@ -1941,7 +2038,7 @@ function heroScene(host,tagsEl,tabsEl,noteEl){
   // calculadora
   const ids=['cRev','cH','cRed','cCost'];
   function calc(){ const rev=+$('cRev').value,h=+$('cH').value,red=+$('cRed').value,cost=+$('cCost').value, P=+(document.querySelector('[name=cPlan]:checked')?.value||180); $('rC').textContent='US$ '+P;
-    $('oRev').textContent=rev; $('oH').textContent=h+' h'; $('oRed').textContent=red+'%'; $('oCost').textContent='US$ '+cost;
+    $('oRev').textContent=rev; $('oH').textContent=String(h).replace('.',',')+' h'; $('oRed').textContent=red+'%'; $('oCost').textContent='US$ '+cost;
     const hrs=rev*h*red/100, val=hrs*cost, be=P/cost;
     $('rH').textContent=hrs.toFixed(1)+' h'; $('rV').textContent='US$ '+nf(Math.round(val));
     const v=$('verdict'); const good=val>=P; v.className='verdict '+(good?'good':'meh');
