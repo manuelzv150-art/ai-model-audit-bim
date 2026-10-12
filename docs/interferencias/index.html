@@ -327,6 +327,21 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 @media (max-width:900px){.ev-stats{grid-template-columns:1fr 1fr}.ev-stats>div{border-left:1px solid var(--line)!important;border-top:1px solid var(--line)!important}.ev-stats>div:nth-child(odd){border-left:0!important}.ev-stats>div:nth-child(-n+2){border-top:0!important}.ev-cols{grid-template-columns:1fr}}
 @media (max-width:560px){.ev-stats{grid-template-columns:1fr}.ev-stats>div{border-left:0!important;border-top:1px solid var(--line)!important}.ev-stats>div:first-child{border-top:0!important}.ev-q p{font-size:19px}}
 
+.hyp .chip{white-space:normal}
+/* ---------- CASO REAL (Prueba A) ---------- */
+.cr-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.cr-tbl th{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:left;padding:0 10px 8px 0;border-bottom:1px solid var(--line)}
+.cr-tbl td{padding:10px 10px 10px 0;border-bottom:1px solid var(--line);color:var(--fg2);vertical-align:middle}
+.cr-tbl td.id{font:600 12.5px var(--mono);color:var(--fg);white-space:nowrap}
+.cr-tbl td.v{font:500 13px var(--mono);white-space:nowrap;text-align:right}
+.cr-tbl td.dn{color:var(--red)}
+.cr-bar{position:relative;height:8px;border-radius:4px;background:var(--line);min-width:90px}
+.cr-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.cr-bar .a{background:var(--grey);opacity:.55}
+.cr-bar .b{background:var(--red);height:4px;top:2px}
+.cr-tbl small{display:block;font:400 11.5px var(--mono);color:var(--dim);margin-top:2px}
+@media (max-width:640px){.cr-tbl .hm{display:none}}
+
 /* ---------- VALIDACIÓN (timeline) ---------- */
 .tl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;position:relative}
 .tl::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,var(--acc) 0 44%,var(--line2) 44%)}
@@ -957,15 +972,16 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
       <div><div class="big" data-count="43" data-suf="%">43%</div><p>del tiempo de revisión se va solo en comparar versiones.</p><span class="chip" style="color:var(--grey)">P3 · promedio</span></div>
       <div><div class="big" data-count="36" data-suf=" de 36">36 de 36</div><p>tareas resueltas con el prototipo. Facilidad promedio de 6,3 sobre 7.</p><span class="chip" style="color:var(--green)">Demo · meta 80%</span></div>
       <div><div class="big">4,7<small>/ 5</small></div><p>de utilidad para su próxima revisión. 5 de 6 lo usarían en su siguiente entrega.</p><span class="chip" style="color:var(--green)">Valor · meta 4</span></div>
-      <div><div class="big" data-count="5" data-suf=" de 6">5 de 6</div><p>aprobaron sin cambios la regla que propuso la IA; uno la corrigió.</p><span class="chip" style="color:var(--green)">H6 · meta 80%</span></div>
+      <div><div class="big" data-count="5" data-suf=" de 6">5 de 6</div><p>aprobaron sin cambios la regla que propuso la IA; uno la corrigió.</p><span class="chip" style="color:var(--amber)">H6 · parcial, caso sintético</span></div>
     </div>
     <div class="ev-cols">
       <div class="ev-card rv">
         <h3>En sus palabras</h3>
         <blockquote class="ev-q"><p>«Lo que más tiempo me quita es saber si lo que acordamos en las actas ya está en el modelo.»</p><cite>E-03 · Director, consultora BIM</cite></blockquote>
-        <blockquote class="ev-q"><p>«Actualizar los cambios de modelado geométrico y de información en corto plazo es demasiado tedioso y toma mucho tiempo.»</p><cite>E-04 · BIM manager, consultora de ingeniería</cite></blockquote>
-        <blockquote class="ev-q"><p>«Cuando ya hay información correcta, actualizar todo el modelo BIM, los documentos, los metrados y la data se nos complica.»</p><cite>E-06 · Director, consultora de arquitectura</cite></blockquote>
-        <p class="src">Códigos anónimos. Dolor principal: saber qué cambió (2), reprocesos, verificar acuerdos, localizar en el modelo y documentar observaciones (1 cada uno). 5 de 6 usan Navisworks.</p>
+        <blockquote class="ev-q"><p>«Actualizar los cambios de modelado geométrico y de información en corto plazo es demasiado tedioso y toma mucho tiempo para lo que le dan a uno.»</p><cite>E-04 · BIM manager, consultora de ingeniería</cite></blockquote>
+        <blockquote class="ev-q"><p>«Cuando hay un cambio o poca información de parte del cliente no se puede avanzar, y luego, cuando hay información correcta, actualizar todo el modelo BIM, los documentos, los metrados, la data, se nos complica.»</p><cite>E-06 · Director, consultora de arquitectura</cite></blockquote>
+        <p class="muted" style="font-size:14.5px"><b style="color:var(--fg)">Lo que interpretamos:</b> el dolor no es detectar choques, eso ya lo cubre Navisworks, sino saber qué información se perdió o no se incorporó entre versiones y si lo acordado sigue en el modelo. Por eso el producto se enfoca en información y cumplimiento, y se posiciona como complemento de Navisworks vía BCF, no como reemplazo.</p>
+        <p class="src">Códigos anónimos; ortografía corregida. Patrón (≥3 de 6): trazabilidad entre versiones, 4 de 6 (saber qué cambió 2, verificar acuerdos 1, localizar 1). Herramientas: Navisworks 5, Revit 4, Excel 3, Solibri 0, BIMcollab 0.</p>
       </div>
       <div class="ev-card rv" style="--i:1">
         <h3>Precio y piloto</h3>
@@ -990,19 +1006,63 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
         <h3>Qué cambiamos por lo que escuchamos</h3>
         <ul class="ev-list">
           <li><i class="ph ph-check-circle" style="color:var(--green)"></i><div><b style="color:var(--fg)">Hecho en la demo:</b> cada interferencia lleva una etiqueta grande «CHOQUE DURO» (rojo sólido) o «FALTA DE HOLGURA» (ámbar, con la línea de distancia en el visor), el dato «Medido 3,0 cm · mínimo 5 cm · faltan 2,0 cm» y un filtro por tipo en la lista y el tablero.<small>E-01, E-02 · E-03 dudó en esa tarea (T5)</small></div></li>
-          <li><i class="ph ph-cube" style="color:var(--teal)"></i><div>Probar con sus propios IFC y no con el caso de ejemplo: la revisión medida se hace con los 3 casos reales.<small>E-03</small></div></li>
-          <li><i class="ph ph-package" style="color:var(--teal)"></i><div>Exportar observaciones en BCF para BIMcollab: ya incluido en el plan Plus.<small>E-03</small></div></li>
-          <li><i class="ph ph-users-three" style="color:var(--teal)"></i><div>Varios revisores en un mismo proyecto y tablero exportable a Power BI.<small>E-06</small></div></li>
-          <li><i class="ph ph-sparkle" style="color:var(--purple)"></i><div>Interfaz más simple y reglas de IA más prácticas de corregir.<small>E-04, E-05</small></div></li>
+          <li><i class="ph ph-check-circle" style="color:var(--green)"></i><div><b style="color:var(--fg)">Foco en información:</b> retrocesos primero y vista Antes · Ahora · Esperado, porque 6 de 6 perdieron información entre versiones.<small>Entrevistas · H-e</small></div></li>
+          <li><i class="ph ph-check-circle" style="color:var(--green)"></i><div><b style="color:var(--fg)">Complemento de Navisworks:</b> las observaciones salen en BCF 2.1 para el software que ya usan; BCF ya está en el plan Plus.<small>Navisworks 5 de 6 · E-03 pidió BCF · H-f</small></div></li>
+          <li><i class="ph ph-check-circle" style="color:var(--green)"></i><div><b style="color:var(--fg)">Avance = cumplimiento:</b> en el caso real el modelo creció 74% y cumplió menos; contar cambios no mide avance.<small>Caso real · H-a</small></div></li>
+          <li><i class="ph ph-arrow-right" style="color:var(--teal)"></i><div>Guía de exportación IFC desde Revit y evaluar un complemento para Revit, porque solo 2 de 6 trabajan con IFC.<small>H-g</small></div></li>
+          <li><i class="ph ph-arrow-right" style="color:var(--teal)"></i><div>Proyectos multiusuario (fase 2) y exportación a Power BI (fase 3).<small>E-06</small></div></li>
         </ul>
       </div>
       <div class="ev-card rv" style="--i:1">
         <h3>Lo que todavía no está probado</h3>
         <ul class="ev-list">
-          <li><i class="ph ph-warning" style="color:var(--amber)"></i><div>Solo 2 de 6 tenían IFC en su última entrega; los 6 tenían BEP. El mercado supone entregas con IFC y lo revisamos en los pilotos.</div></li>
-          <li><i class="ph ph-user-check" style="color:var(--amber)"></i><div>4 de 6 confiarían en el resultado sin revisarlo y 2 solo en parte. Por eso cada regla sigue pasando por el coordinador.</div></li>
-          <li><i class="ph ph-timer" style="color:var(--amber)"></i><div>El ahorro de tiempo (H2) y la precisión (H3) se miden en una revisión real con cronómetro por fase, no en la demo.</div></li>
+          <li><i class="ph ph-timer" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Ahorro de tiempo (H2) y calidad (H3):</b> revisión manual frente a asistida del mismo caso, cronometrada por fase, con los casos de E-04, E-05 y E-06 más el caso real auditado.<small>Pendiente · 31/10/2026</small></div></li>
+          <li><i class="ph ph-seal-check" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Precisión del motor:</b> un coordinador del proyecto valida 20 hallazgos al azar del caso real.<small>Pendiente · 31/10/2026</small></div></li>
+          <li><i class="ph ph-user-check" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Riesgo de sobreconfianza:</b> 4 de 6 confiarían en el resultado sin revisarlo. Por eso la aprobación humana de cada regla sigue siendo obligatoria.<small>H-i</small></div></li>
+          <li><i class="ph ph-warning" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Pocas entregas en IFC:</b> los 6 tenían BEP, pero solo 2 trabajaban con IFC. El SAM bajó de 50% a 33%.<small>H-g · supuesto rechazado</small></div></li>
         </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="caso" style="padding-top:0">
+  <div class="container">
+    <div class="head rv">
+      <div class="eyebrow">Prueba A · caso real · 07/10/2026</div>
+      <h2 class="h2">El modelo creció 74%. <span class="serif">Cumplía menos.</span></h2>
+      <p class="lead">Auditamos dos versiones reales del modelo de arquitectura de un proyecto aeroportuario contra su plan de ejecución BIM, su estándar BIM y su plantilla de parámetros. Contar cambios habría mostrado avance; medir contra lo acordado mostró un retroceso de calidad.</p>
+    </div>
+    <div class="ev-stats rv">
+      <div><div class="big">750 → 1 308</div><p>elementos entre la versión 1 y la 2: 558 agregados, 175 modificados y 575 sin cambio.</p><span class="chip" style="color:var(--grey)">+74% elementos</span></div>
+      <div><div class="big">1,3<small>s</small></div><p>de cómputo para comparar y verificar ambos modelos (43 y 66 MB) en el navegador.</p><span class="chip" style="color:var(--green)">Procesa modelos reales</span></div>
+      <div><div class="big">11 + 7</div><p>reglas aplicadas: 11 por elemento y 7 de modelo, tomadas de los documentos del proyecto.</p><span class="chip" style="color:var(--grey)">Requisitos reales</span></div>
+    </div>
+    <div class="ev-cols">
+      <div class="ev-card rv">
+        <h3>Cumplimiento por requisito, V1 frente a V2</h3>
+        <table class="cr-tbl">
+          <thead><tr><th>ID</th><th>Requisito</th><th class="hm">V1 → V2</th><th style="text-align:right">V1</th><th style="text-align:right">V2</th></tr></thead>
+          <tbody>
+            <tr><td class="id">P-01</td><td>Clave BIM completa<small>Parámetro no existe en 870</small></td><td class="hm"><div class="cr-bar"><i class="a" style="width:37.1%"></i><i class="b" style="width:33.5%"></i></div></td><td class="v">37,1%</td><td class="v dn">33,5%</td></tr>
+            <tr><td class="id">P-03</td><td>Disciplina completa<small>Parámetro no existe en 313</small></td><td class="hm"><div class="cr-bar"><i class="a" style="width:80.9%"></i><i class="b" style="width:76.1%"></i></div></td><td class="v">80,9%</td><td class="v dn">76,1%</td></tr>
+            <tr><td class="id">P-04</td><td>Código de familia completo<small>Parámetro no existe en 313</small></td><td class="hm"><div class="cr-bar"><i class="a" style="width:80.9%"></i><i class="b" style="width:76.1%"></i></div></td><td class="v">80,9%</td><td class="v dn">76,1%</td></tr>
+            <tr><td class="id">P-05</td><td>Código OmniClass 21<small>Vacío en 858; formato inválido en 12</small></td><td class="hm"><div class="cr-bar"><i class="a" style="width:37.1%"></i><i class="b" style="width:33.5%"></i></div></td><td class="v">37,1%</td><td class="v dn">33,5%</td></tr>
+            <tr><td class="id">P-02</td><td>Clasificación completa<small>Parámetro no existe en ningún elemento</small></td><td class="hm"><div class="cr-bar"></div></td><td class="v">0%</td><td class="v dn">0%</td></tr>
+            <tr><td class="id">N-01</td><td>Nomenclatura de tipos<small>Tildes o ñ, espacios, código no listado</small></td><td class="hm"><div class="cr-bar"><i class="a" style="width:95.6%"></i><i class="b" style="width:90.9%"></i></div></td><td class="v">95,6%</td><td class="v dn">90,9%</td></tr>
+          </tbody>
+        </table>
+        <p class="src">% sobre elementos evaluables; «No evaluable» nunca cuenta como cumplido. En gris V1, en rojo V2. Fase única, workset y modelos genéricos cumplen sobre 96%.</p>
+      </div>
+      <div class="ev-card rv" style="--i:1">
+        <h3>Lo que encontró el motor</h3>
+        <ul class="ev-list">
+          <li><i class="ph ph-trend-down" style="color:var(--red)"></i><div>Los elementos nuevos entraron sin la información del BEP: bajó el cumplimiento en 4 de los 5 parámetros exigidos.<small>H-a</small></div></li>
+          <li><i class="ph ph-map-pin" style="color:var(--amber)"></i><div>Georreferencia de exportación por defecto de Revit y sin conversión de mapa; los elementos sí están en coordenadas del proyecto.<small>G-04 · requiere revisión · H-c</small></div></li>
+          <li><i class="ph ph-stack" style="color:var(--amber)"></i><div>Los 21 niveles no siguen el formato de nombres del estándar, y el nombre de archivo tampoco.<small>G-01, G-03 · incumple</small></div></li>
+          <li><i class="ph ph-prohibit" style="color:var(--grey)"></i><div>Geometría de detalle, vistas y advertencias de Revit no viajan en el IFC: quedan como «No evaluable».<small>G-05 a G-07 · H-b</small></div></li>
+        </ul>
+        <p class="src">Con el caso real también ajustamos el motor para combinar propiedades de tipo e instancia, porque Revit exporta parámetros en el tipo. Pendiente al 31/10/2026: validar 20 hallazgos al azar con un coordinador del proyecto para medir la precisión real (H3).</p>
       </div>
     </div>
   </div>
@@ -1014,15 +1074,16 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     <div class="mkt">
       <div class="rings rv" aria-label="TAM, SAM y SOM">
         <div class="ring r1"><span>TAM</span><b>US$ 665 280</b><small>308 proyectos de edificación con BIM en Lima, al año</small></div>
-        <div class="ring r2"><span>SAM</span><b>US$ 332 640</b><small>154 con entregas recurrentes e IFC</small></div>
-        <div class="ring r3"><span>SOM año 1</span><b>US$ 36 000</b></div>
+        <div class="ring r2"><span>SAM</span><b>US$ 222 480</b><small>103 con BEP e IFC (33%)</small></div>
+        <div class="ring r3"><span>SOM año 1</span><b>US$ 36 000</b><small>19% del SAM</small></div>
       </div>
       <div class="alts rv" style="--i:1">
         <div class="alt us"><b>AI model audit</b><span class="price">US$ 90 a 260 / proyecto-mes</span><p>Tres planes: Comparador, Auditoría IA (reglas desde el BEP y las actas en español, aprobadas por el coordinador) y Plus con interferencias. Cobro por proyecto, no por usuario.</p></div>
+        <div class="alt"><b>Lo que usan hoy: Navisworks + Revit + Excel</b><span class="price">5 de 6</span><p>Detecta choques geométricos, pero no compara la información entre versiones ni verifica el BEP y las actas. AI model audit lo complementa vía BCF; no lo reemplaza. Solibri y BIMcollab: 0 de 6.</p></div>
         <div class="alt"><b>Autodesk BIM Collaborate Pro</b><span class="price">US$ 945 / usuario-año</span><p>Coordinación en la nube y comparación de modelos.</p></div>
         <div class="alt"><b>Solibri Advanced / Premium</b><span class="price">€ 2 109 a 2 772 / usuario-año</span><p>Verificación por reglas que configura un especialista. Asistente de IA en beta en Premium.</p></div>
         <div class="alt"><b>BIMcollab</b><span class="price">€ 12,50 a 25 / usuario-mes</span><p>Gestión de incidencias y comunicación de conflictos.</p></div>
-        <p class="src" style="margin-top:6px">TAM = 308 proyectos × US$ 180 × 12 (plan Auditoría IA; PUCP 2023; precio en validación). SAM supone 50% con entregas recurrentes. SOM = 20 proyectos × 10 meses. Precios: Novedge, Solibri Store y BIMcollab, consultados el 03/10/2026.</p>
+        <p class="src" style="margin-top:6px">TAM = 308 proyectos × US$ 180 × 12 (855 proyectos de edificación en Lima y Callao × 36% con BIM, PUCP-GETEC 2023; US$ 180 en rango para 3 de 3 respuestas válidas). SAM = 33%: en las entrevistas, 2 de 6 contaban con BEP e IFC; reemplaza el supuesto anterior de 50% y crece si exportan IFC desde Revit. SOM = 20 proyectos × 10 meses, igual al punto de equilibrio. Precios: Novedge, Solibri Store y BIMcollab, consultados el 03/10/2026.</p>
       </div>
     </div>
   </div>
@@ -1073,13 +1134,13 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
     <p class="src plansrc">Precios en validación (H4). En las entrevistas, las 3 respuestas válidas ubicaron US$ 180 entre «barato» (mediana US$ 120) y «caro» (mediana US$ 250).</p>
     <div class="price-grid one">
       <div class="calc rv" style="--i:1" aria-labelledby="calcT">
-        <div class="calchd"><div><h3 id="calcT">¿Se paga solo en su proyecto?</h3><p class="muted" style="font-size:14.5px;margin-top:6px">Elija un plan y mueva los supuestos. Las revisiones y las horas parten de la mediana de las 6 entrevistas; la reducción y el costo por hora todavía son supuestos.</p></div>
+        <div class="calchd"><div><h3 id="calcT">¿Se paga solo en su proyecto?</h3><p class="muted" style="font-size:14.5px;margin-top:6px">Elija un plan y mueva los supuestos. Las revisiones y las horas parten de la mediana de las 6 entrevistas. La reducción (meta H2) y el valor de US$ 25 por hora del coordinador son supuestos: no se preguntaron y se medirán en los pilotos.</p></div>
           <div class="pseg" role="radiogroup" aria-label="Plan"><label><input type="radio" name="cPlan" value="90">Comparador</label><label><input type="radio" name="cPlan" value="180" checked>Auditoría IA</label><label><input type="radio" name="cPlan" value="260">Plus</label></div></div>
         <div class="fields">
           <div class="fld"><label for="cRev">Revisiones al mes por proyecto <output id="oRev"></output></label><input type="range" id="cRev" min="1" max="24" step="1" value="4"></div>
           <div class="fld"><label for="cH">Horas por revisión manual <output id="oH"></output></label><input type="range" id="cH" min="1" max="40" step="0.5" value="22.5"></div>
           <div class="fld"><label for="cRed">Reducción de tiempo <output id="oRed"></output></label><input type="range" id="cRed" min="10" max="60" step="5" value="30"></div>
-          <div class="fld"><label for="cCost">Costo por hora del coordinador <output id="oCost"></output></label><input type="range" id="cCost" min="6" max="40" step="1" value="14"></div>
+          <div class="fld"><label for="cCost">Costo por hora del coordinador <output id="oCost"></output></label><input type="range" id="cCost" min="6" max="60" step="1" value="25"></div>
         </div>
         <div class="calc-out">
           <div><div class="l">Horas liberadas al mes</div><div class="v" id="rH">0</div></div>
@@ -1095,21 +1156,24 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
 
 <section class="block" id="validacion" style="padding-top:0">
   <div class="container">
-    <div class="head rv"><h2 class="h2">Así validamos antes de construir más.</h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir. Las entrevistas ya validaron el dolor; ahora medimos el ahorro en casos reales.</p></div>
+    <div class="head rv"><h2 class="h2">Así validamos antes de construir más.</h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir. Lo que no se ha medido figura como pendiente, con fecha.</p></div>
     <div class="tl rv">
       <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set 2026</div><h3>Oportunidad</h3><p>Problema, segmento priorizado frente a otros 3 y mercado con fuentes.</p><div class="crit">Hito 1 entregado</div></div>
-      <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Oct 2026</div><h3>Entrevistas y demo</h3><p>6 entrevistas válidas: 6 de 6 con retrabajo reciente, 36 de 36 tareas resueltas y utilidad de 4,7 sobre 5.</p><div class="crit">H1: validada (6 de 6)<br>H6: 5 de 6 reglas sin cambio<br>H4: US$ 180 en rango (3 de 3)</div></div>
-      <div class="st now"><div class="dot"><i class="ph ph-timer"></i></div><div class="when">Oct a nov 2026</div><h3>Revisión medida</h3><p>3 casos reales (2 IFC + BEP) revisados a mano y con el prototipo, con cronómetro por fase. Línea base: 22,5 h por auditoría.</p><div class="crit">H2: 30% menos tiempo<br>H3: 90% de precisión</div></div>
+      <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">02 a 11/10/2026</div><h3>Entrevistas, demo y caso real</h3><p>6 entrevistas válidas, prueba de la demo con los 6 (36 de 36 tareas) y auditoría de un caso real con el prototipo.</p><div class="crit">H1: confirmada (6 de 6)<br>H4: confirmada (n = 3)<br>Demo comprensible: confirmada<br>SAM 50%: rechazado → 33%</div></div>
+      <div class="st now"><div class="dot"><i class="ph ph-timer"></i></div><div class="when">Al 31/10/2026</div><h3>Revisión medida</h3><p>Casos de E-04, E-05 y E-06 más el caso real, revisados a mano y con el prototipo, con cronómetro por fase. Línea base: 22,5 h por auditoría.</p><div class="crit">H2: 30% menos tiempo<br>H3: 90% de precisión<br>H6: 80% de reglas IA útiles</div></div>
       <div class="st"><div class="dot"><i class="ph ph-handshake"></i></div><div class="when">Nov a dic 2026</div><h3>Pilotos pagados</h3><p>3 entrevistados aceptaron el piloto y 2 lo condicionan a probarlo en un proyecto real.</p><div class="crit">2 pilotos a US$ 180: seguir<br>0: bajar precio o cambiar segmento</div></div>
       <div class="st"><div class="dot"><i class="ph ph-rocket-launch"></i></div><div class="when">Ene 2027</div><h3>MVP</h3><p>Geometría completa, alcance aprobado y costo de operación medido.</p><div class="crit">90% en 3 casos y costo de US$ 60 o menos por proyecto-mes</div></div>
     </div>
     <div class="hyp rv">
-      <span class="chip" style="color:var(--green)">H1 dolor recurrente · validada, 6 de 6</span>
-      <span class="chip" style="color:var(--amber)">H2 ahorro de tiempo · línea base 22,5 h</span>
-      <span class="chip" style="color:var(--amber)">H3 calidad · se mide en 3 casos reales</span>
-      <span class="chip" style="color:var(--amber)">H4 disposición a pagar · señal positiva, 3 de 3</span>
-      <span class="chip" style="color:var(--grey)">H5 costo de operación · pendiente, MVP</span>
-      <span class="chip" style="color:var(--green)">H6 reglas útiles de la IA · 5 de 6 sin cambio</span>
+      <span class="chip" style="color:var(--green)">H1 dolor recurrente · confirmada, 6 de 6</span>
+      <span class="chip" style="color:var(--amber)">H2 ahorro ≥30% · pendiente 31/10</span>
+      <span class="chip" style="color:var(--amber)">H3 calidad ≥90% · pendiente 31/10</span>
+      <span class="chip" style="color:var(--green)">H4 US$ 180 por proyecto-mes · confirmada, n = 3</span>
+      <span class="chip" style="color:var(--grey)">H5 costo ≤ US$ 60 · pendiente dic</span>
+      <span class="chip" style="color:var(--amber)">H6 reglas IA útiles · parcial, 6 de 6 en caso sintético</span>
+      <span class="chip" style="color:var(--red)">SAM 50% · rechazado → 33%</span>
+      <span class="chip" style="color:var(--red)">Contar cambios mide avance · rechazado</span>
+      <span class="chip" style="color:var(--green)">Procesa modelos reales en segundos · confirmado</span>
     </div>
   </div>
 </section>
