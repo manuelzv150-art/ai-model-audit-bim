@@ -58,6 +58,17 @@ Página `interferencias.html`, que la demo muestra en el botón **Interferencias
 
 En todos los casos la IA solo propone: ninguna regla se verifica sin aprobación humana, y el cumplimiento lo calcula un motor determinista.
 
+## Prueba con proyecto real (MARIAN, 12/10/2026)
+
+Dos IFC2X3 de Revit 2026 (V01 09-03-26, 146 elementos; V02 10-03-26, 131) pasaron por los tres módulos de la página publicada y se compararon con IfcOpenShell e ifctester:
+
+- **Avance**: 15 eliminados, 1 modificado; información 84/88 (95,5 %), 88/88 veredictos iguales a la referencia.
+- **Interferencias**: 62 activas (54 choques duros + 8 holguras), 1 nueva, 14 resueltas. Choques duros: precisión 100 %, exhaustividad 94,7 %.
+- **IDS**: 84/92 (91 %), 92/92 veredictos iguales a ifctester.
+- Mejoras detectadas: separar «resuelta» de «eliminada», medir la holgura sobre la malla y publicar la IA en vivo.
+
+Detalle en `hito2/Anexo_evidencias_Hito2_v1.1.pdf` y `hito2/Deck_Hito2_v1.1.pdf` (sección «Pruebas» de la página).
+
 ## Transparencia
 
 Los datos del caso de ejemplo son sintéticos. Las cifras de mercado citan su fuente; precios, ahorros y escenarios son supuestos en validación. Claude (Anthropic) apoyó el código y la redacción, con revisión del equipo.

@@ -753,6 +753,7 @@ tr:last-child td{border-bottom:0}
       <li><a href="#ids">IDS</a></li>
       <li><a href="#ia">IA</a></li>
       <li><a href="#entrevistas">Entrevistas</a></li>
+      <li><a href="#marian">Pruebas</a></li>
       <li><a href="#mercado">Mercado</a></li>
       <li><a href="#precio">Planes</a></li>
     </ul>
@@ -1037,10 +1038,10 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
         </ul>
       </div>
       <div class="ev-card rv" style="--i:1">
-        <h3>Lo que todavía no está probado</h3>
+        <h3>Lo que ya medimos y lo que falta</h3>
         <ul class="ev-list">
-          <li><i class="ph ph-timer" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Ahorro de tiempo (H2) y calidad (H3):</b> revisión manual frente a asistida del mismo caso, cronometrada por fase, con los casos de E-04, E-05 y E-06 más el caso real auditado.<small>Pendiente · 31/10/2026</small></div></li>
-          <li><i class="ph ph-seal-check" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Precisión del motor:</b> un coordinador del proyecto valida 20 hallazgos al azar del caso real.<small>Pendiente · 31/10/2026</small></div></li>
+          <li><i class="ph ph-seal-check" style="color:var(--green)"></i><div><b style="color:var(--fg)">Calidad del motor (H3), medida:</b> en el proyecto real MARIAN la plataforma coincidió con IfcOpenShell e ifctester: precisión 100% y exhaustividad de 95% en choques duros y de 100% en información e IDS.<small>Pruebas C y D · 12/10/2026 · <a href="#marian">ver resultados</a></small></div></li>
+          <li><i class="ph ph-timer" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Ahorro de tiempo humano (H2):</b> el tiempo de máquina ya está medido (2,5 s en MARIAN); falta cronometrar a un coordinador revisando a mano y con la plataforma el mismo caso.<small>Se mide en los pilotos · nov–dic 2026</small></div></li>
           <li><i class="ph ph-user-check" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Riesgo de sobreconfianza:</b> 4 de 6 confiarían en el resultado sin revisarlo. Por eso la aprobación humana de cada regla sigue siendo obligatoria.<small>H-i</small></div></li>
           <li><i class="ph ph-warning" style="color:var(--amber)"></i><div><b style="color:var(--fg)">Pocas entregas en IFC:</b> los 6 tenían BEP, pero solo 2 trabajaban con IFC. El SAM bajó de 50% a 33%.<small>H-g · supuesto rechazado</small></div></li>
         </ul>
@@ -1085,7 +1086,53 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
           <li><i class="ph ph-stack" style="color:var(--amber)"></i><div>Los 21 niveles no siguen el formato de nombres del estándar, y el nombre de archivo tampoco.<small>G-01, G-03 · incumple</small></div></li>
           <li><i class="ph ph-prohibit" style="color:var(--grey)"></i><div>Geometría de detalle, vistas y advertencias de Revit no viajan en el IFC: quedan como «No evaluable».<small>G-05 a G-07 · H-b</small></div></li>
         </ul>
-        <p class="src">Con el caso real también ajustamos el motor para combinar propiedades de tipo e instancia, porque Revit exporta parámetros en el tipo. Pendiente al 31/10/2026: validar 20 hallazgos al azar con un coordinador del proyecto para medir la precisión real (H3).</p>
+        <p class="src">Con el caso real también ajustamos el motor para combinar propiedades de tipo e instancia, porque Revit exporta parámetros en el tipo. La precisión del motor (H3) se midió después con el proyecto MARIAN contra referencias independientes (<a href="#marian">pruebas C y D</a>).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="marian" style="padding-top:0">
+  <div class="container">
+    <div class="head rv">
+      <div class="eyebrow">Pruebas C y D · proyecto real MARIAN · 12/10/2026</div>
+      <h2 class="h2">Probamos la plataforma publicada <span class="serif">con un proyecto real.</span></h2>
+      <p class="lead">Dos exportaciones IFC2X3 de Revit 2026 del proyecto MARIAN (V01 09-03-26, 146 elementos; V02 10-03-26, 131) pasaron por los tres módulos de esta página. Luego comparamos cada resultado, elemento por elemento y par por par, con IfcOpenShell e ifctester.</p>
+    </div>
+    <div class="ev-stats rv">
+      <div><div class="big">95,5%</div><p>de cumplimiento de información en V02 (84 de 88). 15 elementos eliminados y 1 muro modificado frente a V01.</p><span class="chip" style="color:var(--green)">Avance · 88/88 coinciden</span></div>
+      <div><div class="big">54 / 54</div><p>choques duros confirmados por la referencia, sin falsas alarmas; detectó 54 de 57 (95%).</p><span class="chip" style="color:var(--green)">Interferencias · H3 ≥90%</span></div>
+      <div><div class="big">92 / 92</div><p>veredictos del IDS iguales a ifctester: 84 cumplen (91%) y 8 elementos fallan.</p><span class="chip" style="color:var(--green)">Validación IDS</span></div>
+      <div><div class="big">2,5<small>s</small></div><p>para leer las dos versiones y detectar choques en ambas, dentro del navegador.</p><span class="chip" style="color:var(--grey)">Tiempo de máquina</span></div>
+      <div><div class="big">1 nueva</div><p>interferencia en V02, causada por el único cambio geométrico: un muro alargado 2,9 cm.</p><span class="chip" style="color:var(--grey)">Comparar versiones</span></div>
+      <div><div class="big">9 de 10</div><p>reglas propuestas fueron útiles en Avance e Interferencias (1 corregida). Desde texto, el IDS convirtió 2 de 5.</p><span class="chip" style="color:var(--amber)">H6 · parcial</span></div>
+    </div>
+    <div class="ev-cols">
+      <div class="ev-card rv" style="min-width:0">
+        <h3>Precisión frente a la referencia (H3)</h3>
+        <div class="tblwrap"><table class="cr-tbl">
+          <thead><tr><th>Qué se compara</th><th style="text-align:right">Plataforma</th><th style="text-align:right">Referencia</th><th style="text-align:right">Precisión</th><th style="text-align:right">Exhaust.</th></tr></thead>
+          <tbody>
+            <tr><td>Eliminados y agregados</td><td class="v">15 · 0</td><td class="v">15 · 0</td><td class="v">100%</td><td class="v">100%</td></tr>
+            <tr><td>Información (4 reglas)</td><td class="v">88</td><td class="v">88</td><td class="v">100%</td><td class="v">100%</td></tr>
+            <tr><td>Choques duros V02</td><td class="v">54</td><td class="v">57</td><td class="v">100%</td><td class="v">94,7%</td></tr>
+            <tr><td>Choques duros V01</td><td class="v">66</td><td class="v">69</td><td class="v">100%</td><td class="v">95,7%</td></tr>
+            <tr><td>Veredictos IDS</td><td class="v">92</td><td class="v">92</td><td class="v">100%</td><td class="v">100%</td></tr>
+            <tr><td>Holgura &lt;2 cm entre muros<small>Medida entre cajas envolventes</small></td><td class="v">8</td><td class="v">58</td><td class="v">100%</td><td class="v dn">13,8%</td></tr>
+          </tbody>
+        </table></div>
+        <p class="src">Referencia: IfcOpenShell 0.9 (geometría OpenCascade), volumen de intersección &gt;1 cm³ y distancia exacta para choques; ifctester para el IDS. El proyecto no trae BEP: se usaron 10 requisitos de prueba (5 de información y 5 de interferencias) escritos a partir de las propiedades del modelo.</p>
+      </div>
+      <div class="ev-card rv" style="--i:1">
+        <h3>Lo que encontró y lo que vamos a corregir</h3>
+        <figure style="margin:0 0 14px"><img src="hito2/marian_interferencia.jpg" alt="Choque duro nuevo entre dos muros interiores en el visor de interferencias" loading="lazy" style="width:100%;border-radius:14px;border:1px solid var(--line);display:block"></figure>
+        <ul class="ev-list">
+          <li><i class="ph ph-git-diff" style="color:var(--teal)"></i><div>El único cambio geométrico de V02 (un muro alargado 2,9 cm) creó la única interferencia nueva. Comparar versiones explica de dónde sale cada choque.<small>H-k</small></div></li>
+          <li><i class="ph ph-warning" style="color:var(--amber)"></i><div>Las 14 interferencias «resueltas» desaparecieron porque se eliminó un elemento, no por una corrección. Vamos a separar «resuelta» de «eliminada».<small>H-l · O-1</small></div></li>
+          <li><i class="ph ph-ruler" style="color:var(--amber)"></i><div>La holgura entre cajas acierta en lo que reporta, pero omite contactos cuando las cajas se solapan. Siguiente ajuste: medirla sobre la malla.<small>O-2</small></div></li>
+          <li><i class="ph ph-sparkle" style="color:var(--amber)"></i><div>Sin IA en vivo en esta página, respondió el asistente local por palabras clave. Medir H6 con Gemini exige publicar la IA en vivo.<small>O-3 · fase 1</small></div></li>
+        </ul>
+        <p class="src">Detalle completo, tablas por regla y observaciones en el <a href="hito2/Anexo_evidencias_Hito2_v1.1.pdf">anexo de evidencias v1.1 (PDF)</a> y el <a href="hito2/Deck_Hito2_v1.1.pdf">deck del Hito 2 (PDF)</a>.</p>
       </div>
     </div>
   </div>
@@ -1198,28 +1245,28 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
 
 <section class="block" id="validacion" style="padding-top:0">
   <div class="container">
-    <div class="head rv"><h2 class="h2">Plan de desarrollo: <span class="serif">cada fase con criterio de salida.</span></h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir. Lo que no se ha medido figura como pendiente, con fecha.</p></div>
+    <div class="head rv"><h2 class="h2">Plan de desarrollo: <span class="serif">cada fase con criterio de salida.</span></h2><p class="lead">Cada experimento tiene una métrica y un criterio de decisión definidos antes de medir. Lo que solo se mide con personas en un piloto figura con su experimento y fecha.</p></div>
     <div class="tl rv">
       <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set 2026 · Hito 1</div><h3>Oportunidad</h3><p>Problema, segmento priorizado frente a otros 3 y mercado con fuentes.</p><div class="crit">Hito 1 entregado</div></div>
-      <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set a oct 2026 · Fase 0</div><h3>Demo y evidencia</h3><p>Demo navegable publicada, IFC reales de 66 MB, interferencias, BCF e IDS. 6 entrevistas y caso real auditado.</p><div class="crit">Salida: 6 pruebas de usuario (logrado)</div></div>
-      <div class="st now"><div class="dot"><i class="ph ph-timer"></i></div><div class="when">13 a 31/10/2026 · Fase 1</div><h3>Validar valor</h3><p>IA en vivo publicada, Prueba C con 3 casos (manual frente a asistida) y ajuste de la ficha por T5 (hecho).</p><div class="crit">Salida: H2 ≥30%, H3 ≥90%, H6 ≥80%</div></div>
+      <div class="st done"><div class="dot"><i class="ph ph-check"></i></div><div class="when">Set a oct 2026 · Fase 0</div><h3>Demo y evidencia</h3><p>Demo navegable publicada, IFC reales de 66 MB, interferencias, BCF e IDS. 6 entrevistas, caso AICC y caso MARIAN con precisión medida.</p><div class="crit">Salida: 6 pruebas de usuario (logrado)</div></div>
+      <div class="st now"><div class="dot"><i class="ph ph-timer"></i></div><div class="when">13 a 31/10/2026 · Fase 1</div><h3>Validar valor</h3><p>Ajuste de la ficha por T5 (hecho), precisión del motor en el caso MARIAN (hecho), IA en vivo publicada y holgura medida sobre la malla.</p><div class="crit">Salida: H3 ≥90% (logrado); H6 ≥80% con IA en vivo</div></div>
       <div class="st"><div class="dot"><i class="ph ph-handshake"></i></div><div class="when">Nov a dic 2026 · Fase 2</div><h3>Pilotos</h3><p>2 pilotos pagados, proyectos multiusuario y guía de exportación IFC desde Revit.</p><div class="crit">Salida: 2 pilotos; costo ≤ US$ 60 por proyecto-mes</div></div>
       <div class="st"><div class="dot"><i class="ph ph-rocket-launch"></i></div><div class="when">Ene a mar 2027 · Fase 3</div><h3>MVP</h3><p>Cuentas y datos cifrados, exportación a Power BI y complemento para Revit.</p><div class="crit">Salida: ≥90% en 3 casos; 20 proyectos</div></div>
     </div>
     <div class="ev-card rv" style="margin-top:40px">
-      <h3>Lo que falta probar</h3>
+      <h3>Lo que ya probamos y lo que falta</h3>
       <div class="tblwrap"><table class="cr-tbl hyp-tbl">
         <thead><tr><th>Hipótesis</th><th>Estado</th><th class="hm">Experimento</th><th>Criterio de decisión</th><th style="text-align:right">Fecha</th></tr></thead>
         <tbody>
           <tr><td class="id">H1 Dolor</td><td class="st"><span class="chip" style="color:var(--green)">Confirmada</span></td><td class="hm">6 entrevistas</td><td>6/6 con episodio; 3 casos</td><td class="v">Hecho</td></tr>
           <tr><td class="id">H4 Pago US$ 180</td><td class="st"><span class="chip" style="color:var(--green)">Confirmada (n=3)</span></td><td class="hm">Piloto pagado</td><td>≥2 firmados; 0 → bajar precio</td><td class="v">Nov–dic</td></tr>
-          <tr><td class="id">H2 Ahorro</td><td class="st"><span class="chip" style="color:var(--amber)">Pendiente</span></td><td class="hm">Prueba C, 3 casos</td><td>≥30% menos tiempo</td><td class="v">31/10</td></tr>
-          <tr><td class="id">H3 Calidad</td><td class="st"><span class="chip" style="color:var(--amber)">Pendiente</span></td><td class="hm">50 elementos, 2 revisores</td><td>Precisión y exhaustividad ≥90%</td><td class="v">31/10</td></tr>
-          <tr><td class="id">H6 IA</td><td class="st"><span class="chip" style="color:var(--amber)">Parcial</span></td><td class="hm">Reglas IA en el caso real</td><td>≥80% de reglas útiles</td><td class="v">31/10</td></tr>
-          <tr><td class="id">H5 Costo</td><td class="st"><span class="chip" style="color:var(--grey)">Pendiente</span></td><td class="hm">Registro en pilotos</td><td>≤ US$ 60 por proyecto-mes</td><td class="v">Dic</td></tr>
+          <tr><td class="id">H3 Calidad</td><td class="st"><span class="chip" style="color:var(--green)">Confirmada (motor)</span></td><td class="hm">MARIAN vs IfcOpenShell e ifctester</td><td>≥90%: precisión 100%; exhaustividad 95% (choques) y 100% (datos)</td><td class="v">12/10</td></tr>
+          <tr><td class="id">H6 IA</td><td class="st"><span class="chip" style="color:var(--amber)">Parcial</span></td><td class="hm">Reglas en MARIAN (asistente local)</td><td>≥80% útiles: 90%; IDS desde texto 40%</td><td class="v">12/10</td></tr>
+          <tr><td class="id">H2 Ahorro</td><td class="st"><span class="chip" style="color:var(--amber)">Se mide en piloto</span></td><td class="hm">Mismo caso a mano y asistido</td><td>≥30% menos tiempo humano</td><td class="v">Nov–dic</td></tr>
+          <tr><td class="id">H5 Costo</td><td class="st"><span class="chip" style="color:var(--grey)">Se mide en piloto</span></td><td class="hm">Registro de soporte</td><td>≤ US$ 60 por proyecto-mes</td><td class="v">Dic</td></tr>
         </tbody>
       </table></div>
-      <p class="src">Supuestos rechazados con la evidencia: SAM = 50% del TAM (ahora 33%) y «contar cambios basta para medir avance».</p>
+      <p class="src">Supuestos rechazados con la evidencia: SAM = 50% del TAM (ahora 33%), «contar cambios basta para medir avance» y «una interferencia que desaparece fue corregida» (MARIAN: 14 de 14 por elementos eliminados).</p>
     </div>
   </div>
 </section>
