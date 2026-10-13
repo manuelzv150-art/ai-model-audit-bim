@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="../ia-servicio.js"></script>
 <style>
 /* AI model audit · Visor de interferencias (módulo independiente). Mismo sistema visual del sitio: tema oscuro, acento naranja. */
 :root{
@@ -1176,7 +1177,7 @@ function localText(text){ const out=[]; let sec='';
     out.push({codigo:im?im[1]:'R-'+(out.length+1),a:ts[0]||'',b:ts[1]||'',tipo:tol>0?'holgura':'dura',tolerancia_m:tol,prioridad:'',fuente:sec,cita:body.slice(0,160),ambiguedad:ts.length<2?'El requisito no nombra dos grupos de elementos.':''}); }
   return out; }
 function aiFlow(steps,cur,note){ $('aiFlow').hidden=false; $('aiFlow').innerHTML=steps.map((s,i)=>`<div class="st ${i<cur?'done':i===cur?'run':''}"><i class="ph ${i<cur?'ph-check-circle':i===cur?'ph-circle-notch':'ph-circle'}"></i>${esc(s)}</div>`).join('')+(note?`<div class="note">${note}</div>`:''); }
-let SAI=null; (async()=>{ try{ if(!EMBED&&window.claude?.use) SAI=await claude.use('sample'); }catch(e){} })();
+let SAI=null; (async()=>{ try{ if(!EMBED&&window.claude?.use) SAI=await claude.use('sample'); else if(!EMBED&&window.AMA_IA&&await AMA_IA.disponible()) SAI=AMA_IA; }catch(e){} })();
 function aiCaller(){ if(PARENT?.hasAI?.()) return p=>PARENT.ai(p); if(SAI) return p=>SAI.json(p); return null; }
 async function rulesFromMatrix(rows,name,text){
   if(text!=null){ if(!text.trim()){ toast('Pegue el texto del BEP o las actas'); return; } } else if(!rows.length){ toast('La matriz está vacía'); return; }

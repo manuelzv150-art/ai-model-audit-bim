@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="../ia-servicio.js"></script>
 <style>
 /*
   AI model audit · Hito 2 · Plataforma (landing + prototipo navegable)
@@ -2220,9 +2221,9 @@ const S={m1:null,m2:null,name1:'',name2:'',bep:'',demo:false,rules:[],cmp:null,c
   t:{cfg:0,rev:0,cfgOn:null,revOn:null},ia:{proposed:0,calls:0,discarded:0},tour:{t0:Date.now(),done:{}}};
 let capS=null,capD=null,AI='demo';
 function setAiMode(){ AI=capS?'live':'demo';
-  $('aiMode').innerHTML=AI==='live'?'<i class="ph ph-sparkle"></i><span>IA conectada. Las reglas las propone el modelo en vivo.</span>'
+  $('aiMode').innerHTML=AI==='live'?'<i class="ph ph-sparkle"></i><span>IA conectada'+(capS===window.AMA_IA?' (Gemini en vivo)':'')+'. Las reglas las propone el modelo; usted aprueba, corrige o devuelve cada una.</span>'
    :'<i class="ph ph-sparkle"></i><span>Modo demostración. Con el caso de ejemplo la IA responde con una salida pregrabada; con sus archivos, un asistente local aproximado.</span>'; }
-(async()=>{ try{ if(window.claude?.use){ capS=await claude.use('sample'); capD=await claude.use('downloads'); } }catch(e){} setAiMode(); try{ sendModels('in'); sendModels('ids'); }catch(e){} })();
+(async()=>{ try{ if(window.claude?.use){ capS=await claude.use('sample'); capD=await claude.use('downloads'); } else if(window.AMA_IA&&await AMA_IA.disponible()){ capS=AMA_IA; } }catch(e){} setAiMode(); try{ sendModels('in'); sendModels('ids'); }catch(e){} })();
 setAiMode();
 
 /* tiempos */

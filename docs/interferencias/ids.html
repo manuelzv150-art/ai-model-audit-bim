@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="../ia-servicio.js"></script>
 <style>
 /* AI model audit · Visor de interferencias (módulo independiente). Mismo sistema visual del sitio: tema oscuro, acento naranja. */
 :root{
@@ -1087,7 +1088,7 @@ $('dash').addEventListener('pointermove',e=>{ const t=e.target.closest('[data-ti
 $('dash').addEventListener('pointerleave',()=>dtip.hidden=true);
 
 /* ===================== IA: IDS desde el BEP y resumen de resultados ===================== */
-let SAI=null; (async()=>{ try{ if(!EMBED&&window.claude?.use) SAI=await claude.use('sample'); }catch(e){} })();
+let SAI=null; (async()=>{ try{ if(!EMBED&&window.claude?.use) SAI=await claude.use('sample'); else if(!EMBED&&window.AMA_IA&&await AMA_IA.disponible()) SAI=AMA_IA; }catch(e){} })();
 function aiCaller(){ if(PARENT?.hasAI?.()) return p=>PARENT.ai(p); if(SAI) return p=>SAI.json(p); return null; }
 const AI_SAMPLE=`REQ-01. Todas las vigas deben declararse portantes y registrar su resistencia al fuego en formato RF-xx (Pset_BeamCommon).
 REQ-02. Las columnas serán de concreto y se declararán portantes.

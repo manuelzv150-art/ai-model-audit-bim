@@ -188,6 +188,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
   </section>
 </div>
 
+<script src="ia-servicio.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/web-ifc-api-iife.js"></script>
 <script>
@@ -406,7 +407,7 @@ async function aiJson(prompt,{signal,modelTier}={}){ if(capS) return capS.json(p
   const raw=body.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('').trim(); if(!raw) throw {code:'invalid_json'};
   try{return JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g,''))}catch(e){throw {code:'invalid_json'}}
 }
-(async()=>{ if(!window.claude?.use) return; capS=await claude.use('sample'); capD=await claude.use('downloads'); })();
+(async()=>{ if(window.claude?.use){ capS=await claude.use('sample'); capD=await claude.use('downloads'); return; } if(window.AMA_IA&&await AMA_IA.disponible()){ capS=AMA_IA; $('iaStatus').textContent='IA conectada: Gemini en vivo mediante el servicio del proyecto. Proponga reglas y apruebe cada una.'; } })();
 $('btnGemini').onclick=configureGemini;
 setTimeout(()=>{ if(!capS&&!geminiKey) $('iaStatus').textContent='Conecte Gemini para que la IA proponga reglas, o agregue una regla manual.'; },1500);
 
