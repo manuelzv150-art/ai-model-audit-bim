@@ -735,6 +735,25 @@ tr:last-child td{border-bottom:0}
 .chcard.plus .chplan{color:var(--purple)}
 @media (max-width:1100px){.chcards{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.chcards{grid-template-columns:1fr}}
+
+/* Acceso a la demo (inicio de sesión de la demo; sin servidor) */
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(900px 480px at 50% -10%,rgba(242,136,58,.12),transparent 60%),var(--bg)}
+.lg-card{width:100%;max-width:420px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r-card);padding:32px 28px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.lg-card .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-bottom:18px}
+.lg-card .logo svg{width:30px;height:30px}
+.lg-card h1{font-size:26px;line-height:1.15;margin:4px 0 6px;font-weight:600}
+.lg-card p.lead{color:var(--muted);margin:0 0 20px;font-size:14.5px}
+.lg-card label{display:block;font-size:13px;color:var(--fg2);margin:14px 0 6px;font-weight:500}
+.lg-card input{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r-in);padding:12px 14px;font-size:15px}
+.lg-card input:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:var(--acc)}
+.lg-pw{position:relative}.lg-pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);cursor:pointer;padding:8px;font-size:18px}
+.lg-err{color:var(--red);font-size:13px;min-height:20px;margin:10px 0 0}
+.lg-card .btn{width:100%;margin-top:10px}
+.lg-sep{display:flex;align-items:center;gap:10px;color:var(--dim);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:14px 0 2px}
+.lg-sep:before,.lg-sep:after{content:"";height:1px;background:var(--line);flex:1}
+.lg-hint{margin-top:16px;padding:10px 12px;border:1px dashed var(--line2);border-radius:var(--r-in);color:var(--muted);font-size:12.5px;line-height:1.5}
+.lg-hint code{font-family:var(--mono);color:var(--acc2)}
+.lg-back{display:block;text-align:center;margin-top:14px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
@@ -1327,6 +1346,24 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
 </div>
 
 <!-- ======================= APP ======================= -->
+<div id="login" hidden>
+  <form class="lg-card" id="lgForm" autocomplete="on" novalidate>
+    <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="#0F1B2A" stroke="#F2883A" stroke-width="2"/><path d="M16 16 28 10M16 16 4 10M16 16v13" stroke="#2EC4D6" stroke-width="1.6"/></svg>AI model audit</div>
+    <div class="eyebrow">Acceso a la demo</div>
+    <h1>Inicie sesión</h1>
+    <p class="lead">Ingrese con su usuario para abrir el prototipo, o entre como invitado para revisar el caso de ejemplo.</p>
+    <label for="lgUser">Usuario o correo</label>
+    <input id="lgUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label for="lgPass">Contraseña</label>
+    <div class="lg-pw"><input id="lgPass" name="password" type="password" autocomplete="current-password"><button type="button" id="lgEye" aria-label="Mostrar contraseña"><i class="ph ph-eye"></i></button></div>
+    <div class="lg-err" id="lgErr" role="alert" aria-live="polite"></div>
+    <button class="btn pri" type="submit"><i class="ph ph-sign-in"></i>Ingresar</button>
+    <div class="lg-sep">o</div>
+    <button class="btn" type="button" id="lgGuest"><i class="ph ph-user"></i>Entrar como invitado</button>
+    <div class="lg-hint"><b>Cuenta de prueba:</b> usuario <code>demo</code> · contraseña <code>demo2026</code>. El acceso es de demostración: los modelos IFC se leen en su navegador y no se suben a ningún servidor.</div>
+    <a class="lg-back" href="#top">← Volver al sitio</a>
+  </form>
+</div>
 <div id="app" hidden>
   <header class="apptop">
     <a class="logo" href="#top" aria-label="Volver al sitio"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="#0F1B2A" stroke="#F2883A" stroke-width="2"/><path d="M16 16 28 10M16 16 4 10M16 16v13" stroke="#2EC4D6" stroke-width="1.6"/></svg></a>
@@ -1341,6 +1378,7 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
       <span class="timer" title="Tiempo configurando reglas (paso 2)"><i class="ph ph-sliders-horizontal" style="color:var(--purple)"></i>Configuración <b id="tCfg">0:00</b></span>
       <span class="timer" title="Tiempo revisando resultados (pasos 3 a 5)"><i class="ph ph-eye" style="color:var(--teal)"></i>Revisión <b id="tRev">0:00</b></span>
     </div>
+    <button class="btn ghost sm" id="btnLogout" title="Cerrar sesión" aria-label="Cerrar sesión"><i class="ph ph-sign-out"></i></button>
     <button class="btn sm" id="btnTour"><i class="ph ph-flag-checkered"></i><span>Recorrido</span></button>
     <a class="btn ghost sm" href="#top" aria-label="Salir de la demo"><i class="ph ph-x"></i></a>
   </header>
@@ -2273,9 +2311,21 @@ window.addEventListener('message',async e=>{ const k=Object.keys(FR).find(k=>frW
   else if(d.type==='ama-ai'){ try{ if(!capS) throw {code:'unavailable'}; reply(true,await capS.json(d.prompt)); }catch(err){ reply(false,null,{code:err?.code||'error'}); } }
   else if(d.type==='ama-save'){ try{ await clSave(d.name,d.blob); reply(true); }catch(err){ reply(false,null,{code:err?.code||'error'}); } } });
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-cl],[data-ids]'); if(!a) return; e.preventDefault(); e.stopPropagation(); const k=a.hasAttribute('data-ids')?'ids':'in'; wantMod=k; if((a.dataset.cl||a.dataset.ids)==='ejemplo'||needSample()) sampleFor.add(k); if(location.hash!=='#app') location.hash='#app'; else route(); },true);
-function route(){ const app=location.hash==='#app'; $('app').hidden=!app; $('site').hidden=app; document.title=app?'AI model audit · Demo':'AI model audit';
+/* Acceso (demo): sesión en sessionStorage; las cuentas están en el cliente, no es seguridad real */
+const AUTH_USERS={'demo':'demo2026','demo@aimodelaudit.pe':'demo2026'}; let authMem=null;
+function authGet(){ try{ return sessionStorage.getItem('ama_auth')||authMem }catch(e){ return authMem } }
+function authSet(v){ authMem=v; try{ v?sessionStorage.setItem('ama_auth',v):sessionStorage.removeItem('ama_auth') }catch(e){} }
+function route(){ const app=location.hash==='#app'; const ok=!!authGet(); $('login').hidden=!(app&&!ok); $('app').hidden=!(app&&ok); $('site').hidden=app; if(app&&!ok){ document.title='AI model audit · Acceso'; setTimeout(()=>{ try{$('lgUser').focus()}catch(e){} },0); return; }
+  { const o=$('btnLogout'); if(o) o.hidden=!ok; } document.title=app?'AI model audit · Demo':'AI model audit';
   if(app){ if(wantMod){ const m=wantMod; wantMod=null; setModule(m); } else if(!mod) showChooser(); else setModule(mod); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
 window.addEventListener('hashchange',route);
+$('lgEye').onclick=()=>{ const i=$('lgPass'), s=i.type==='password'; i.type=s?'text':'password'; $('lgEye').firstElementChild.className='ph '+(s?'ph-eye-slash':'ph-eye'); };
+$('lgForm').addEventListener('submit',e=>{ e.preventDefault(); const u=$('lgUser').value.trim().toLowerCase(), pw=$('lgPass').value;
+  if(!u||!pw){ $('lgErr').textContent='Ingrese usuario y contraseña.'; return; }
+  if(AUTH_USERS[u]!==undefined&&AUTH_USERS[u]===pw){ $('lgErr').textContent=''; $('lgPass').value=''; authSet(u); route(); }
+  else{ $('lgErr').textContent='Usuario o contraseña incorrectos.'; $('lgPass').select(); } });
+$('lgGuest').onclick=()=>{ $('lgErr').textContent=''; authSet('invitado'); route(); };
+$('btnLogout').onclick=()=>{ authSet(null); location.hash='#top'; route(); };
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-demo]'); if(!a) return; e.preventDefault(); if(location.hash!=='#app') location.hash='#app'; else route(); if(!S.m1) loadDemo(); });
 
 /* ---------- 1 carga ---------- */
