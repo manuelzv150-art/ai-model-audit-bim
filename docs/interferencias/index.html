@@ -388,6 +388,61 @@ form.pilot{display:flex;flex-direction:column;gap:16px}
 .fi input::placeholder{color:#7C8DA2}
 .fi input:focus,.fi select:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}
 .fi .err{font-size:12.5px;color:#FF8A80;min-height:0}
+/* login de la demo */
+.lg-ov{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(4,9,15,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:pvIn .3s var(--ease)}
+.lg-ov[hidden]{display:none}
+.lg-box{position:relative;width:min(420px,100%);max-height:calc(100vh - 32px);overflow:auto;background:radial-gradient(90% 70% at 0% 0%,rgba(242,136,58,.12),transparent 60%),var(--s1);border:1px solid var(--line2);border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.55);padding:28px 24px 22px;display:flex;flex-direction:column;gap:16px}
+.lg-box h2{margin:0;font-size:24px;line-height:1.2;letter-spacing:-.01em}
+.lg-box p{margin:0;color:var(--muted);font-size:14.5px}
+.lg-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.lg-x:hover{color:var(--fg);background:var(--s2)}
+.lg-pw{position:relative}
+.lg-pw input{padding-right:44px}
+.lg-pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--muted);cursor:pointer;padding:6px;font-size:18px;display:grid;place-items:center}
+.lg-note{font-size:12.5px !important;color:var(--dim) !important;text-align:center}
+.lg-user{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:700px){.lg-user span{display:none}}
+/* chat con IA (solo con sesión iniciada) */
+.ch-fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:70;width:62px;height:62px;border-radius:50%;border:1px solid rgba(152,136,246,.6);cursor:pointer;display:grid;place-items:center;color:#fff;font-size:28px;background:radial-gradient(circle at 30% 25%,#B3A6FF 0%,#7C69F0 45%,#4B3BC4 100%);box-shadow:0 0 0 6px rgba(152,136,246,.16),0 16px 40px rgba(75,59,196,.5);transition:transform .2s var(--ease)}
+.ch-fab:hover{transform:scale(1.06)}
+.ch-fab[hidden],.ch-tip[hidden],.ch-panel[hidden]{display:none}
+.ch-fab .dotx{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:var(--green,#38C48E);border:2px solid var(--bg)}
+.ch-tip{position:fixed;right:18px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:70;background:var(--fg);color:var(--bg);font-weight:600;font-size:15px;padding:12px 16px;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.4);cursor:pointer;animation:toast .35s var(--ease);display:flex;align-items:center;gap:10px}
+.ch-tip::after{content:"";position:absolute;right:24px;bottom:-7px;width:14px;height:14px;background:var(--fg);transform:rotate(45deg)}
+.ch-tip button{border:0;background:transparent;color:inherit;opacity:.55;cursor:pointer;padding:0;font-size:15px;display:grid;place-items:center}
+.ch-panel{position:fixed;right:18px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:75;width:min(400px,calc(100vw - 32px));height:min(600px,calc(100vh - 120px));display:flex;flex-direction:column;background:var(--s1);border:1px solid var(--line2);border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden;animation:pvIn .3s var(--ease)}
+.ch-head{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border-bottom:1px solid var(--line);background:radial-gradient(120% 140% at 0% 0%,rgba(152,136,246,.22),transparent 60%),var(--s2)}
+.ch-av{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-size:20px;background:radial-gradient(circle at 30% 25%,#B3A6FF,#4B3BC4)}
+.ch-head b{display:block;font-size:15px;line-height:1.2}
+.ch-head small{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px}
+.ch-head small i{width:7px;height:7px;border-radius:50%;background:var(--green,#38C48E);display:inline-block}
+.ch-head small.off i{background:var(--amber,#EDAA45)}
+.ch-head .sp{flex:1}
+.ch-ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:16px}
+.ch-ib:hover{color:var(--fg);background:var(--s3)}
+.ch-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.ch-m{max-width:88%;padding:10px 13px;border-radius:16px;font-size:14.5px;line-height:1.5;word-wrap:break-word;animation:pvIn .3s var(--ease)}
+.ch-m.bot{align-self:flex-start;background:var(--s2);border:1px solid var(--line);border-bottom-left-radius:6px;color:var(--fg2)}
+.ch-m.me{align-self:flex-end;background:var(--acc);color:var(--accInk);border-bottom-right-radius:6px;font-weight:500}
+.ch-m.err{border-color:rgba(255,138,128,.45);color:#FFB4AC}
+.ch-m ul{margin:6px 0;padding-left:18px}
+.ch-m p{margin:0 0 6px}.ch-m p:last-child{margin:0}
+.ch-m strong{color:var(--fg)}
+.ch-typing{display:inline-flex;gap:4px;padding:4px 2px}
+.ch-typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:chDot 1s infinite ease-in-out}
+.ch-typing i:nth-child(2){animation-delay:.15s}.ch-typing i:nth-child(3){animation-delay:.3s}
+@keyframes chDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.ch-sug{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+.ch-sug button{border:1px solid rgba(152,136,246,.45);background:rgba(152,136,246,.1);color:#D9D2FF;border-radius:var(--r-pill);padding:6px 11px;font-size:12.5px;cursor:pointer}
+.ch-sug button:hover{background:rgba(152,136,246,.22)}
+.ch-form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--bg2)}
+.ch-form textarea{flex:1;resize:none;min-height:42px;max-height:120px;background:var(--s1);border:1px solid var(--line2);border-radius:14px;padding:10px 12px;font-size:14.5px;color:var(--fg);line-height:1.4}
+.ch-form textarea:focus{outline:2px solid #9888F6;outline-offset:1px;border-color:transparent}
+.ch-form button{width:42px;height:42px;flex:none;border-radius:50%;border:0;background:#9888F6;color:#140F33;font-size:18px;cursor:pointer;display:grid;place-items:center;align-self:flex-end}
+.ch-form button:disabled{opacity:.4;cursor:not-allowed}
+.ch-foot{font-size:11.5px;color:var(--dim);text-align:center;padding:0 12px 10px;background:var(--bg2)}
+body.ch-on .tour{bottom:96px}
+@media (max-width:520px){.ch-panel{right:8px;left:8px;width:auto;bottom:calc(86px + env(safe-area-inset-bottom,0px));height:calc(100vh - 110px)}.ch-tip{font-size:14px}}
 .fi.bad input,.fi.bad select{border-color:var(--red)}
 .formnote{font-size:12.5px;color:var(--dim)}
 .sent{display:flex;flex-direction:column;gap:12px;align-items:flex-start;justify-content:center;height:100%}
@@ -1326,6 +1381,42 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
 </footer>
 </div>
 
+<!-- ======================= LOGIN ======================= -->
+<div class="lg-ov" id="login" hidden role="dialog" aria-modal="true" aria-labelledby="lgTitle">
+  <div class="lg-box">
+    <button class="lg-x" id="lgClose" type="button" aria-label="Cerrar"><i class="ph ph-x"></i></button>
+    <div class="cap2" style="color:var(--acc)">Acceso a la demo</div>
+    <h2 id="lgTitle">Inicie sesión para probar la demo</h2>
+    <p>Ingrese su correo y una contraseña para entrar al prototipo.</p>
+    <form class="pilot" id="lgForm" novalidate>
+      <div class="fi"><label for="lgEmail">Correo</label><input id="lgEmail" type="email" autocomplete="email" placeholder="nombre@empresa.com"><span class="err"></span></div>
+      <div class="fi"><label for="lgPass">Contraseña</label><div class="lg-pw"><input id="lgPass" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"><button type="button" id="lgEye" aria-label="Mostrar contraseña"><i class="ph ph-eye"></i></button></div><span class="err"></span></div>
+      <button class="btn pri" type="submit"><i class="ph ph-sign-in"></i>Ingresar a la demo</button>
+    </form>
+    <p class="lg-note">Prototipo: el acceso se valida en su navegador y los datos no salen de él.</p>
+  </div>
+</div>
+
+<!-- ======================= CHAT IA ======================= -->
+<div class="ch-tip" id="chTip" hidden role="button" tabindex="0">¿Necesitas ayuda? <button type="button" id="chTipX" aria-label="Ocultar aviso"><i class="ph ph-x"></i></button></div>
+<button class="ch-fab" id="chFab" type="button" hidden aria-label="Abrir asistente IA" aria-expanded="false"><i class="ph-fill ph-sparkle"></i><span class="dotx"></span></button>
+<div class="ch-panel" id="chPanel" hidden role="dialog" aria-label="Asistente IA del proyecto">
+  <div class="ch-head">
+    <div class="ch-av"><i class="ph-fill ph-sparkle"></i></div>
+    <div><b>Asistente AI model audit</b><small id="chState"><i></i>Conectado a Gemini</small></div>
+    <div class="sp"></div>
+    <button class="ch-ib" id="chReset" type="button" title="Nueva conversación" aria-label="Nueva conversación"><i class="ph ph-arrow-counter-clockwise"></i></button>
+    <button class="ch-ib" id="chClose" type="button" aria-label="Cerrar chat"><i class="ph ph-x"></i></button>
+  </div>
+  <div class="ch-log" id="chLog" aria-live="polite"></div>
+  <div class="ch-sug" id="chSug"></div>
+  <form class="ch-form" id="chForm">
+    <textarea id="chIn" rows="1" placeholder="Pregunte sobre el proyecto…" aria-label="Mensaje"></textarea>
+    <button type="submit" id="chSend" aria-label="Enviar"><i class="ph-fill ph-paper-plane-right"></i></button>
+  </form>
+  <div class="ch-foot">Respuestas generadas por IA a partir de la información del proyecto. Verifique los datos importantes.</div>
+</div>
+
 <!-- ======================= APP ======================= -->
 <div id="app" hidden>
   <header class="apptop">
@@ -1342,6 +1433,8 @@ R-07. Los muros que delimitan escaleras de evacuación deberán indicar su <mark
       <span class="timer" title="Tiempo revisando resultados (pasos 3 a 5)"><i class="ph ph-eye" style="color:var(--teal)"></i>Revisión <b id="tRev">0:00</b></span>
     </div>
     <button class="btn sm" id="btnTour"><i class="ph ph-flag-checkered"></i><span>Recorrido</span></button>
+    <span class="lg-user" id="lgUser" hidden><i class="ph ph-user-circle"></i><span id="lgUserName"></span></span>
+    <button class="btn ghost sm" id="lgOut" title="Cerrar sesión" aria-label="Cerrar sesión" hidden><i class="ph ph-sign-out"></i></button>
     <a class="btn ghost sm" href="#top" aria-label="Salir de la demo"><i class="ph ph-x"></i></a>
   </header>
 
@@ -2247,6 +2340,93 @@ function markSteps(){ const ok={1:S.m1&&S.m2,2:S.rules.some(r=>r.st==='ap'),3:!!
 document.querySelectorAll('.rstep').forEach(b=>b.onclick=()=>go(+b.dataset.step));
 $('go2').onclick=()=>go(4); $('go4b').onclick=()=>go(2); $('go3').onclick=()=>go(3);
 
+/* login de la demo: se pide al pulsar «Probar la demo» (o al abrir #app) */
+const Auth=(()=>{ const KEY='ama-session'; let pending=null, lastFocus=null;
+  const get=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } };
+  let mem=get();
+  const ok=()=>!!mem;
+  const paint=()=>{ $('lgUser').hidden=!mem; $('lgOut').hidden=!mem; $('lgUserName').textContent=mem?mem.email:''; window.dispatchEvent(new CustomEvent('ama-auth',{detail:mem})); };
+  const setErr=(id,msg)=>{ const box=$(id).closest('.fi'); box.classList.toggle('bad',!!msg); box.querySelector('.err').textContent=msg||''; };
+  function open(target){ pending=target; lastFocus=document.activeElement; setErr('lgEmail'); setErr('lgPass'); $('login').hidden=false; document.body.style.overflow='hidden'; setTimeout(()=>$('lgEmail').focus(),50); }
+  function close(){ $('login').hidden=true; document.body.style.overflow=''; pending=null; lastFocus?.focus?.(); }
+  $('lgForm').addEventListener('submit',e=>{ e.preventDefault();
+    const email=$('lgEmail').value.trim(), pass=$('lgPass').value; let good=true;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ setErr('lgEmail','Ingrese un correo válido'); good=false; } else setErr('lgEmail');
+    if(pass.length<6){ setErr('lgPass','La contraseña debe tener al menos 6 caracteres'); good=false; } else setErr('lgPass');
+    if(!good) return;
+    mem={email,at:new Date().toISOString()}; try{ localStorage.setItem(KEY,JSON.stringify(mem)); }catch(e){}
+    paint(); const t=pending; $('lgPass').value=''; close(); toast('Sesión iniciada: '+email);
+    if(t&&document.contains(t)) t.click(); else location.hash='#app'; });
+  $('lgClose').onclick=close;
+  $('login').addEventListener('click',e=>{ if(e.target===$('login')) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('login').hidden) close(); });
+  $('lgEye').onclick=()=>{ const i=$('lgPass'), show=i.type==='password'; i.type=show?'text':'password'; $('lgEye').innerHTML=`<i class="ph ph-eye${show?'-slash':''}"></i>`; $('lgEye').setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña'); };
+  $('lgOut').onclick=()=>{ mem=null; try{ localStorage.removeItem(KEY); }catch(e){} paint(); toast('Sesión cerrada'); location.hash='#top'; };
+  /* corre antes que los demás listeners (captura en window) */
+  window.addEventListener('click',e=>{ const a=e.target.closest('[data-demo],[data-cl],[data-ids]'); if(!a||ok()) return; e.preventDefault(); e.stopImmediatePropagation(); open(a); },true);
+  paint();
+  return {ok,open,user:()=>mem};
+})();
+
+/* chat con IA sobre el proyecto: visible solo con sesión iniciada; usa el Worker (Gemini) */
+const ChatIA=(()=>{ const URL_IA=(window.AMA_IA&&AMA_IA.url)||'https://ai-model-audit-ia.manuelzv150.workers.dev';
+  const SUG=['¿Qué problema resuelve?','¿Cómo funciona la revisión?','¿Qué incluye el plan Plus?','¿Cuánto cuesta?','¿Qué resultados tuvo la validación?'];
+  let hist=[], busy=false, ctxCache='';
+  const h=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function md(t){ const lines=h(t.trim()).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').split(/\n/); let out='',ul=false;
+    for(const l of lines){ const m=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/); if(m){ if(!ul){out+='<ul>';ul=true} out+='<li>'+m[1]+'</li>'; continue; } if(ul){out+='</ul>';ul=false} if(l.trim()) out+='<p>'+l+'</p>'; }
+    return out+(ul?'</ul>':''); }
+  function ctx(){ if(ctxCache) return ctxCache; const site=$('site'); const txt=(site?site.innerText:document.body.innerText).replace(/[ \t]+/g,' ').replace(/\n{2,}/g,'\n').trim(); ctxCache=txt.slice(0,40000); return ctxCache; }
+  function where(){ if(location.hash!=='#app') return 'El usuario está leyendo la página de presentación.'; const sel=document.querySelector('.modsw [aria-selected=true] span'); return 'El usuario está dentro de la demo'+(sel&&!document.querySelector('.modsw').hidden?', en el módulo «'+sel.textContent+'»':'')+'.'+(typeof S!=='undefined'&&S.demo?' Tiene cargado el caso de ejemplo (datos sintéticos).':''); }
+  function prompt(q){ const conv=hist.slice(-10).map(m=>(m.r==='u'?'Usuario: ':'Asistente: ')+m.t).join('\n');
+    return `Eres el asistente virtual de «AI model audit», una startup que revisa modelos BIM (IFC) con IA: avance del modelo frente al BEP, interferencias y validación IDS. Respondes a personas que iniciaron sesión para probar la demo.
+Reglas:
+- Responde SIEMPRE en español, en tono cercano y profesional, de forma breve (máximo 120 palabras salvo que pidan detalle).
+- Usa solo la información del proyecto que aparece abajo. Si algo no está, dilo con honestidad y sugiere escribir al equipo mediante el formulario de piloto. No inventes cifras, precios ni clientes.
+- Puedes explicar cómo usar la demo paso a paso.
+- Formato: texto plano; puedes usar **negritas** y listas con guiones. Sin encabezados ni tablas.
+- No respondas temas ajenos al proyecto, BIM o la demo; redirige amablemente.
+
+Contexto actual: ${where()}
+
+=== INFORMACIÓN DEL PROYECTO (texto de la página) ===
+${ctx()}
+=== FIN ===
+
+${conv?'Conversación previa:\n'+conv+'\n\n':''}Usuario: ${q}
+Asistente:`; }
+  function add(r,t,cls){ const d=document.createElement('div'); d.className='ch-m '+(r==='u'?'me':'bot')+(cls?' '+cls:''); if(r==='u') d.textContent=t; else d.innerHTML=md(t); $('chLog').appendChild(d); $('chLog').scrollTop=$('chLog').scrollHeight; return d; }
+  function sugs(){ $('chSug').innerHTML=hist.length>2?'':SUG.map(s=>`<button type="button">${h(s)}</button>`).join(''); $('chSug').querySelectorAll('button').forEach(b=>b.onclick=()=>send(b.textContent)); }
+  function welcome(){ $('chLog').innerHTML=''; const u=Auth.user(); add('b',`Hola${u?', **'+u.email.split('@')[0]+'**':''}. Soy el asistente de **AI model audit**. Puedo contarle cómo funciona la revisión de modelos BIM, los planes, los resultados de la validación o guiarle por la demo. ¿Qué le gustaría saber?`); sugs(); }
+  async function send(q){ q=(q||'').trim(); if(!q||busy) return; busy=true; $('chSend').disabled=true; $('chIn').value=''; fit();
+    add('u',q); $('chSug').innerHTML=''; const tip=add('b',''); tip.innerHTML='<span class="ch-typing"><i></i><i></i><i></i></span>';
+    try{ const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(),30000);
+      const r=await fetch(URL_IA+'/redactar',{method:'POST',signal:ctl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt(q)})}); clearTimeout(to);
+      const b=await r.json().catch(()=>({})); if(!r.ok||!b.ok) throw new Error(r.status===429?'limite':(b.error||'HTTP '+r.status));
+      const ans=String(b.texto||'').replace(/^\s*Asistente:\s*/i,'').trim()||'No obtuve respuesta. ¿Puede reformular la pregunta?';
+      tip.innerHTML=md(ans); hist.push({r:'u',t:q},{r:'b',t:ans}); state(true);
+    }catch(e){ tip.classList.add('err'); tip.innerHTML=md(e.message==='limite'?'Se alcanzó el límite de consultas por minuto. Espere unos segundos e intente de nuevo.':'No pude conectar con la IA en este momento. Intente de nuevo en unos segundos.'); if(e.message!=='limite') state(false); }
+    busy=false; $('chSend').disabled=false; $('chLog').scrollTop=$('chLog').scrollHeight; sugs(); $('chIn').focus(); }
+  function state(on){ const s=$('chState'); s.classList.toggle('off',!on); s.innerHTML='<i></i>'+(on?'Conectado a Gemini':'IA sin conexión'); }
+  function fit(){ const t=$('chIn'); t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,120)+'px'; }
+  function openP(){ $('chPanel').hidden=false; $('chTip').hidden=true; $('chFab').setAttribute('aria-expanded','true'); $('chFab').innerHTML='<i class="ph ph-x"></i>'; if(!$('chLog').children.length) welcome(); setTimeout(()=>$('chIn').focus(),60); }
+  function closeP(){ $('chPanel').hidden=true; $('chFab').setAttribute('aria-expanded','false'); $('chFab').innerHTML='<i class="ph-fill ph-sparkle"></i><span class="dotx"></span>'; }
+  function sync(e){ const on=!!(e?e.detail:Auth.user()); $('chFab').hidden=!on; document.body.classList.toggle('ch-on',on);
+    if(!on){ closeP(); $('chTip').hidden=true; hist=[]; $('chLog').innerHTML=''; return; }
+    let seen=false; try{ seen=sessionStorage.getItem('ama-chat-tip')==='1'; }catch(_){} if(!seen&&$('chPanel').hidden){ $('chTip').hidden=false; } }
+  $('chFab').onclick=()=>$('chPanel').hidden?openP():closeP();
+  $('chTip').onclick=e=>{ if(e.target.closest('#chTipX')){ $('chTip').hidden=true; try{ sessionStorage.setItem('ama-chat-tip','1'); }catch(_){} return; } openP(); };
+  $('chTip').onkeydown=e=>{ if(e.key==='Enter') openP(); };
+  $('chClose').onclick=closeP;
+  $('chReset').onclick=()=>{ hist=[]; welcome(); };
+  $('chForm').onsubmit=e=>{ e.preventDefault(); send($('chIn').value); };
+  $('chIn').addEventListener('input',fit);
+  $('chIn').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send($('chIn').value); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('chPanel').hidden&&$('login').hidden) closeP(); });
+  window.addEventListener('ama-auth',sync); sync();
+  return {open:openP,close:closeP,send};
+})();
+
 /* ruta: sitio o app */
 /* módulos de la demo: avance del modelo (pasos 1 a 5) e interferencias (plan Plus, embebido) */
 let mod=null, wantMod=null; const sampleFor=new Set();
@@ -2273,7 +2453,8 @@ window.addEventListener('message',async e=>{ const k=Object.keys(FR).find(k=>frW
   else if(d.type==='ama-ai'){ try{ if(!capS) throw {code:'unavailable'}; reply(true,await capS.json(d.prompt)); }catch(err){ reply(false,null,{code:err?.code||'error'}); } }
   else if(d.type==='ama-save'){ try{ await clSave(d.name,d.blob); reply(true); }catch(err){ reply(false,null,{code:err?.code||'error'}); } } });
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-cl],[data-ids]'); if(!a) return; e.preventDefault(); e.stopPropagation(); const k=a.hasAttribute('data-ids')?'ids':'in'; wantMod=k; if((a.dataset.cl||a.dataset.ids)==='ejemplo'||needSample()) sampleFor.add(k); if(location.hash!=='#app') location.hash='#app'; else route(); },true);
-function route(){ const app=location.hash==='#app'; $('app').hidden=!app; $('site').hidden=app; document.title=app?'AI model audit · Demo':'AI model audit';
+function route(){ if(location.hash==='#app'&&!Auth.ok()){ history.replaceState(null,'',location.pathname+location.search+'#top'); Auth.open(null); }
+  const app=location.hash==='#app'; $('app').hidden=!app; $('site').hidden=app; document.title=app?'AI model audit · Demo':'AI model audit';
   if(app){ if(wantMod){ const m=wantMod; wantMod=null; setModule(m); } else if(!mod) showChooser(); else setModule(mod); } else { timers(0); const t=location.hash&&location.hash.length>1&&document.querySelector(location.hash); if(t) setTimeout(()=>t.scrollIntoView({behavior:'auto'}),0); } }
 window.addEventListener('hashchange',route);
 document.addEventListener('click',e=>{ const a=e.target.closest('[data-demo]'); if(!a) return; e.preventDefault(); if(location.hash!=='#app') location.hash='#app'; else route(); if(!S.m1) loadDemo(); });
