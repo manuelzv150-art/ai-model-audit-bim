@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI model audit · Sustentación final</title>
+<meta name="description" content="Sustentación final del Hito 3 · AI model audit · Grupo 20 · Diplomado IA en Ingeniería y Construcción">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap">
+<link rel="stylesheet" href="deck.css">
+<style>
+html,body{margin:0;height:100%;background:#050506;overflow:hidden}
+*{box-sizing:border-box} p,h1,h2,h3{margin:0}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0}
+#stage>section{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;display:none}
+#stage>section.on{display:flex}
+aside{display:none}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,#F2A25C,#A39CF8);transition:width .3s}
+#hud{position:fixed;right:16px;bottom:12px;display:flex;gap:8px;align-items:center;font:500 14px 'DM Sans',system-ui,sans-serif;color:#C2C2C2;opacity:.75}
+#hud button{background:rgba(22,22,22,.8);color:#EDEDED;border:1px solid rgba(237,237,237,.35);border-radius:999px;padding:6px 12px;font:inherit;cursor:pointer}
+#hud button:focus-visible{outline:2px solid #F2A25C;outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.rise,.fragment{animation:none!important;transition:none!important}}
+</style></head><body>
+<main id="stage" aria-live="polite"><section id="cover" data-transition="fade">
+<div class="horizon"></div>
+<div class="shade"></div>
+<img src="visor_3d.jpg" alt="Visor 3D de la demo: cambios y cumplimiento por elemento" style="position:absolute; left:1056px; top:208px; width:864px; height:664px; object-fit:cover; border-radius:40px 0 0 40px;">
+<p class="eyebrow rise" style="--i:0">Grupo 20 · Eje Startup · Hito 3</p>
+<h1 class="rise" style="--i:1; margin-top:56px; width:900px">AI model audit</h1>
+<p class="lead rise" style="--i:2; width:860px; color:#EDEDED; font-size:44px; line-height:1.2">Lo que cambió. Lo que falta. La evidencia.</p>
+<p class="lead rise" style="--i:3; width:820px">Revisión de entregas BIM con IA: compara dos versiones IFC contra el BEP y las actas, elemento por elemento.</p>
+<p class="rise" style="--i:4; align-self:flex-start; margin-top:48px; font-size:28px; background:#EDEDED; color:#141416; padding:16px 32px; border-radius:999px">Petición: 2 pilotos pagados →</p>
+<p class="foot">Manuel Daniel Bencomo Rojas · Rainer Luice Murrieta Huaranca · 19/11/2026</p>
+<aside>Manuel (≈20 s). Somos Manuel y Rainer, de AI model audit. Revisar una entrega BIM sigue siendo manual: hoy les mostramos cómo una IA con un motor verificable dice, elemento por elemento, qué cambió, qué falta y si lo acordado se cumplió. Al final pedimos algo concreto: dos pilotos pagados.</aside>
+</section>
+<section id="problema">
+<div class="wash"></div>
+<p class="eyebrow">01 · Problema</p>
+<h2>Revisar una entrega BIM sigue siendo manual.</h2>
+<div class="cards c3">
+<div class="card rise" style="--i:1"><p class="big">22,5 h</p><p class="cap">mediana por auditoría manual (rango 9–36 h)</p></div>
+<div class="card rise" style="--i:2"><p class="big">6 de 6</p><p class="cap">empresas con retrabajo en los últimos 3 meses</p></div>
+<div class="card rise" style="--i:3"><p class="big">5 de 6</p><p class="cap">usan Navisworks, que detecta choques pero no compara información</p></div>
+</div>
+<div class="cards c2" style="margin-top:24px">
+<div class="card fragment"><p class="lab">Caso real AICC</p><p class="mid" style="margin-top:16px">+74% de elementos…</p><p class="cap">…y el cumplimiento de requisitos bajó de 37,1% a 33,5%. Contar cambios no es medir avance.</p></div>
+<div class="card fragment"><p class="lab">Por qué ahora</p><p class="mid" style="margin-top:16px">BIM obligatorio</p><p class="cap">en 14 tipologías de inversión pública desde agosto de 2026 [F1].</p></div>
+</div>
+<p class="foot">Fuente: 6 entrevistas a consultoras BIM y de ingeniería de Lima (02–11/10/2026) · auditoría AICC (07/10/2026)</p>
+<aside>Manuel (≈30 s). Entrevistamos a seis consultoras: las seis tuvieron retrabajo en los últimos tres meses; una auditoría manual toma 22,5 horas de mediana. Clic: en un caso real el modelo creció 74% y aun así el cumplimiento bajó. Clic: y desde agosto el BIM es obligatorio en 14 tipologías de inversión pública.</aside>
+</section>
+<section id="solucion" class="alt">
+<div class="wash"></div>
+<p class="eyebrow">02 · Solución e IA</p>
+<h2>La IA propone. Usted aprueba. El motor decide.</h2>
+<div class="cards c3">
+<div class="card fragment"><p class="lab">1 · IA propone</p><h3 style="margin-top:16px">Reglas desde el BEP y las actas</h3><p class="cap">Cada regla cita su fuente. Gemini 3.5 Flash-Lite, US$ 0,02 por propuesta.</p></div>
+<div class="card fragment"><p class="lab">2 · Coordinador aprueba</p><h3 style="margin-top:16px">Nada se verifica sin aprobación</h3><p class="cap">Aprueba, corrige o devuelve. 4 de 6 confiarían sin revisar: por eso es obligatorio.</p></div>
+<div class="card fragment"><p class="lab">3 · Motor verifica</p><h3 style="margin-top:16px">Veredicto determinista</h3><p class="cap">Cumple, incumple, retrocede o «no evaluable». El IFC nunca sale del navegador.</p></div>
+</div>
+<div class="card fragment" style="margin-top:24px; display:flex; gap:40px; align-items:center"><p class="big" style="font-size:72px">14/15</p><p class="cap" style="margin:0">reglas útiles con Gemini en vivo (93%; meta ≥ 80%). Resultado en CSV, HTML y BCF 2.1, para Revit o Navisworks.</p></div>
+<p class="foot">Pruebas E y F del anexo · F6: el mejor LLM logra 65,6% de F1 al generar IDS (Kanazawa et al., 2026)</p>
+<aside>Rainer (≈30 s). Clic por cada paso: la IA lee el BEP y las actas y propone reglas con cita; el coordinador aprueba, corrige o devuelve; un motor determinista verifica. Clic: con Gemini en vivo, 14 de 15 reglas fueron útiles.</aside>
+</section>
+<section id="demo" data-transition="fade">
+<div class="wash"></div>
+<p class="eyebrow">03 · Demo en vivo</p>
+<h2>La demo, paso a paso.</h2>
+<div style="display:flex; gap:40px; margin-top:36px; align-items:flex-start">
+<video class="clip" src="demo_paso_a_paso.mp4" poster="demo_portada.jpg" muted loop playsinline preload="auto" aria-label="Video paso a paso de la demo: inicio de sesión, caso de ejemplo, reglas con IA, visor 3D, reporte, interferencias, validación IDS y asistente IA" style="width:1040px; height:585px; object-fit:contain; background:#141416; border-radius:20px"></video>
+<div style="display:flex; flex-direction:column; flex:1">
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">1 · Inicio de sesión</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">2 · Caso de ejemplo cargado</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">3 · La IA propone; usted aprueba</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">4 · Visor 3D: M-01 retrocedió</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">5 · Reporte CSV · HTML · BCF</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">6 · Plus: interferencias</p></div>
+<div class="row fragment" style="padding:12px 0"><p class="t" style="font-size:26px">7 · Plus: validación IDS</p></div>
+<div class="row fragment" style="padding:12px 0; border-bottom:1px solid rgba(237,237,237,.16)"><p class="t" style="font-size:26px">8 · Asistente IA en vivo</p></div>
+</div>
+</div>
+<p class="foot">Demo: manuelzv150-art.github.io/ai-model-audit-bim/interferencias/ · caso de ejemplo con datos sintéticos · video de 1:19 (respaldo completo: 3:20)</p>
+<aside>Rainer (≈60–80 s). El video arranca solo al llegar a la diapositiva y se repite; un clic sobre él lo pausa. Narrar al ritmo del rótulo de cada paso y usar los clics para marcar el paso en la lista de la derecha: 1 inicio de sesión, 2 caso de ejemplo, 3 la IA propone reglas con cita del BEP y el coordinador las aprueba, 4 en el visor M-01 retrocedió (tenía EI60 y ahora está vacío), 5 reporte con evidencia en CSV, HTML y BCF, 6 y 7 módulos Plus de interferencias e IDS, 8 el asistente responde «180 dólares al mes». Si hay tiempo y conexión, abrir la demo real en otra pestaña.</aside>
+</section>
+<section id="resultados" class="alt tight">
+<div class="wash"></div>
+<p class="eyebrow">03 · Resultados verificados</p>
+<h2>Con datos reales: los mismos veredictos que las herramientas de referencia.</h2>
+<div class="cards c3">
+<div class="card rise" style="--i:1"><p class="big">88/88</p><p class="cap">veredictos de información iguales a IfcOpenShell</p></div>
+<div class="card rise" style="--i:2"><p class="big">54</p><p class="cap">choques duros confirmados, 0 falsas alarmas</p></div>
+<div class="card rise" style="--i:3"><p class="big">92/92</p><p class="cap">veredictos IDS iguales a ifctester</p></div>
+<div class="card rise" style="--i:4"><p class="big">36/36</p><p class="cap">tareas logradas sin ayuda por 6 usuarios</p></div>
+<div class="card rise" style="--i:5"><p class="big">12/12</p><p class="cap">respuestas correctas del asistente IA (prueba F, ronda final)</p></div>
+<div class="card rise" style="--i:6"><p class="big">2,5 s</p><p class="cap">lectura de ambos IFC y detección de choques</p></div>
+</div>
+<p class="foot">Proyecto real MARIAN (Revit 2026, IFC2X3) · referencias: IfcOpenShell 0.9, ifctester, manifold3d · anexo, sección 3</p>
+<aside>Rainer (≈25 s). Con un proyecto real, MARIAN, el motor dio los mismos veredictos que las herramientas de referencia: 88 de 88 en información y 92 de 92 en IDS; 54 choques duros sin falsas alarmas. Seis usuarios lograron 36 de 36 tareas sin ayuda, y el asistente acertó 12 de 12 sin inventar cifras.</aside>
+</section>
+<section id="validacion">
+<div class="wash"></div>
+<p class="eyebrow">04 · Validación</p>
+<h2>Lo que escuchamos y probamos cambió la propuesta.</h2>
+<div class="rows">
+<div class="row fragment"><div><p class="t">6 entrevistas con el mismo guion</p><p class="d">6/6 con retrabajo → mostramos primero los retrocesos</p></div><p class="pill">Decisión</p></div>
+<div class="row fragment"><div><p class="t">Alternativas: 5/6 Navisworks, 0/6 Solibri</p><p class="d">→ complementamos Navisworks vía BCF 2.1</p></div><p class="pill">Decisión</p></div>
+<div class="row fragment"><div><p class="t">Solo 2 de 6 trabajan con IFC</p><p class="d">→ SAM corregido de 50% a 33%</p></div><p class="pill warn">Supuesto rechazado</p></div>
+<div class="row fragment"><div><p class="t">4 de 6 confiarían sin revisar</p><p class="d">→ aprobación humana obligatoria</p></div><p class="pill">Decisión</p></div>
+<div class="row fragment" style="border-bottom:1px solid rgba(237,237,237,.16)"><div><p class="t">11 participantes: 6 entrevistas + 5 encuestas tras la demo</p><p class="d">5 aceptan el piloto y 5 lo condicionan</p></div><p class="pill ok">Señal de interés</p></div>
+</div>
+<p class="foot">Regla fijada antes de codificar: patrón = ≥ 3 menciones · trazabilidad completa en el anexo, sección 7</p>
+<aside>Manuel (≈30 s). Cada clic, un hallazgo y la decisión que tomamos: retrocesos primero, convivir con Navisworks, SAM de 50 a 33%, aprobación obligatoria. En total, 11 profesionales del segmento: 5 aceptan el piloto y 5 lo condicionan.</aside>
+</section>
+<section id="precio" class="alt tight">
+<div class="wash"></div>
+<p class="eyebrow">04 · Hipótesis de precio</p>
+<h2>Precio: US$ 180 no se confirmó (3 de 8).</h2>
+<div class="cards c3">
+<div class="card rise" style="--i:1"><p class="big">8 de 8</p><p class="cap">respuestas válidas · meta cumplida</p></div>
+<div class="card hi rise" style="--i:2"><p class="big">3 de 8</p><p class="cap">ponen US$ 180 dentro de su rango (38%; meta 70%)</p></div>
+<div class="card rise" style="--i:3"><p class="big">US$ 35–125</p><p class="cap">mediana «barato» · «caro»</p></div>
+</div>
+<p class="fragment lab" style="margin-top:48px">Aprendizaje: hay dos segmentos → dos planes</p>
+<div class="cards c2" style="margin-top:20px">
+<div class="card fragment"><p class="mid">US$ 180</p><p class="cap">Consultoras con BEP · valoran US$ 100–300 · 3 pilotos aceptados</p></div>
+<div class="card fragment"><p class="mid">US$ 50 · Profesional</p><p class="cap">Coordinadores e independientes · en rango para 5 de 5</p></div>
+</div>
+<p class="foot">Válida = US$ 180 no mencionado antes de las preguntas · E-01 a E-03 entrevistas; E-07 a E-11 encuesta escrita tras la demo</p>
+<aside>Rainer (≈30 s). La hipótesis más importante era el precio. Con 8 respuestas válidas, solo 3 ponen 180 dólares dentro de su rango. Clic: aprendimos que hay dos segmentos. Clic: 180 dólares para consultoras, donde ya hay 3 pilotos aceptados, y un plan Profesional de 50 para coordinadores e independientes.</aside>
+</section>
+<section id="negocio">
+<div class="wash"></div>
+<p class="eyebrow">05 · Mercado y modelo de negocio</p>
+<h2>Mercado en proyectos; cobro por proyecto.</h2>
+<div class="cards c3">
+<div class="card rise" style="--i:1"><p class="lab">TAM · 308 proyectos</p><p class="mid" style="margin-top:14px">US$ 665 280</p><p class="cap">por año · edificación con BIM en Lima [F3]</p></div>
+<div class="card rise" style="--i:2"><p class="lab">SAM · 103 proyectos</p><p class="mid" style="margin-top:14px">US$ 222 480</p><p class="cap">33% con BEP e IFC, medido en campo</p></div>
+<div class="card rise" style="--i:3"><p class="lab">SOM año 1 · 20</p><p class="mid" style="margin-top:14px">US$ 36 000</p><p class="cap">igual al punto de equilibrio</p></div>
+</div>
+<div class="cards c3" style="margin-top:24px">
+<div class="card fragment"><p class="mid">US$ 152</p><p class="cap">contribución por proyecto de consultora (180 − 28)</p></div>
+<div class="card fragment"><p class="mid">15 + 15</p><p class="cap">proyectos de consultora + Profesional = equilibrio (fijos US$ 2 907)</p></div>
+<div class="card fragment"><p class="mid">14%</p><p class="cap">de ahorro paga el plan: auditar a mano cuesta US$ 1 256 al mes</p></div>
+</div>
+<p class="foot">Competencia: Navisworks ≈ US$ 2 000/año (choques, no datos) · Solibri € 2 109–2 772 · BIMcollab € 150–300 · anexo, secciones 4 y 6</p>
+<aside>Rainer (≈30 s). Medimos el mercado en proyectos: 308 en Lima, 103 alcanzables y 20 para el primer año. Clic: cada proyecto de consultora deja 152 dólares; con 15 de consultora y 15 Profesional llegamos al equilibrio. Clic: al cliente le conviene si ahorra apenas 14% de su tiempo.</aside>
+</section>
+<section id="limites" class="alt">
+<div class="wash"></div>
+<p class="eyebrow">06 · Limitaciones</p>
+<h2>Lo que todavía no está probado, dicho con claridad.</h2>
+<div class="rows">
+<div class="row fragment"><div><p class="t">Ahorro de tiempo (H2) y costo de soporte (H5)</p><p class="d">0 pilotos firmados: se miden en el primero · meta ≥ 30% y ≤ US$ 60</p></div><p class="pill warn">En medición</p></div>
+<div class="row fragment"><div><p class="t">Plan Profesional de US$ 50</p><p class="d">viable solo con soporte autoservicio (0,5 h, supuesto)</p></div><p class="pill warn">Supuesto</p></div>
+<div class="row fragment"><div><p class="t">Holgura entre muros</p><p class="d">exhaustividad 13,8% con cajas envolventes → medición en malla</p></div><p class="pill">Fase 1</p></div>
+<div class="row fragment"><div><p class="t">Clientes sin IFC (solo 2 de 6)</p><p class="d">guía de exportación desde Revit y complemento Revit</p></div><p class="pill">Etapa 2</p></div>
+<div class="row fragment" style="border-bottom:1px solid rgba(237,237,237,.16)"><div><p class="t">Demo de prototipo</p><p class="d">inicio de sesión local; el caso de ejemplo usa una respuesta de IA pregrabada</p></div><p class="pill">Etapa 2</p></div>
+</div>
+<p class="foot">Riesgos y respuestas: anexo, sección 6 · deck, diapositiva 12</p>
+<aside>Manuel (≈30 s). Reconocemos lo que falta: ahorro y soporte se miden en el primer piloto; el plan Profesional depende de un soporte autoservicio que todavía es supuesto; la holgura entre muros necesita malla; la mayoría aún no trabaja con IFC; y la demo es un prototipo. Cada punto tiene su respuesta y su etapa.</aside>
+</section>
+<section id="peticion">
+<div class="horizon"></div>
+<div class="shade" style="background:linear-gradient(90deg, rgba(11,11,12,.94) 0%, rgba(11,11,12,.82) 60%, rgba(11,11,12,.45) 100%)"></div>
+<p class="eyebrow rise" style="--i:0">07 · Petición y próximos pasos</p>
+<h1 class="rise" style="--i:1; margin-top:44px; font-size:96px; width:1500px">Pedimos 2 pilotos pagados de 1 proyecto.</h1>
+<p class="lead rise" style="--i:2; color:#EDEDED; width:1400px">US$ 180 al mes · nov–dic 2026 · 2 IFC + BEP autorizados · un coordinador que cronometre. Si no ahorra 30%, no hay segundo mes.</p>
+<div class="cards c3" style="margin-top:48px; width:1664px">
+<div class="card fragment" style="background:rgba(22,22,22,.70)"><p class="lab">Nov–dic 2026</p><h3 style="margin-top:12px">2 pilotos · medir H2 y H5</h3></div>
+<div class="card fragment" style="background:rgba(22,22,22,.70)"><p class="lab">Ene–mar 2027</p><h3 style="margin-top:12px">5 empresas · ≥ 8 proyectos</h3></div>
+<div class="card fragment" style="background:rgba(22,22,22,.70)"><p class="lab">2027</p><h3 style="margin-top:12px">20 proyectos · equilibrio</h3></div>
+</div>
+<p class="fragment" style="align-self:flex-start; margin-top:40px; font-size:28px; background:#EDEDED; color:#141416; padding:14px 30px; border-radius:999px">manuelzv150-art.github.io/ai-model-audit-bim/interferencias/</p>
+<p class="foot" style="color:#C2C2C2">Manuel Daniel Bencomo Rojas · coordinador BIM · Rainer Luice Murrieta Huaranca · especialista BIM · ¡Gracias!</p>
+<aside>Ambos (≈25 s). Pedimos dos pilotos pagados de un proyecto, 180 dólares al mes, con dos IFC y el BEP autorizados y un coordinador que cronometre. Si no ahorra al menos 30%, no hay segundo mes. Clic por cada etapa: pilotos, cinco empresas, veinte proyectos. Gracias; pasamos a preguntas.</aside>
+</section>
+</main>
+<div id="bar"></div>
+<nav id="hud" aria-label="Navegación"><button id="prev" aria-label="Anterior">←</button><span id="num"></span><button id="next" aria-label="Siguiente">→</button><button id="fs" aria-label="Pantalla completa">⛶</button></nav>
+<script>
+(()=>{
+const st=document.getElementById('stage'), S=[...st.children], num=document.getElementById('num'), bar=document.getElementById('bar');
+let i=0;
+const frags=s=>[...s.querySelectorAll('.fragment')];
+function fit(){const k=Math.min(innerWidth/1920,innerHeight/1080);st.style.transform=`translate(${-960*k}px,${-540*k}px) scale(${k})`;}
+function show(n,allFrags){
+  n=Math.max(0,Math.min(S.length-1,n));
+  S.forEach((s,j)=>{s.classList.toggle('on',j===n);s.querySelectorAll('video').forEach(v=>{if(j===n){v.currentTime=0;v.play().catch(()=>{})}else v.pause()})});
+  frags(S[n]).forEach(f=>f.classList.toggle('visible',!!allFrags));
+  i=n; num.textContent=(n+1)+' / '+S.length; bar.style.width=((n+1)/S.length*100)+'%';
+  history.replaceState(null,'','#'+(n+1));
+}
+function next(){const f=frags(S[i]).find(x=>!x.classList.contains('visible')); if(f) f.classList.add('visible'); else if(i<S.length-1) show(i+1);}
+function prev(){const v=frags(S[i]).filter(x=>x.classList.contains('visible')); if(v.length) v[v.length-1].classList.remove('visible'); else if(i>0) show(i-1,true);}
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();next();}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev();}
+  else if(e.key==='Home') show(0); else if(e.key==='End') show(S.length-1,true);
+  else if(e.key==='f'||e.key==='F') toggleFs();
+});
+st.addEventListener('click',e=>{ if(e.target.tagName==='VIDEO'){const v=e.target; v.paused?v.play():v.pause(); return;} next(); });
+let x0=null; addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(x0===null)return; const dx=e.changedTouches[0].clientX-x0; if(Math.abs(dx)>40)(dx<0?next:prev)(); x0=null;});
+function toggleFs(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}
+document.getElementById('next').onclick=e=>{e.stopPropagation();next();};
+document.getElementById('prev').onclick=e=>{e.stopPropagation();prev();};
+document.getElementById('fs').onclick=e=>{e.stopPropagation();toggleFs();};
+addEventListener('resize',fit); fit();
+show((parseInt(location.hash.slice(1))||1)-1);
+})();
+</script></body></html>
